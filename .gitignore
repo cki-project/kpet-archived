@@ -1,0 +1,7 @@
+*.pyc
+*.swp
+*.swo
+kpet.egg-info
+.tox/
+.coverage
+.eggs/
