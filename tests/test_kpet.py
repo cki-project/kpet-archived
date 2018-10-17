@@ -1,10 +1,13 @@
+"""Test cases for main module"""
 import unittest
 import argparse
 import kpet
 
 
 class ArgumentParserTest(unittest.TestCase):
+    """Test cases for command line parsing."""
     def test_build_tree_command(self):
+        """Test building the tree command."""
         parser = argparse.ArgumentParser()
         common_parser = argparse.ArgumentParser(add_help=False)
         cmd_parser = parser.add_subparsers(dest="command")
@@ -14,6 +17,7 @@ class ArgumentParserTest(unittest.TestCase):
         self.assertEqual('list', args.action)
 
     def test_build_arch_command(self):
+        """Test building the arch command."""
         parser = argparse.ArgumentParser()
         common_parser = argparse.ArgumentParser(add_help=False)
         cmd_parser = parser.add_subparsers(dest="command")
@@ -23,6 +27,7 @@ class ArgumentParserTest(unittest.TestCase):
         self.assertEqual('list', args.action)
 
     def test_build_run_command(self):
+        """Test building the run command."""
         parser = argparse.ArgumentParser()
         common_parser = argparse.ArgumentParser(add_help=False)
         cmd_parser = parser.add_subparsers(dest="command")

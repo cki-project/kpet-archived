@@ -1,6 +1,11 @@
+"""Main entry point and command line parsing"""
+from __future__ import print_function
 import argparse
 import os
 import logging
+
+
+# (argparse uses help as parameter) pylint: disable=redefined-builtin
 
 
 def _build_command(cmds_parser, common_parser, name, help):
@@ -19,7 +24,7 @@ def _build_command(cmds_parser, common_parser, name, help):
 
 def build_run_command(cmds_parser, common_parser):
     """Build the argument parser for the run command"""
-    run_parser, action_subparser = _build_command(
+    _, action_subparser = _build_command(
         cmds_parser,
         common_parser,
         'run',
@@ -76,13 +81,13 @@ def build_run_command(cmds_parser, common_parser):
 
 def build_arch_command(cmds_parser, common_parser):
     """Build the argument parser for the arch command"""
-    arch_parser, action_subparser = _build_command(
+    _, action_subparser = _build_command(
         cmds_parser,
         common_parser,
         "arch",
         help='Architecture to test on, default action "list"',
     )
-    action_parser = action_subparser.add_parser(
+    action_subparser.add_parser(
         "list",
         help='Output a list of known architecture names',
         parents=[common_parser],
@@ -91,13 +96,13 @@ def build_arch_command(cmds_parser, common_parser):
 
 def build_tree_command(cmds_parser, common_parser):
     """Build the argument parser for the tree command"""
-    tree_parser, action_subparser = _build_command(
+    _, action_subparser = _build_command(
         cmds_parser,
         common_parser,
         "tree",
         help='Kernel tree, default action "list".',
     )
-    action_parser = action_subparser.add_parser(
+    action_subparser.add_parser(
         "list",
         help='List available kernel trees.',
         parents=[common_parser],
