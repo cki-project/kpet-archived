@@ -16,6 +16,7 @@ from __future__ import print_function
 import argparse
 import os
 import logging
+from kpet import run
 
 
 # (argparse uses help as parameter) pylint: disable=redefined-builtin
@@ -53,6 +54,12 @@ def build_run_command(cmds_parser, common_parser):
         '--description',
         default='',
         help='An arbitrary text describing the run'
+    )
+    action_parser.add_argument(
+        '-o',
+        '--output',
+        default=None,
+        help='Path where will be saved the xml, default is stdout'
     )
     action_parser.add_argument(
         '-t',
@@ -122,6 +129,22 @@ def build_tree_command(cmds_parser, common_parser):
     )
 
 
+def exec_command(args, commands):
+    """Call the associated command handler"""
+    try:
+        command = commands[args.command]
+    except KeyError:
+        print('Not implemented yet')
+        return
+    try:
+        command[0](*command[1:])
+    except SystemExit:
+        pass
+    except:  # noqa: E731 don't use bare except pylint:disable=bad-option-value
+        logging.error('While executing command "%s"', args.command)
+        raise
+
+
 def main():
     """Entry point for kpet tool"""
     logging.basicConfig(format="%(created)10.6f:%(levelname)s:%(message)s")
@@ -145,7 +168,8 @@ def main():
     build_arch_command(cmds_parser, common_parser)
 
     args = parser.parse_args()
-    if args.command == 'help':
-        parser.print_help()
-    else:
-        print('Not implemented yet')
+    commands = {
+        'help': [parser.print_help],
+        'run': [run.main, args],
+    }
+    exec_command(args, commands)
