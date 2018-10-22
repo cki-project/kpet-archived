@@ -14,6 +14,7 @@
 """Test cases for main module"""
 import unittest
 import argparse
+import mock
 import kpet
 
 
@@ -45,7 +46,10 @@ class ArgumentParserTest(unittest.TestCase):
         common_parser = argparse.ArgumentParser(add_help=False)
         cmd_parser = parser.add_subparsers(dest="command")
         kpet.build_run_command(cmd_parser, common_parser)
-        self.assertRaises(SystemExit, parser.parse_args, ['run', 'generate'])
+        with mock.patch('sys.stderr', mock.Mock()):
+            # Hide stderr output
+            self.assertRaises(SystemExit,
+                              parser.parse_args, ['run', 'generate'])
 
         args = parser.parse_args(
             ['run', 'generate', '-t', 'foo', '-k', 'bar', 'mbox1', 'mbox2']
