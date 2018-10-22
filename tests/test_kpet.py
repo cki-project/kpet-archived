@@ -59,3 +59,42 @@ class ArgumentParserTest(unittest.TestCase):
         self.assertEqual('foo', args.tree)
         self.assertEqual('bar', args.kernel)
         self.assertListEqual(['mbox1', 'mbox2'], args.mboxes)
+
+    def test_exec_command(self):
+        """
+        Check the success case, command in question raises an exception,
+        that SystemExit is ignored and when a command is not implemented prints
+        `Not implemented yet` on stdout
+        """
+        mock_command = mock.Mock()
+        commands = {
+            'foobar': [mock_command, 'foo', 'bar'],
+        }
+        mock_args = mock.Mock()
+        mock_args.command = 'foobar'
+        kpet.exec_command(mock_args, commands)
+        mock_command.assert_called_with('foo', 'bar')
+
+        mock_command.reset_mock()
+        mock_command.side_effect = ValueError
+        with mock.patch('sys.stderr', mock.Mock()):
+            # Hide stderr output
+            self.assertRaises(
+                ValueError,
+                kpet.exec_command,
+                mock_args, commands
+            )
+
+        mock_command.reset_mock()
+        mock_command.side_effect = SystemExit
+        kpet.exec_command(mock_args, commands)
+        mock_command.assert_called_with('foo', 'bar')
+
+        mock_args.command = 'barfoo'
+        mock_command.reset_mock()
+        with mock.patch('sys.stdout') as mock_stdout:
+            kpet.exec_command(mock_args, commands)
+            self.assertEqual(
+                mock_stdout.write.call_args_list[0],
+                mock.call('Not implemented yet'),
+            )
