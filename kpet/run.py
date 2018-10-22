@@ -30,7 +30,7 @@ def generate(args):
     if not args.output:
         print(content)
     else:
-        with open(args.output) as file_handler:
+        with open(args.output, 'w') as file_handler:
             file_handler.write(content)
 
 
