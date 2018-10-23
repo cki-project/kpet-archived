@@ -64,7 +64,7 @@ class ArgumentParserTest(unittest.TestCase):
         """
         Check the success case, command in question raises an exception,
         that SystemExit is ignored and when a command is not implemented prints
-        `Not implemented yet` on stdout
+        `Not implemented yet` on stderr
         """
         mock_command = mock.Mock()
         commands = {
@@ -92,7 +92,7 @@ class ArgumentParserTest(unittest.TestCase):
 
         mock_args.command = 'barfoo'
         mock_command.reset_mock()
-        with mock.patch('sys.stdout') as mock_stdout:
+        with mock.patch('sys.stderr') as mock_stdout:
             kpet.exec_command(mock_args, commands)
             self.assertEqual(
                 mock_stdout.write.call_args_list[0],

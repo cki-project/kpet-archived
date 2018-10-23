@@ -15,6 +15,7 @@
 from __future__ import print_function
 import argparse
 import os
+import sys
 import logging
 from kpet import run
 
@@ -134,7 +135,7 @@ def exec_command(args, commands):
     try:
         command = commands[args.command]
     except KeyError:
-        print('Not implemented yet')
+        print('Not implemented yet', file=sys.stderr)
         return
     try:
         command[0](*command[1:])
