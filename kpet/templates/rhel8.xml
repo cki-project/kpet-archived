@@ -6,12 +6,12 @@
         <and>
           <name op="=" value="RHEL-8.0"/>
           <variant op="=" value="BaseOS"/>
-          <distro_arch op="=" value={ARCH}/>
+          <distro_arch op="=" value={ARCH_ATTR}/>
         </and>
       </distroRequires>
       <hostRequires>
         <and>
-          <arch op="=" value={ARCH}/>
+          <arch op="=" value={ARCH_ATTR}/>
           <not><hostname op="like" value="%gigabyte%"/></not>
         </and>
         <or>
@@ -28,7 +28,7 @@
 cat >/etc/yum.repos.d/BUILDROOT-8.repo <<EOF
 [BUILDROOT-8]
 name=BUILDROOT-8
-baseurl=http://example.com/compose/Buildroot/{ARCH}/os/
+baseurl=http://example.com/compose/Buildroot/{ARCH_RAW}/os/
 enabled=1
 gpgcheck=0
 EOF

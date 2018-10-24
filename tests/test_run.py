@@ -40,7 +40,8 @@ class RunTest(unittest.TestCase):
         template_content = utils.get_template_content(mock_args.tree + '.xml')
         content_expected = template_content.format(
             DESCRIPTION=mock_args.description,
-            ARCH='"{}"'.format(mock_args.arch),
+            ARCH_RAW='{}'.format(mock_args.arch),
+            ARCH_ATTR='"{}"'.format(mock_args.arch),
             KURL='"{}"'.format(mock_args.kernel),
         )
         with mock.patch('sys.stdout') as mock_stdout:
