@@ -16,7 +16,7 @@ import os
 import tempfile
 import unittest
 import mock
-from kpet import run, utils
+from kpet import run, utils, exceptions
 
 
 class RunTest(unittest.TestCase):
@@ -34,6 +34,9 @@ class RunTest(unittest.TestCase):
         mock_args.arch = 'baz'
         mock_args.output = ''
         mock_args.db = ''
+        self.assertRaises(exceptions.ParameterNotFound, run.generate,
+                          mock_args)
+        mock_args.db = 'kpet'
         template_content = utils.get_template_content(mock_args.tree + '.xml')
         content_expected = template_content.format(
             DESCRIPTION=mock_args.description,
