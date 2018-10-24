@@ -33,6 +33,7 @@ class RunTest(unittest.TestCase):
         mock_args.kernel = 'bar'
         mock_args.arch = 'baz'
         mock_args.output = ''
+        mock_args.db = ''
         template_content = utils.get_template_content(mock_args.tree + '.xml')
         content_expected = template_content.format(
             DESCRIPTION=mock_args.description,

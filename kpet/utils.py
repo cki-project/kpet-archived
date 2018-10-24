@@ -19,17 +19,17 @@ class TemplateNotFound(Exception):
     """Raised when an template is not found"""
 
 
-def get_template_path(filename):
+def get_template_path(filename, dbdir=None):
     """Return the full path for the corresponding template"""
-    current_dir = os.path.realpath(os.path.dirname(__file__))
-    path = os.path.join(current_dir, 'templates', filename)
+    workdir = dbdir or os.path.realpath(os.path.dirname(__file__))
+    path = os.path.join(workdir, 'templates', filename)
     if not os.path.exists(path):
         raise TemplateNotFound(path)
     return path
 
 
-def get_template_content(filename):
+def get_template_content(filename, dbdir=None):
     """Return the content for the corresponding template"""
-    template_path = get_template_path(filename)
+    template_path = get_template_path(filename, dbdir)
     with open(template_path) as file_handler:
         return file_handler.read()
