@@ -14,12 +14,14 @@
 """Module where the `run` command is implemented"""
 from __future__ import print_function
 from xml.sax.saxutils import escape, quoteattr
-from kpet.exceptions import ActionNotFound
+from kpet.exceptions import ActionNotFound, ParameterNotFound
 from kpet import utils
 
 
 def generate(args):
     """Generate an xml output compatible with beaker"""
+    if not args.db:
+        raise ParameterNotFound('--db is required')
     tree = '{}.xml'.format(args.tree)
     template_content = utils.get_template_content(tree, args.db)
     content = template_content.format(
