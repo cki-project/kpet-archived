@@ -26,7 +26,8 @@ def generate(args):
     template_content = utils.get_template_content(tree, args.db)
     content = template_content.format(
         DESCRIPTION=escape(args.description),
-        ARCH=quoteattr(args.arch),
+        ARCH_RAW=escape(args.arch),
+        ARCH_ATTR=quoteattr(args.arch),
         KURL=quoteattr(args.kernel),
     )
     if not args.output:

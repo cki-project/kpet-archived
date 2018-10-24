@@ -7,12 +7,12 @@
           <distro_family op="=" value="RedHatEnterpriseLinux7"/>
           <distro_name op="=" value="RHEL-7.5"/>
           <distro_variant op="=" value="Server"/>
-          <distro_arch op="=" value={ARCH}/>
+          <distro_arch op="=" value={ARCH_ATTR}/>
         </and>
       </distroRequires>
       <hostRequires>
         <and>
-          <arch op="=" value={ARCH}/>
+          <arch op="=" value={ARCH_ATTR}/>
         </and>
         <or>
           <labcontroller op="=" value="lab01.example.com"/>
