@@ -153,11 +153,11 @@ def main():
     description = "KPET - Kernel Patch-Evaluated Testing"
     common_parser = argparse.ArgumentParser(add_help=False)
     common_parser.add_argument('--verbose', '-v', action='count')
-    common_parser.add_argument(
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument(
         '--db',
         help='Location of database of kernel trees and tests',
     )
-    parser = argparse.ArgumentParser(description=description)
     cmds_parser = parser.add_subparsers(title="Command", dest="command")
 
     cmds_parser.add_parser(
