@@ -16,7 +16,7 @@ import os
 import tempfile
 import unittest
 import mock
-from kpet import run, utils, exceptions
+from kpet import run, utils
 
 
 class RunTest(unittest.TestCase):
@@ -33,9 +33,6 @@ class RunTest(unittest.TestCase):
         mock_args.kernel = 'bar'
         mock_args.arch = 'baz'
         mock_args.output = ''
-        mock_args.db = ''
-        self.assertRaises(exceptions.ParameterNotFound, run.generate,
-                          mock_args)
         dbdir = os.path.join(os.path.dirname(__file__), 'assets')
         mock_args.db = 'kpet'
         mock_args.db = dbdir

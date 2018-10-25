@@ -16,7 +16,3 @@
 
 class ActionNotFound(Exception):
     """Raised when an action is not found"""
-
-
-class ParameterNotFound(Exception):
-    """Raised when there is a missing parameter"""
