@@ -157,6 +157,7 @@ def main():
     parser.add_argument(
         '--db',
         help='Location of database of kernel trees and tests',
+        required=True,
     )
     cmds_parser = parser.add_subparsers(title="Command", dest="command")
 
