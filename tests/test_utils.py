@@ -31,7 +31,7 @@ class UtilsTest(unittest.TestCase):
         """
         self.assertEqual(
             self.template_rel_path,
-            os.path.relpath(utils.get_template_path('rhel7.xml', self.root_dir),
+            os.path.relpath(utils.get_template_path('rhel7', self.root_dir),
                             self.root_dir),
         )
 
@@ -48,5 +48,5 @@ class UtilsTest(unittest.TestCase):
             template_content = template_handler.read()
         self.assertEqual(
             template_content,
-            utils.get_template_content('rhel7.xml', self.root_dir)
+            utils.get_template_content('rhel7', self.root_dir)
         )

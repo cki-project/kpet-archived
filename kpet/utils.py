@@ -19,16 +19,17 @@ class TemplateNotFound(Exception):
     """Raised when an template is not found"""
 
 
-def get_template_path(filename, dbdir):
+def get_template_path(tree, dbdir):
     """Return the full path for the corresponding template"""
+    filename = '{}.xml'.format(tree)
     path = os.path.join(dbdir, 'templates', filename)
     if not os.path.exists(path):
         raise TemplateNotFound(path)
     return path
 
 
-def get_template_content(filename, dbdir):
+def get_template_content(tree, dbdir):
     """Return the content for the corresponding template"""
-    template_path = get_template_path(filename, dbdir)
+    template_path = get_template_path(tree, dbdir)
     with open(template_path) as file_handler:
         return file_handler.read()

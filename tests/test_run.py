@@ -39,8 +39,7 @@ class RunTest(unittest.TestCase):
         dbdir = os.path.join(os.path.dirname(__file__), 'assets')
         mock_args.db = 'kpet'
         mock_args.db = dbdir
-        template_content = utils.get_template_content(mock_args.tree + '.xml',
-                                                      dbdir)
+        template_content = utils.get_template_content(mock_args.tree, dbdir)
         content_expected = template_content.format(
             DESCRIPTION=mock_args.description,
             ARCH_RAW='{}'.format(mock_args.arch),
