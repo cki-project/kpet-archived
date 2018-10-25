@@ -12,6 +12,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Test cases for main module"""
+import os
 import unittest
 import argparse
 import mock
@@ -98,3 +99,18 @@ class ArgumentParserTest(unittest.TestCase):
                 mock_stdout.write.call_args_list[0],
                 mock.call('Not implemented yet'),
             )
+
+    def test_main(self):
+        """
+        Check --db is required and also run generate command executes
+        successfully
+        """
+        dbdir = os.path.join(os.path.dirname(__file__), 'assets')
+        args = ['run', 'generate', '-t', 'rhel7', '-k',
+                'url']
+        self.assertRaises(SystemExit, kpet.main, args)
+        args = ['--db', dbdir, 'run', 'generate', '-t', 'rhel7', '-k',
+                'url']
+        with mock.patch('sys.stdout') as mock_stdout:
+            kpet.main(args)
+        self.assertIn('whiteboard', mock_stdout.write.call_args_list[0][0][0])
