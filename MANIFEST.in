@@ -2,4 +2,3 @@ include README.md
 include LICENSE
 include kpet/*
 include tests/*
-include kpet/templates/*
