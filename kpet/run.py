@@ -22,8 +22,7 @@ def generate(args):
     """Generate an xml output compatible with beaker"""
     if not args.db:
         raise ParameterNotFound('--db is required')
-    tree = '{}.xml'.format(args.tree)
-    template_content = utils.get_template_content(tree, args.db)
+    template_content = utils.get_template_content(args.tree, args.db)
     content = template_content.format(
         DESCRIPTION=escape(args.description),
         ARCH_RAW=escape(args.arch),
