@@ -146,7 +146,7 @@ def exec_command(args, commands):
         raise
 
 
-def main():
+def main(args=None):
     """Entry point for kpet tool"""
     logging.basicConfig(format="%(created)10.6f:%(levelname)s:%(message)s")
     logging.getLogger().setLevel(os.environ.get('LOG_LEVEL', 'INFO'))
@@ -165,7 +165,7 @@ def main():
     build_tree_command(cmds_parser, common_parser)
     build_arch_command(cmds_parser, common_parser)
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     commands = {
         'help': [parser.print_help],
         'run': [run.main, args],
