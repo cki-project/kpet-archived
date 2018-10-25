@@ -36,8 +36,11 @@ class RunTest(unittest.TestCase):
         mock_args.db = ''
         self.assertRaises(exceptions.ParameterNotFound, run.generate,
                           mock_args)
+        dbdir = os.path.join(os.path.dirname(__file__), 'assets')
         mock_args.db = 'kpet'
-        template_content = utils.get_template_content(mock_args.tree + '.xml')
+        mock_args.db = dbdir
+        template_content = utils.get_template_content(mock_args.tree + '.xml',
+                                                      dbdir)
         content_expected = template_content.format(
             DESCRIPTION=mock_args.description,
             ARCH_RAW='{}'.format(mock_args.arch),

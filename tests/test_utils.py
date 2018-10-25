@@ -21,8 +21,8 @@ class UtilsTest(unittest.TestCase):
     """Test cases for utils."""
     def setUp(self):
         """Set common attributes used later on the test cases"""
-        self.root_dir = os.path.join(os.path.dirname(__file__), os.path.pardir)
-        self.template_rel_path = 'kpet/templates/rhel7.xml'
+        self.root_dir = os.path.join(os.path.dirname(__file__), 'assets')
+        self.template_rel_path = 'templates/rhel7.xml'
 
     def test_get_template_path(self):
         """
@@ -31,11 +31,12 @@ class UtilsTest(unittest.TestCase):
         """
         self.assertEqual(
             self.template_rel_path,
-            os.path.relpath(utils.get_template_path('rhel7.xml'),
+            os.path.relpath(utils.get_template_path('rhel7.xml', self.root_dir),
                             self.root_dir),
         )
 
-        self.assertRaises(utils.TemplateNotFound, utils.get_template_path, 'f')
+        self.assertRaises(utils.TemplateNotFound,
+                          utils.get_template_path, 'not-found', self.root_dir)
 
     def test_get_template_content(self):
         """
@@ -45,5 +46,7 @@ class UtilsTest(unittest.TestCase):
         template_path = os.path.join(self.root_dir, self.template_rel_path)
         with open(template_path) as template_handler:
             template_content = template_handler.read()
-        self.assertEqual(template_content,
-                         utils.get_template_content('rhel7.xml'))
+        self.assertEqual(
+            template_content,
+            utils.get_template_content('rhel7.xml', self.root_dir)
+        )
