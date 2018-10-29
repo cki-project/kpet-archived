@@ -160,10 +160,6 @@ def main():
     )
     cmds_parser = parser.add_subparsers(title="Command", dest="command")
 
-    cmds_parser.add_parser(
-        'help',
-        help='show this help message and exit',
-    )
     build_run_command(cmds_parser, common_parser)
     build_tree_command(cmds_parser, common_parser)
     build_arch_command(cmds_parser, common_parser)
