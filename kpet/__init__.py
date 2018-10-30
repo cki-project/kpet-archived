@@ -93,6 +93,18 @@ def build_run_command(cmds_parser, common_parser):
         help='Patch series cover letter mbox URL/path'
     )
     action_parser.add_argument(
+        '-l',
+        '--layout',
+        help='Layout of smart testing'
+    )
+    action_parser.add_argument(
+        '-otc',
+        '--output-testcase',
+        action='store_true',
+        default=False,
+        help='Output test cases according to patch series'
+    )
+    action_parser.add_argument(
         'mboxes',
         nargs='*',
         default=[],
