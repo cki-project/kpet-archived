@@ -1,0 +1,4 @@
+{
+    "default": "default/patterns.json",
+    "fs": "fs/patterns.json"
+}

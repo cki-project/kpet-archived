@@ -91,3 +91,16 @@ class RunTest(unittest.TestCase):
 
         mock_args.action = 'action-not-found'
         self.assertRaises(run.ActionNotFound, run.main, mock_args)
+
+    @mock.patch('kpet.targeted.get_test_cases')
+    def test_print_test_cases(self, mock_get_test_cases):
+        """
+        Check get_test_cases prints the suggested test cases.
+        """
+        mock_get_test_cases.return_value = ['default/ltplite', 'fs/xfs']
+        with mock.patch('sys.stdout') as mock_stdout:
+            run.print_test_cases("", "")
+        self.assertEqual('default/ltplite',
+                         mock_stdout.write.call_args_list[0][0][0])
+        self.assertEqual('fs/xfs',
+                         mock_stdout.write.call_args_list[2][0][0])

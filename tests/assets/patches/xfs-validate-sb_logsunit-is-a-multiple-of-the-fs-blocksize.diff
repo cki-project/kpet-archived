@@ -1,0 +1,17 @@
+diff --git a/fs/xfs/xfs_log.c b/fs/xfs/xfs_log.c
+index d729e00..da4dcab 100644
+--- a/fs/xfs/xfs_log.c
++++ b/fs/xfs/xfs_log.c
+@@ -659,6 +659,12 @@ xfs_log_mount(
+ 			 XFS_FSB_TO_B(mp, mp->m_sb.sb_logblocks),
+ 			 XFS_MAX_LOG_BYTES);
+ 		error = -EINVAL;
++	} else if (mp->m_sb.sb_logsunit > 1 &&
++		   mp->m_sb.sb_logsunit % mp->m_sb.sb_blocksize) {
++		xfs_warn(mp,
++		"log stripe unit %u bytes must be a multiple of block size",
++			 mp->m_sb.sb_logsunit);
++		error = -EINVAL;
+ 	}
+ 	if (error) {
+ 		if (xfs_sb_version_hascrc(&mp->m_sb)) {
