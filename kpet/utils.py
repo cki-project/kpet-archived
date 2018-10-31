@@ -13,6 +13,12 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Utils used across kpet's commands"""
 import os
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
+import tempfile
+import requests
 
 
 class TemplateNotFound(Exception):
@@ -33,3 +39,21 @@ def get_template_content(tree, dbdir):
     template_path = get_template_path(tree, dbdir)
     with open(template_path) as file_handler:
         return file_handler.read()
+
+
+def patch2localfile(patches, workdir):
+    """Convert all patches in local files"""
+    result = []
+    for patch in patches:
+        # check if it's an url
+        if urlparse(patch).scheme:
+            response = requests.get(patch)
+            response.raise_for_status()
+            tmpfile = tempfile.mktemp(dir=workdir)
+            with open(tmpfile, 'wb') as file_handler:
+                file_handler.write(response.content)
+            result.append(tmpfile)
+        else:
+            # it's a local file
+            result.append(patch)
+    return result
