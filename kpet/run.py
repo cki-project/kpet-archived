@@ -13,9 +13,28 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Module where the `run` command is implemented"""
 from __future__ import print_function
+import tempfile
+import shutil
 from xml.sax.saxutils import escape, quoteattr
 from kpet.exceptions import ActionNotFound
-from kpet import utils
+from kpet import utils, targeted
+
+
+def print_test_cases(patches, dbdir):
+    """
+    Print test cases by querying layout according list of patch files.
+    Args:
+        patches: List of patches, they can be local files or remote urls
+        dbdir:   Path to the kpet-db
+    """
+    tmpdir = tempfile.mkdtemp(suffix='kpet')
+    try:
+        patches = utils.patch2localfile(patches, tmpdir)
+        src_files = targeted.get_src_files(patches)
+        for test_case in targeted.get_test_cases(src_files, dbdir):
+            print(test_case)
+    finally:
+        shutil.rmtree(tmpdir)
 
 
 def generate(template_content, kernel, output, arch, description):
@@ -47,6 +66,8 @@ def main(args):
         template_content = utils.get_template_content(args.tree, args.db)
         generate(template_content, args.kernel, args.output, args.arch,
                  args.description)
+    elif args.action == 'print-test-cases':
+        print_test_cases(args.patches, args.db)
     else:
         raise ActionNotFound(
             'Action: "{}" not found in command "{}"'.format(

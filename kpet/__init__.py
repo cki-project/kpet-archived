@@ -98,6 +98,17 @@ def build_run_command(cmds_parser, common_parser):
         default=[],
         help='List of mbox URLs/paths comprising the patch series'
     )
+    print_test_cases_parser = action_subparser.add_parser(
+        "print-test-cases",
+        help="Print test cases applicable to the patches",
+        parents=[common_parser],
+    )
+    print_test_cases_parser.add_argument(
+        'patches',
+        nargs='*',
+        default=[],
+        help='List of patches URLs/paths'
+    )
 
 
 def build_arch_command(cmds_parser, common_parser):
