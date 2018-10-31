@@ -15,7 +15,7 @@
 from __future__ import print_function
 import os
 import errno
-from kpet.exceptions import ActionNotFound
+from kpet import utils
 
 
 class TemplateDirNotFound(Exception):
@@ -51,9 +51,4 @@ def main(args):
     if args.action == 'list':
         list_tree(args.db)
     else:
-        raise ActionNotFound(
-            'Action: "{}" not found in command "{}"'.format(
-                args.action,
-                args.command
-            )
-        )
+        utils.raise_action_not_found(args.action, args.command)

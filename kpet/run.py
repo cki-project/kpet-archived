@@ -16,7 +16,6 @@ from __future__ import print_function
 import tempfile
 import shutil
 from xml.sax.saxutils import escape, quoteattr
-from kpet.exceptions import ActionNotFound
 from kpet import utils, targeted
 
 
@@ -69,9 +68,4 @@ def main(args):
     elif args.action == 'print-test-cases':
         print_test_cases(args.patches, args.db)
     else:
-        raise ActionNotFound(
-            'Action: "{}" not found in command "{}"'.format(
-                args.action,
-                args.command
-            )
-        )
+        utils.raise_action_not_found(args.action, args.command)
