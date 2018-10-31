@@ -16,7 +16,7 @@ import os
 import tempfile
 import unittest
 import mock
-from kpet import run, utils
+from kpet import run, utils, exceptions
 
 
 class RunTest(unittest.TestCase):
@@ -90,7 +90,7 @@ class RunTest(unittest.TestCase):
         self.assertRaises(utils.TemplateNotFound, run.main, mock_args)
 
         mock_args.action = 'action-not-found'
-        self.assertRaises(run.ActionNotFound, run.main, mock_args)
+        self.assertRaises(exceptions.ActionNotFound, run.main, mock_args)
 
     @mock.patch('kpet.targeted.get_test_cases')
     def test_print_test_cases(self, mock_get_test_cases):

@@ -19,6 +19,7 @@ except ImportError:
     from urlparse import urlparse
 import tempfile
 import requests
+from kpet.exceptions import ActionNotFound
 
 
 class TemplateNotFound(Exception):
@@ -57,3 +58,13 @@ def patch2localfile(patches, workdir):
             # it's a local file
             result.append(patch)
     return result
+
+
+def raise_action_not_found(action, command):
+    """Raise the ActionNotFound exception"""
+    raise ActionNotFound(
+        'Action: "{}" not found in command "{}"'.format(
+            action,
+            command
+        )
+    )
