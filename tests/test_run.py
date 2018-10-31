@@ -27,32 +27,29 @@ class RunTest(unittest.TestCase):
         the type is not found and if it saves the output in a file instead
         printing it on stdout.
         """
-        mock_args = mock.Mock()
-        mock_args.tree = 'rhel8'
-        mock_args.description = 'Foo'
-        mock_args.kernel = 'bar'
-        mock_args.arch = 'baz'
-        mock_args.output = ''
+        tree = 'rhel8'
+        description = 'Foo'
+        kernel = 'bar'
+        arch = 'baz'
         dbdir = os.path.join(os.path.dirname(__file__), 'assets')
-        mock_args.db = 'kpet'
-        mock_args.db = dbdir
-        template_content = utils.get_template_content(mock_args.tree, dbdir)
+        template_content = utils.get_template_content(tree, dbdir)
         content_expected = template_content.format(
-            DESCRIPTION=mock_args.description,
-            ARCH_RAW='{}'.format(mock_args.arch),
-            ARCH_ATTR='"{}"'.format(mock_args.arch),
-            KURL='"{}"'.format(mock_args.kernel),
+            DESCRIPTION=description,
+            ARCH_RAW='{}'.format(arch),
+            ARCH_ATTR='"{}"'.format(arch),
+            KURL='"{}"'.format(kernel),
         )
         with mock.patch('sys.stdout') as mock_stdout:
-            run.generate(mock_args)
+            run.generate(template_content, kernel, output=None, arch=arch,
+                         description=description)
         self.assertEqual(
             mock.call(content_expected),
             mock_stdout.write.call_args_list[0],
         )
 
         tmpfile = tempfile.mktemp()
-        mock_args.output = tmpfile
-        run.generate(mock_args)
+        run.generate(template_content, kernel, arch=arch,
+                     description=description, output=tmpfile)
         with open(tmpfile) as tmp_handler:
             content = tmp_handler.read()
         self.assertEqual(
@@ -61,19 +58,36 @@ class RunTest(unittest.TestCase):
         )
         os.remove(tmpfile)
 
-        mock_args.tree = 'notfound'
-        self.assertRaises(utils.TemplateNotFound, run.generate, mock_args)
-
     def test_main(self):
         """
         Check generate function is called and that ActionNotFound is
         raised when the action is not found.
         """
+        mock_get_template_content = mock.Mock()
+        mock_get_template_content.return_value = 'some text'
         mock_args = mock.Mock()
         mock_args.action = 'generate'
+        mock_args.tree = 'tree'
+        mock_args.kernel = 'kernel'
+        mock_args.arch = 'arch'
+        mock_args.db = 'db'
+        mock_args.output = None
+        mock_args.description = 'description'
+        mock_args.mboxes = []
         with mock.patch('kpet.run.generate') as mock_generate:
-            run.main(mock_args)
-            mock_generate.assert_called_with(mock_args)
+            with mock.patch('kpet.utils.get_template_content',
+                            mock_get_template_content):
+                run.main(mock_args)
+                mock_generate.assert_called_with(
+                    'some text',
+                    mock_args.kernel,
+                    mock_args.output,
+                    mock_args.arch,
+                    mock_args.description,
+                )
+
+        mock_args.tree = 'notfound'
+        self.assertRaises(utils.TemplateNotFound, run.main, mock_args)
 
         mock_args.action = 'action-not-found'
         self.assertRaises(run.ActionNotFound, run.main, mock_args)

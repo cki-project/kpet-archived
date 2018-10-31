@@ -18,26 +18,35 @@ from kpet.exceptions import ActionNotFound
 from kpet import utils
 
 
-def generate(args):
-    """Generate an xml output compatible with beaker"""
-    template_content = utils.get_template_content(args.tree, args.db)
+def generate(template_content, kernel, output, arch, description):
+    """
+    Generate an xml output compatible with beaker.
+    Args:
+        template_content: Beaker xml with variables to be replaced
+        kernel:           URL of a kernel built
+        output:           Output file where beaker xml will be rendered
+        arch:             Architecture e.g. x86_64, ppc64, etc
+        description:      String used as whiteboard on beaker xml
+    """
     content = template_content.format(
-        DESCRIPTION=escape(args.description),
-        ARCH_RAW=escape(args.arch),
-        ARCH_ATTR=quoteattr(args.arch),
-        KURL=quoteattr(args.kernel),
+        DESCRIPTION=escape(description),
+        ARCH_RAW=escape(arch),
+        ARCH_ATTR=quoteattr(arch),
+        KURL=quoteattr(kernel),
     )
-    if not args.output:
+    if not output:
         print(content)
     else:
-        with open(args.output, 'w') as file_handler:
+        with open(output, 'w') as file_handler:
             file_handler.write(content)
 
 
 def main(args):
     """Main function for the `run` command"""
     if args.action == 'generate':
-        generate(args)
+        template_content = utils.get_template_content(args.tree, args.db)
+        generate(template_content, args.kernel, args.output, args.arch,
+                 args.description)
     else:
         raise ActionNotFound(
             'Action: "{}" not found in command "{}"'.format(
