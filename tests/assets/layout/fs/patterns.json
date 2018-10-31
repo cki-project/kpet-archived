@@ -1,0 +1,37 @@
+{
+    "description": "layout of xfs tests for KPET",
+    "patterns": [
+        {
+            "pattern": "^fs/ext4/.*",
+            "case": "fs/ext4"
+        },
+        {
+            "pattern": "^fs/jbd2/.*",
+            "case": "fs/ext4"
+        },
+        {
+            "pattern": "^fs/xfs/.*",
+            "case": "fs/xfs"
+        },
+        {
+            "pattern": "^fs/[^/]*[ch]",
+            "case": "fs/xfs"
+        }
+    ],
+    "cases": [
+        {
+            "case": "fs/ext4",
+            "template": "fs/xml/xfstests-ext4-4k.xml",
+            "handler": null
+        },
+        {
+            "case": "fs/xfs",
+            "template": "fs/xml/xfstests-xfs-4k-finobt.xml",
+            "handler": null
+        }
+    ],
+    "maintainers": [
+        "Xiong Zhou <xzhou@redhat.com>"
+    ],
+    "version": "1.0"
+}

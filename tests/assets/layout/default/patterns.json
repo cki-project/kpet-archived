@@ -1,0 +1,22 @@
+{
+    "description": "layout of ltplite for KPET",
+    "patterns": [
+        {
+            "pattern": ".*",
+            "case": "default/ltplite"
+        }
+    ],
+    "cases": [
+        {
+            "case": "default/ltplite",
+            "template": "default/xml/ltplite.xml",
+            "handler": null
+        }
+    ],
+    "maintainers": [
+        "Rachel Sibley <rasibley@redhat.com>",
+        "Fendy Tjahjadi <ftjahjad@redhat.com>",
+        "Vector Li <huanli@redhat.com>"
+    ],
+    "version": "1.0"
+}

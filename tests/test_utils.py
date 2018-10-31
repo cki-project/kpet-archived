@@ -13,7 +13,11 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Test cases for utils module"""
 import os
+import tempfile
+import shutil
 import unittest
+import requests
+import mock
 from kpet import utils
 
 
@@ -50,3 +54,32 @@ class UtilsTest(unittest.TestCase):
             template_content,
             utils.get_template_content('rhel7', self.root_dir)
         )
+
+    def test_patch2localfile(self):
+        """
+        Check remote urls are fetched and saved in local files, check local
+        files are untouched and if execption is raised when request response is
+        invalid.
+        """
+        tmpdir = tempfile.mkdtemp()
+        patches = utils.patch2localfile(['/patch', '/another/patch'], tmpdir)
+        self.assertListEqual(
+            ['/patch', '/another/patch'],
+            patches
+        )
+        with mock.patch('requests.get') as mock_request_get:
+            response = mock.Mock()
+            response.content = b'some content'
+            mock_request_get.return_value = response
+            patches = utils.patch2localfile(
+                ['http://mypatch.org', '/localfile'],
+                tmpdir
+            )
+            mock_request_get.assert_called_with('http://mypatch.org')
+            with open(patches[0]) as file_handler:
+                file_content = file_handler.read()
+            self.assertEqual('some content', file_content)
+            response.raise_for_status.side_effect = requests.HTTPError
+            self.assertRaises(requests.HTTPError, utils.patch2localfile,
+                              ['http://mypatch.org', '/localfile'], tmpdir)
+        shutil.rmtree(tmpdir)
