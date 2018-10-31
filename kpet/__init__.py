@@ -45,54 +45,54 @@ def build_run_command(cmds_parser, common_parser):
         'run',
         help='Test suite run, default action "generate"',
     )
-    action_parser = action_subparser.add_parser(
+    generate_parser = action_subparser.add_parser(
         "generate",
         help='Generate the information required for a test run',
         parents=[common_parser],
     )
-    action_parser.add_argument(
+    generate_parser.add_argument(
         '-d',
         '--description',
         default='',
         help='An arbitrary text describing the run'
     )
-    action_parser.add_argument(
+    generate_parser.add_argument(
         '-o',
         '--output',
         default=None,
         help='Path where will be saved the xml, default is stdout'
     )
-    action_parser.add_argument(
+    generate_parser.add_argument(
         '-t',
         '--tree',
         required=True,
         help='kernel "tree" name, chosen from "tree list" output, or "MAIL"'
     )
-    action_parser.add_argument(
+    generate_parser.add_argument(
         '-a',
         '--arch',
         default='x86_64',
         help='An architecture chosen from "arch list" output'
     )
-    action_parser.add_argument(
+    generate_parser.add_argument(
         '--type',
         default='auto',
         choices=['auto', 'tarball-url', 'rpm-url', 'tarball-path', 'rpm-path'],
         help='Type of the kernel reference'
     )
-    action_parser.add_argument(
+    generate_parser.add_argument(
         '-k',
         '--kernel',
         required=True,
         help='Compiled kernel'
     )
-    action_parser.add_argument(
+    generate_parser.add_argument(
         '-c',
         '--cover-letter',
         default='no cover letter',
         help='Patch series cover letter mbox URL/path'
     )
-    action_parser.add_argument(
+    generate_parser.add_argument(
         'mboxes',
         nargs='*',
         default=[],
