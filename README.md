@@ -26,9 +26,12 @@ $ git clone <kpet-db>
 
 How to run it
 -------------
-# To preview patch generated test cases:
+To preview patch generated test cases:
+```bash
 $ kpet --db . run print-test-cases 001.patch
+```
 
-# To generate complete beaker xml, e.g.
+To generate complete beaker xml:
+```bash
 $ kpet --db . run generate --description 'skt ##KVER##' -a aarch64 -k '##KPG_URL##' -t upstream 001.patch
-
+```
