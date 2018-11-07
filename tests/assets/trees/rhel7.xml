@@ -1,0 +1,66 @@
+{% block jobDefinition %}<job>{% endblock %}
+  <whiteboard>{{ DESCRIPTION }}</whiteboard>
+  <recipeSet>
+    {% block recipeSet %}
+      {% block recipeDefinition %}<recipe kernel_options="selinux=0">{% endblock %}
+      <hostRequires>
+        {% block hostRequires %}
+        <or>
+          <labcontroller op="=" value="example1.com"/>
+          <labcontroller op="=" value="example2.com"/>
+          <labcontroller op="=" value="example3.com"/>
+        </or>
+        {% for test_case_requires in TEST_CASES_HOST_REQUIRES %}
+          {% include test_case_requires %}
+        {% endfor %}
+        {% endblock hostRequires %}
+      </hostRequires>
+      <repos/>
+      <partitions>
+        {% block partitions %}
+        {% for test_case_partitions in TEST_CASES_PARTITIONS %}
+          {% include test_case_partitions %}
+        {% endfor %}
+        {% endblock partitions %}
+      </partitions>
+      <ks_appends/>
+      {% block task %}
+      <task name="/distribution/install" role="STANDALONE">
+        <params/>
+      </task>
+      <task name="/distribution/command" role="None">
+        <params>
+          <param name="CMDS_TO_RUN" value="rm /usr/share/restraint/plugins/report_result.d/10_avc_check"/>
+        </params>
+      </task>
+      <task name="/distribution/command" role="None">
+        <params>
+          <param name="CMDS_TO_RUN" value="sed -i 's/^#DefaultTasksMax.*/DefaultTasksMax=50%/' /etc/systemd/system.conf; systemctl daemon-reexec"/>
+        </params>
+      </task>
+      <task name="/distribution/command" role="None">
+        <params>
+          <param name="CMDS_TO_RUN" value="rm /usr/share/restraint/plugins/report_result.d/01_dmesg_check"/>
+        </params>
+      </task>
+      <task name="/distribution/command" role="None">
+        <params>
+          <param name="CMDS_TO_RUN" value="curl https://password.corp.redhat.com/RH-IT-Root-CA.crt &gt; /etc/pki/ca-trust/source/anchors/RH-IT-Root-CA.crt &amp;&amp; update-ca-trust extract"/>
+        </params>
+      </task>
+      <task name="/test/misc/machineinfo">
+        <fetch url="https://github.com/RH-FMK/tests-beaker/archive/staging.zip#test/misc/machineinfo"/>
+      </task>
+      <task name="/distribution/kpkginstall" role="STANDALONE">
+        <fetch url="https://github.com/RH-FMK/tests-beaker/archive/staging.zip#distribution/kpkginstall"/>
+        <params>
+          <param name="KPKG_URL" value="{{ KURL }}"/>
+        </params>
+      </task>
+      {% for test_case in TEST_CASES %}
+        {% include test_case %}
+      {% endfor %}
+      {% endblock task %}
+    {% endblock recipeSet %}
+  </recipeSet>
+</job>
