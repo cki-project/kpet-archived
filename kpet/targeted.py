@@ -41,9 +41,11 @@ def get_patterns_by_layout(layout, dbdir):
 
 def get_src_files(patches):
     """
-    Get source files from the list of patch files.
+    Get paths to source files modified by patches in the specified files.
     Args:
-        patches: List of patches, they can be local files or remote urls
+        patches: List of patch file paths, they can't be URLs.
+    Returns:
+        A set of source file paths modified by the patches.
     """
     pattern = re.compile(r'diff --git a/(.*) b/(.*)')
     src_files = set()
@@ -98,9 +100,11 @@ def get_test_cases(src_files, dbdir):
 
 def get_all_test_cases(dbdir):
     """
-    Get all testcases defined on the database.
+    Get a generator iterating over all testcases defined in the database.
     Args:
         dbdir: Path to the kpet-db
+    Returns:
+        A generator iterating over all test cases.
     """
     for _, path in get_layout(dbdir).items():
         pattern_file = os.path.join(dbdir, 'layout', path)
@@ -112,10 +116,12 @@ def get_all_test_cases(dbdir):
 
 def get_tasks(test_names, dbdir):
     """
-    Get the corresponding task template path for every test name passed.
+    Get the corresponding "task" template path for every test name passed.
     Args:
         test_names: List of test names
         dbdir:      Path to the kpet-db
+    Returns:
+        A set of paths to "task" template files.
     """
     result = set()
     for testcase in get_all_test_cases(dbdir):
@@ -126,11 +132,13 @@ def get_tasks(test_names, dbdir):
 
 def get_host_requires(test_names, dbdir):
     """
-    Get the corresponding host requires template path for every test name
+    Get the corresponding "hostRequires" template path for every test name
     passed.
     Args:
         test_names: List of test names
         dbdir:      Path to the kpet-db
+    Returns:
+        A set of paths to "hostRequires" template files.
     """
     result = set()
     for testcase in get_all_test_cases(dbdir):
@@ -143,10 +151,13 @@ def get_host_requires(test_names, dbdir):
 
 def get_partitions(test_names, dbdir):
     """
-    Get the corresponding partitions template path for every test name passed.
+    Get the corresponding "partitions" template path for every test name
+    passed.
     Args:
         test_names: List of test names
         dbdir:      Path to the kpet-db
+    Returns:
+        A set of paths to "partitions" template files.
     """
     result = set()
     for testcase in get_all_test_cases(dbdir):
