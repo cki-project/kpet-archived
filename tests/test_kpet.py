@@ -111,6 +111,10 @@ class ArgumentParserTest(unittest.TestCase):
         self.assertRaises(SystemExit, kpet.main, args)
         args = ['--db', dbdir, 'run', 'generate', '-t', 'rhel7', '-k',
                 'url']
+        mock_jinja_template = mock.Mock()
+        mock_jinja_template().render.return_value = 'whiteboard'
         with mock.patch('sys.stdout') as mock_stdout:
-            kpet.main(args)
+            with mock.patch('kpet.utils.get_jinja_template',
+                            mock_jinja_template):
+                kpet.main(args)
         self.assertIn('whiteboard', mock_stdout.write.call_args_list[0][0][0])

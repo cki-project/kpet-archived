@@ -1,0 +1,2 @@
+				<partition fs="xfs" name="/mnt/xfstests/mnt1" size="15" type="part"/>
+				<partition fs="xfs" name="/mnt/xfstests/mnt2" size="15" type="part"/>

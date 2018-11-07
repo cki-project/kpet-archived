@@ -15,7 +15,6 @@
 from __future__ import print_function
 import tempfile
 import shutil
-from xml.sax.saxutils import escape, quoteattr
 from kpet import utils, targeted
 
 
@@ -46,22 +45,33 @@ def print_test_cases(patches, dbdir):
         print(test_case)
 
 
-def generate(template_content, kernel, output, arch, description):
+def generate(template, template_params, patches, dbdir, output):
     """
     Generate an xml output compatible with beaker.
     Args:
-        template_content: Beaker xml with variables to be replaced
-        kernel:           URL of a kernel built
-        output:           Output file where beaker xml will be rendered
-        arch:             Architecture e.g. x86_64, ppc64, etc
-        description:      String used as whiteboard on beaker xml
+        template:        Jinja template instance
+        template_params: Template params like arch, whiteboard description, etc
+        patches:         List of patches, can be local files or remote urls
+        dbdir:           Path to the kpet-db
+        output:          Output file where beaker xml will be rendered
     """
-    content = template_content.format(
-        DESCRIPTION=escape(description),
-        ARCH_RAW=escape(arch),
-        ARCH_ATTR=quoteattr(arch),
-        KURL=quoteattr(kernel),
+    test_names = get_test_cases(patches, dbdir)
+    template_params['TEST_CASES'] = sorted(
+        targeted.get_tasks(test_names, dbdir)
     )
+    template_params['TEST_CASES_HOST_REQUIRES'] = sorted(
+        targeted.get_host_requires(
+            test_names,
+            dbdir
+        )
+    )
+    template_params['TEST_CASES_PARTITIONS'] = sorted(
+        targeted.get_host_requires(
+            test_names,
+            dbdir
+        )
+    )
+    content = template.render(template_params)
     if not output:
         print(content)
     else:
@@ -72,9 +82,13 @@ def generate(template_content, kernel, output, arch, description):
 def main(args):
     """Main function for the `run` command"""
     if args.action == 'generate':
-        template_content = utils.get_template_content(args.tree, args.db)
-        generate(template_content, args.kernel, args.output, args.arch,
-                 args.description)
+        template = utils.get_jinja_template(args.tree, args.db)
+        template_params = {
+            'DESCRIPTION': args.description,
+            'ARCH': args.arch,
+            'KURL': args.kernel,
+        }
+        generate(template, template_params, args.mboxes, args.db, args.output)
     elif args.action == 'print-test-cases':
         print_test_cases(args.patches, args.db)
     else:
