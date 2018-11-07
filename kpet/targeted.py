@@ -60,9 +60,11 @@ def get_src_files(patches):
 
 def get_layout(dbdir):
     """
-    Get the layout parsed given a dbdir
+    Load layout from a database.
     Args:
         dbdir: Path to the kpet-db
+    Returns:
+        Layout object loaded from the database.
     """
     layout_path = os.path.join(dbdir, 'layout', 'layout.json')
     with open(layout_path) as layout_handler:
