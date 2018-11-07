@@ -19,9 +19,9 @@ from xml.sax.saxutils import escape, quoteattr
 from kpet import utils, targeted
 
 
-def print_test_cases(patches, dbdir):
+def get_test_cases(patches, dbdir):
     """
-    Print test cases by querying layout according list of patch files.
+    Return test cases by querying layout according list of patch files.
     Args:
         patches: List of patches, they can be local files or remote urls
         dbdir:   Path to the kpet-db
@@ -30,10 +30,20 @@ def print_test_cases(patches, dbdir):
     try:
         patches = utils.patch2localfile(patches, tmpdir)
         src_files = targeted.get_src_files(patches)
-        for test_case in targeted.get_test_cases(src_files, dbdir):
-            print(test_case)
+        return sorted(targeted.get_test_cases(src_files, dbdir))
     finally:
         shutil.rmtree(tmpdir)
+
+
+def print_test_cases(patches, dbdir):
+    """
+    Print test cases by querying layout according list of patch files.
+    Args:
+        patches: List of patches, they can be local files or remote urls
+        dbdir:   Path to the kpet-db
+    """
+    for test_case in get_test_cases(patches, dbdir):
+        print(test_case)
 
 
 def generate(template_content, kernel, output, arch, description):
