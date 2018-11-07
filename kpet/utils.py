@@ -19,6 +19,7 @@ except ImportError:
     from urlparse import urlparse
 import tempfile
 import requests
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from kpet.exceptions import ActionNotFound
 
 
@@ -33,6 +34,22 @@ def get_template_path(tree, dbdir):
     if not os.path.exists(path):
         raise TemplateNotFound(path)
     return path
+
+
+def get_jinja_template(tree, dbdir):
+    """Get a jinja template instance by tree"""
+    template_dirs = [os.path.join(dbdir, 'trees')]
+    template_dirs.append(os.path.join(dbdir, 'layout'))
+    jinja_env = Environment(
+        loader=FileSystemLoader(template_dirs),
+        autoescape=select_autoescape(
+            enabled_extensions=('html', 'xml'),
+            default_for_string=True,
+        ),
+    )
+    template_file = "{}.xml".format(tree)
+    template = jinja_env.get_template(template_file)
+    return template
 
 
 def get_template_content(tree, dbdir):
