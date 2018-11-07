@@ -37,7 +37,14 @@ def get_template_path(tree, dbdir):
 
 
 def get_jinja_template(tree, dbdir):
-    """Get a jinja template instance by tree"""
+    """
+    Get a jinja template instance by tree
+    Args:
+        tree:   The kernel "tree" name
+        dbdir:  Path to the kpet-db
+    Returns:
+        A jinja template instance
+    """
     template_dirs = [os.path.join(dbdir, 'trees')]
     template_dirs.append(os.path.join(dbdir, 'layout'))
     jinja_env = Environment(
