@@ -50,7 +50,8 @@ def generate(template, template_params, patches, dbdir, output):
     Generate an xml output compatible with beaker.
     Args:
         template:        Jinja template instance
-        template_params: Template params like arch, whiteboard description, etc
+        template_params: A dictionary with template parameters such as arch,
+                         whiteboard description, etc.
         patches:         List of patches, can be local files or remote urls
         dbdir:           Path to the kpet-db
         output:          Output file where beaker xml will be rendered
