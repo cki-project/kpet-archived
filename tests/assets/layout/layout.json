@@ -1,4 +1,9 @@
 {
-    "default": "default/patterns.json",
-    "fs": "fs/patterns.json"
+    "schema": {
+        "version": 1
+    },
+    "testsuites": {
+        "default": "default/patterns.json",
+        "fs": "fs/patterns.json"
+    }
 }

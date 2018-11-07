@@ -29,7 +29,7 @@ class TargetedTest(unittest.TestCase):
         """Check patterns are readed from the layout"""
         layout_path = os.path.join(self.db_dir, 'layout', 'layout.json')
         with open(layout_path) as file_handler:
-            layout = json.load(file_handler)
+            layout = json.load(file_handler)['testsuites']
         expected_value = [
             {'pattern': '.*', 'testcase_name': 'default/ltplite'},
             {'pattern': '^fs/ext4/.*', 'testcase_name': 'fs/ext4'},

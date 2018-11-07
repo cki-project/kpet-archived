@@ -71,7 +71,8 @@ def get_layout(dbdir):
     path = os.path.join(dbdir, 'layout', 'layout.json')
     with open(path) as handle:
         obj = json.load(handle)
-    return obj
+    assert obj['schema']['version'] == 1
+    return obj['testsuites']
 
 
 def get_test_cases(src_files, dbdir):
