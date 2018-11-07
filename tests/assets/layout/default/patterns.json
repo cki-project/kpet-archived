@@ -3,7 +3,7 @@
     "patterns": [
         {
             "pattern": ".*",
-            "case": "default/ltplite"
+            "testcase_name": "default/ltplite"
         }
     ],
     "cases": [

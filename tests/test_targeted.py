@@ -31,11 +31,11 @@ class TargetedTest(unittest.TestCase):
         with open(layout_path) as file_handler:
             layout = json.load(file_handler)
         expected_value = [
-            {'pattern': '.*', 'case': 'default/ltplite'},
-            {'pattern': '^fs/ext4/.*', 'case': 'fs/ext4'},
-            {'pattern': '^fs/jbd2/.*', 'case': 'fs/ext4'},
-            {'pattern': '^fs/xfs/.*', 'case': 'fs/xfs'},
-            {'pattern': '^fs/[^/]*[ch]', 'case': 'fs/xfs'},
+            {'pattern': '.*', 'testcase_name': 'default/ltplite'},
+            {'pattern': '^fs/ext4/.*', 'testcase_name': 'fs/ext4'},
+            {'pattern': '^fs/jbd2/.*', 'testcase_name': 'fs/ext4'},
+            {'pattern': '^fs/xfs/.*', 'testcase_name': 'fs/xfs'},
+            {'pattern': '^fs/[^/]*[ch]', 'testcase_name': 'fs/xfs'},
         ]
         self.assertListEqual(
             expected_value,

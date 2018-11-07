@@ -88,9 +88,9 @@ def get_test_cases(src_files, dbdir):
     test_cases = set()
     for pattern_item in patterns:
         if not src_files:
-            test_cases.add(pattern_item['case'])
+            test_cases.add(pattern_item['testcase_name'])
         else:
             for src_path in src_files:
                 if re.match(pattern_item['pattern'], src_path):
-                    test_cases.add(pattern_item['case'])
+                    test_cases.add(pattern_item['testcase_name'])
     return test_cases
