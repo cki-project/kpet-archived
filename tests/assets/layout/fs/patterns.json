@@ -3,19 +3,19 @@
     "patterns": [
         {
             "pattern": "^fs/ext4/.*",
-            "case": "fs/ext4"
+            "testcase_name": "fs/ext4"
         },
         {
             "pattern": "^fs/jbd2/.*",
-            "case": "fs/ext4"
+            "testcase_name": "fs/ext4"
         },
         {
             "pattern": "^fs/xfs/.*",
-            "case": "fs/xfs"
+            "testcase_name": "fs/xfs"
         },
         {
             "pattern": "^fs/[^/]*[ch]",
-            "case": "fs/xfs"
+            "testcase_name": "fs/xfs"
         }
     ],
     "cases": [
