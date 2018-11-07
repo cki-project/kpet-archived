@@ -8,9 +8,8 @@
     ],
     "cases": [
         {
-            "case": "default/ltplite",
-            "template": "default/xml/ltplite.xml",
-            "handler": null
+            "name": "default/ltplite",
+            "tasks": "default/xml/ltplite.xml"
         }
     ],
     "maintainers": [

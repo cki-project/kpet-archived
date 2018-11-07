@@ -94,3 +94,64 @@ def get_test_cases(src_files, dbdir):
                 if re.match(pattern_item['pattern'], src_path):
                     test_cases.add(pattern_item['testcase_name'])
     return test_cases
+
+
+def get_all_test_cases(dbdir):
+    """
+    Get all testcases defined on the database.
+    Args:
+        dbdir: Path to the kpet-db
+    """
+    for _, path in get_layout(dbdir).items():
+        pattern_file = os.path.join(dbdir, 'layout', path)
+        with open(pattern_file) as file_handler:
+            pattern = json.load(file_handler)
+        for testcase in pattern['cases']:
+            yield testcase
+
+
+def get_tasks(test_names, dbdir):
+    """
+    Get the corresponding task template path for every test name passed.
+    Args:
+        test_names: List of test names
+        dbdir:      Path to the kpet-db
+    """
+    result = set()
+    for testcase in get_all_test_cases(dbdir):
+        if testcase['name'] in test_names:
+            result.add(testcase['tasks'])
+    return result
+
+
+def get_host_requires(test_names, dbdir):
+    """
+    Get the corresponding host requires template path for every test name
+    passed.
+    Args:
+        test_names: List of test names
+        dbdir:      Path to the kpet-db
+    """
+    result = set()
+    for testcase in get_all_test_cases(dbdir):
+        if testcase['name'] in test_names:
+            host_requires = testcase.get('hostRequires', None)
+            if host_requires:
+                result.add(host_requires)
+    return result
+
+
+def get_partitions(test_names, dbdir):
+    """
+    Get the corresponding partitions template path for every test name passed.
+    Args:
+        test_names: List of test names
+        dbdir:      Path to the kpet-db
+    """
+    result = set()
+    for testcase in get_all_test_cases(dbdir):
+        if testcase['name'] in test_names:
+            partitions = testcase.get('partitions', None)
+            if partitions:
+                result.add(partitions)
+    return result

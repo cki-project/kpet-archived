@@ -91,3 +91,63 @@ class TargetedTest(unittest.TestCase):
             set({'fs/xfs', 'default/ltplite', 'fs/ext4'}),
             targeted.get_test_cases(src_files, self.db_dir)
         )
+
+    def test_get_all_test_cases(self):
+        """Check all test cases in the database are returned"""
+        expected_value = [
+            {
+                'name': 'default/ltplite',
+                'tasks': 'default/xml/ltplite.xml',
+            },
+            {
+                'name': 'fs/ext4',
+                'tasks': 'fs/xml/xfstests-ext4-4k.xml',
+                'hostRequires': 'fs/xml/hostrequires.xml',
+            },
+            {
+                'name': 'fs/xfs',
+                'tasks': 'fs/xml/xfstests-xfs-4k-finobt.xml',
+                "partitions": 'fs/xml/partitions.xml',
+            },
+        ]
+        self.assertListEqual(
+            expected_value,
+            list(targeted.get_all_test_cases(self.db_dir))
+        )
+
+    def test_get_tasks(self):
+        """Check tasks template paths are returned by test name"""
+        self.assertSequenceEqual(
+            {'fs/xml/xfstests-ext4-4k.xml'},
+            targeted.get_tasks(['fs/ext4'], self.db_dir)
+        )
+        self.assertSequenceEqual(
+            {'default/xml/ltplite.xml', 'fs/xml/xfstests-ext4-4k.xml'},
+            targeted.get_tasks(['fs/ext4', 'default/ltplite'], self.db_dir)
+        )
+        self.assertSequenceEqual(
+            {},
+            targeted.get_tasks([], self.db_dir)
+        )
+
+    def test_get_host_requires(self):
+        """Check host requires template paths are returned by test name"""
+        self.assertSequenceEqual(
+            {'fs/xml/hostrequires.xml'},
+            targeted.get_host_requires(['fs/ext4'], self.db_dir)
+        )
+        self.assertSequenceEqual(
+            {},
+            targeted.get_host_requires(['fs/xfs'], self.db_dir)
+        )
+
+    def test_get_partitions(self):
+        """Check partitions template paths are returned by test name"""
+        self.assertSequenceEqual(
+            {'fs/xml/partitions.xml'},
+            targeted.get_partitions(['fs/xfs'], self.db_dir)
+        )
+        self.assertSequenceEqual(
+            {},
+            targeted.get_partitions(['fs/ext4'], self.db_dir)
+        )
