@@ -58,6 +58,18 @@ def get_src_files(patches):
     return src_files
 
 
+def get_layout(dbdir):
+    """
+    Get the layout parsed given a dbdir
+    Args:
+        dbdir: Path to the kpet-db
+    """
+    layout_path = os.path.join(dbdir, 'layout', 'layout.json')
+    with open(layout_path) as layout_handler:
+        layout = json.load(layout_handler)
+    return layout
+
+
 def get_test_cases(src_files, dbdir):
     """
     Get test cases by querying layout according to source files.
@@ -68,9 +80,7 @@ def get_test_cases(src_files, dbdir):
         All test cases applicable to the src_files. It'll return all of them
         if src_files is empty.
     """
-    layout_path = os.path.join(dbdir, 'layout/layout.json')
-    with open(layout_path) as layout_handler:
-        layout = json.load(layout_handler)
+    layout = get_layout(dbdir)
     patterns = get_patterns_by_layout(layout, dbdir)
 
     test_cases = set()
