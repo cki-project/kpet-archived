@@ -66,10 +66,10 @@ def get_layout(dbdir):
     Returns:
         Layout object loaded from the database.
     """
-    layout_path = os.path.join(dbdir, 'layout', 'layout.json')
-    with open(layout_path) as layout_handler:
-        layout = json.load(layout_handler)
-    return layout
+    path = os.path.join(dbdir, 'layout', 'layout.json')
+    with open(path) as handle:
+        obj = json.load(handle)
+    return obj
 
 
 def get_test_cases(src_files, dbdir):
