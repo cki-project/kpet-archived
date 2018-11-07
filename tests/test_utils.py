@@ -29,33 +29,6 @@ class UtilsTest(unittest.TestCase):
         self.root_dir = os.path.join(os.path.dirname(__file__), 'assets')
         self.template_rel_path = 'templates/rhel7.xml'
 
-    def test_get_template_path(self):
-        """
-        Check the success case and if it raises the proper exception when
-        the template is not found
-        """
-        self.assertEqual(
-            self.template_rel_path,
-            os.path.relpath(utils.get_template_path('rhel7', self.root_dir),
-                            self.root_dir),
-        )
-
-        self.assertRaises(utils.TemplateNotFound,
-                          utils.get_template_path, 'not-found', self.root_dir)
-
-    def test_get_template_content(self):
-        """
-        Check the success case i.e. gets the actual content of the
-        template.
-        """
-        template_path = os.path.join(self.root_dir, self.template_rel_path)
-        with open(template_path) as template_handler:
-            template_content = template_handler.read()
-        self.assertEqual(
-            template_content,
-            utils.get_template_content('rhel7', self.root_dir)
-        )
-
     def test_patch2localfile(self):
         """
         Check remote urls are fetched and saved in local files, check local
