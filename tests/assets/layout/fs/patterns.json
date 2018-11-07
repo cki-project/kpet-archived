@@ -20,14 +20,14 @@
     ],
     "cases": [
         {
-            "case": "fs/ext4",
-            "template": "fs/xml/xfstests-ext4-4k.xml",
-            "handler": null
+            "name": "fs/ext4",
+            "tasks": "fs/xml/xfstests-ext4-4k.xml",
+            "hostRequires": "fs/xml/hostrequires.xml"
         },
         {
-            "case": "fs/xfs",
-            "template": "fs/xml/xfstests-xfs-4k-finobt.xml",
-            "handler": null
+            "name": "fs/xfs",
+            "tasks": "fs/xml/xfstests-xfs-4k-finobt.xml",
+            "partitions": "fs/xml/partitions.xml"
         }
     ],
     "maintainers": [
