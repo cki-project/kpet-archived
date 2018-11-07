@@ -23,19 +23,6 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from kpet.exceptions import ActionNotFound
 
 
-class TemplateNotFound(Exception):
-    """Raised when an template is not found"""
-
-
-def get_template_path(tree, dbdir):
-    """Return the full path for the corresponding template"""
-    filename = '{}.xml'.format(tree)
-    path = os.path.join(dbdir, 'templates', filename)
-    if not os.path.exists(path):
-        raise TemplateNotFound(path)
-    return path
-
-
 def get_jinja_template(tree, dbdir):
     """
     Get a jinja template instance by tree
@@ -57,13 +44,6 @@ def get_jinja_template(tree, dbdir):
     template_file = "{}.xml".format(tree)
     template = jinja_env.get_template(template_file)
     return template
-
-
-def get_template_content(tree, dbdir):
-    """Return the content for the corresponding template"""
-    template_path = get_template_path(tree, dbdir)
-    with open(template_path) as file_handler:
-        return file_handler.read()
 
 
 def patch2localfile(patches, workdir):
