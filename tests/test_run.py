@@ -27,29 +27,24 @@ class RunTest(unittest.TestCase):
         the type is not found and if it saves the output in a file instead
         printing it on stdout.
         """
-        tree = 'rhel8'
-        description = 'Foo'
-        kernel = 'bar'
-        arch = 'baz'
+        template_params = {
+            'DESCRIPTION': 'Foo',
+            'KURL': 'bar',
+            'ARCH': 'baz',
+        }
         dbdir = os.path.join(os.path.dirname(__file__), 'assets')
-        template_content = utils.get_template_content(tree, dbdir)
-        content_expected = template_content.format(
-            DESCRIPTION=description,
-            ARCH_RAW='{}'.format(arch),
-            ARCH_ATTR='"{}"'.format(arch),
-            KURL='"{}"'.format(kernel),
-        )
+        template = utils.get_jinja_template('rhel7', dbdir)
         with mock.patch('sys.stdout') as mock_stdout:
-            run.generate(template_content, kernel, output=None, arch=arch,
-                         description=description)
+            run.generate(template, template_params, [], dbdir, None)
+        with open(os.path.join(dbdir, 'rhel7_rendered.xml')) as file_handler:
+            content_expected = file_handler.read()
         self.assertEqual(
             mock.call(content_expected),
             mock_stdout.write.call_args_list[0],
         )
 
         tmpfile = tempfile.mktemp()
-        run.generate(template_content, kernel, arch=arch,
-                     description=description, output=tmpfile)
+        run.generate(template, template_params, [], dbdir, tmpfile)
         with open(tmpfile) as tmp_handler:
             content = tmp_handler.read()
         self.assertEqual(
@@ -63,11 +58,10 @@ class RunTest(unittest.TestCase):
         Check generate function is called and that ActionNotFound is
         raised when the action is not found.
         """
-        mock_get_template_content = mock.Mock()
-        mock_get_template_content.return_value = 'some text'
+        mock_jinja_template = mock.Mock()
         mock_args = mock.Mock()
         mock_args.action = 'generate'
-        mock_args.tree = 'tree'
+        mock_args.tree = 'rhel7'
         mock_args.kernel = 'kernel'
         mock_args.arch = 'arch'
         mock_args.db = 'db'
@@ -75,19 +69,21 @@ class RunTest(unittest.TestCase):
         mock_args.description = 'description'
         mock_args.mboxes = []
         with mock.patch('kpet.run.generate') as mock_generate:
-            with mock.patch('kpet.utils.get_template_content',
-                            mock_get_template_content):
+            with mock.patch('kpet.utils.get_jinja_template',
+                            mock_jinja_template):
                 run.main(mock_args)
                 mock_generate.assert_called_with(
-                    'some text',
-                    mock_args.kernel,
-                    mock_args.output,
-                    mock_args.arch,
-                    mock_args.description,
+                    mock_jinja_template(),
+                    {
+                        'DESCRIPTION':
+                        'description',
+                        'ARCH': 'arch',
+                        'KURL': 'kernel'
+                    },
+                    [],
+                    'db',
+                    None
                 )
-
-        mock_args.tree = 'notfound'
-        self.assertRaises(utils.TemplateNotFound, run.main, mock_args)
 
         mock_args.action = 'action-not-found'
         self.assertRaises(exceptions.ActionNotFound, run.main, mock_args)

@@ -1,0 +1,6 @@
+				<and>
+					<cpu_count op="&gt;" value="2"/>
+					<hypervisor op="=" value=""/>
+					<key_value key="DISKSPACE" op="&gt;=" value="50000"/>
+				</and>
+				<system_type value="Machine"/>
