@@ -67,7 +67,7 @@ def generate(template, template_params, patches, dbdir, output):
         )
     )
     template_params['TEST_CASES_PARTITIONS'] = sorted(
-        targeted.get_host_requires(
+        targeted.get_partitions(
             test_names,
             dbdir
         )
