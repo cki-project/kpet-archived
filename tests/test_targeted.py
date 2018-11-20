@@ -58,6 +58,15 @@ class TargetedTest(unittest.TestCase):
             'fs/ext4/inode.c',
             'fs/ext4/ioctl.c',
             'fs/xfs/xfs_log.c',
+            'block/blk-core.c',
+            'drivers/scsi/scsi_lib.c',
+            'drivers/s390/scsi/zfcp_dbf.h',
+            'drivers/s390/scsi/zfcp_fc.h',
+            'drivers/s390/scsi/zfcp_fsf.h',
+            'drivers/s390/scsi/zfcp_qdio.h',
+            'drivers/s390/scsi/zfcp_reqlist.h',
+            'lib/iomap.c',
+            'lib/llist.c',
         }
         self.assertSequenceEqual(
             expected_value,
