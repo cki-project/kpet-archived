@@ -39,25 +39,34 @@ def get_patterns_by_layout(layout, dbdir):
     return patterns
 
 
-def get_src_files(patches):
+def get_src_files(patch_path_list):
     """
     Get paths to source files modified by patches in the specified files.
     Args:
-        patches: List of patch file paths, they can't be URLs.
+        patch_path_list: List of patch file paths, they can't be URLs.
     Returns:
         A set of source file paths modified by the patches.
     """
-    pattern = re.compile(r'diff --git a/(.*) b/(.*)')
-    src_files = set()
-    for patch_path in patches:
-        with open(patch_path) as patch_handler:
-            patch_content = patch_handler.read()
-            match = re.findall(pattern, patch_content)
-            if not match:
+    pattern = re.compile(r'^---$|'
+                         r'^--- [^\s/]+/(\S+)(\s.*)?$\n'
+                         r'^\+\+\+ [^\s/]+/(\S+)(\s.*)?$',
+                         re.MULTILINE)
+    file_set = set()
+    for patch_path in patch_path_list:
+        with open(patch_path) as patch_file:
+            patch_content = patch_file.read()
+            patch_file_set = set()
+            for match in re.finditer(pattern, patch_content):
+                if match.group(0) == "---":
+                    patch_file_set = set()
+                else:
+                    patch_file_set.add(match.group(1))
+                    patch_file_set.add(match.group(3))
+            if patch_file_set:
+                file_set |= patch_file_set
+            else:
                 raise UnrecognizedPatchFormat(patch_content)
-            for src_match in match:
-                src_files.update(src_match)
-    return src_files
+    return file_set
 
 
 def get_layout(dbdir):

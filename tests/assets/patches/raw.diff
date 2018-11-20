@@ -1,0 +1,51 @@
+diff -ru kernel.old/lib/iomap.c kernel.new/lib/iomap.c
+--- kernel.old/lib/iomap.c	2018-11-20 13:15:35.617581159 +0200
++++ kernel.new/lib/iomap.c	2018-11-20 13:16:52.497062651 +0200
+@@ -225,23 +225,6 @@
+ EXPORT_SYMBOL(iowrite16_rep);
+ EXPORT_SYMBOL(iowrite32_rep);
+ 
+-#ifdef CONFIG_HAS_IOPORT_MAP
+-/* Create a virtual mapping cookie for an IO port range */
+-void __iomem *ioport_map(unsigned long port, unsigned int nr)
+-{
+-	if (port > PIO_MASK)
+-		return NULL;
+-	return (void __iomem *) (unsigned long) (port + PIO_OFFSET);
+-}
+-
+-void ioport_unmap(void __iomem *addr)
+-{
+-	/* Nothing to do */
+-}
+-EXPORT_SYMBOL(ioport_map);
+-EXPORT_SYMBOL(ioport_unmap);
+-#endif /* CONFIG_HAS_IOPORT_MAP */
+-
+ #ifdef CONFIG_PCI
+ /* Hide the details if this is a MMIO or PIO address space and just do what
+  * you expect in the correct way. */
+diff -ru kernel.old/lib/llist.c kernel.new/lib/llist.c
+--- kernel.old/lib/llist.c	2018-11-20 13:15:46.001512030 +0200
++++ kernel.new/lib/llist.c	2018-11-20 13:22:45.870525761 +0200
+@@ -46,7 +46,6 @@
+ 
+ 	return !first;
+ }
+-EXPORT_SYMBOL_GPL(llist_add_batch);
+ 
+ /**
+  * llist_del_first - delete the first entry of lock-less list
+@@ -79,7 +78,6 @@
+ 
+ 	return entry;
+ }
+-EXPORT_SYMBOL_GPL(llist_del_first);
+ 
+ /**
+  * llist_reverse_order - reverse order of a llist chain
+@@ -101,4 +99,3 @@
+ 
+ 	return new_head;
+ }
+-EXPORT_SYMBOL_GPL(llist_reverse_order);
