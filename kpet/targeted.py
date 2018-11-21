@@ -21,6 +21,10 @@ class UnrecognizedPatchFormat(Exception):
     """Raised when can't extract any source file from a patch"""
 
 
+class UnrecognizedPatchPathFormat(Exception):
+    """Raised when can't extract source file path from a diff header"""
+
+
 def get_patterns_by_layout(layout, dbdir):
     """
     Return patterns of layout.
@@ -39,6 +43,28 @@ def get_patterns_by_layout(layout, dbdir):
     return patterns
 
 
+def __get_src_file_path(diff_header_path):
+    """
+    Extract source file path from a path from a ---/+++ diff header.
+    Return None if file doesn't exist before/after the change. Throw an
+    exception if the path is invalid.
+    Args:
+        diff_header_path: The file path from the ---/+++ diff header.
+    Returns:
+        Source file path if the file exists before/after the change.
+    Raises:
+        UnrecognizedPatchPathFormat: the diff header file path was invalid.
+    """
+    if diff_header_path == "/dev/null":
+        return None
+    slash_idx = diff_header_path.find("/")
+    # If path has no slash, starts with a slash, or ends with a slash
+    if slash_idx <= 0 or diff_header_path[-1] == "/":
+        raise UnrecognizedPatchPathFormat(diff_header_path)
+    # Strip top directory
+    return diff_header_path[slash_idx + 1:]
+
+
 def get_src_files(patch_path_list):
     """
     Get paths to source files modified by patches in the specified files.
@@ -46,10 +72,13 @@ def get_src_files(patch_path_list):
         patch_path_list: List of patch file paths, they can't be URLs.
     Returns:
         A set of source file paths modified by the patches.
+    Raises:
+        UnrecognizedPatchFormat: a patch format was invalid.
+        UnrecognizedPatchPathFormat: a path in a diff header was invalid.
     """
     pattern = re.compile(r'^---$|'
-                         r'^--- [^\s/]+/(\S+)(\s.*)?$\n'
-                         r'^\+\+\+ [^\s/]+/(\S+)(\s.*)?$',
+                         r'^--- (\S+)(\s.*)?$\n'
+                         r'^\+\+\+ (\S+)(\s.*)?$',
                          re.MULTILINE)
     file_set = set()
     for patch_path in patch_path_list:
@@ -60,8 +89,14 @@ def get_src_files(patch_path_list):
                 if match.group(0) == "---":
                     patch_file_set = set()
                 else:
-                    patch_file_set.add(match.group(1))
-                    patch_file_set.add(match.group(3))
+                    old_file = __get_src_file_path(match.group(1))
+                    new_file = __get_src_file_path(match.group(3))
+                    if not old_file and not new_file:
+                        raise UnrecognizedPatchFormat(patch_content)
+                    if old_file:
+                        patch_file_set.add(old_file)
+                    if new_file:
+                        patch_file_set.add(new_file)
             if patch_file_set:
                 file_set |= patch_file_set
             else:
