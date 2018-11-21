@@ -53,6 +53,7 @@ class TargetedTest(unittest.TestCase):
         for patch in sorted(os.listdir(patches_dir)):
             patches.append(os.path.join(patches_dir, patch))
         expected_value = {
+            'Kconfig',
             'fs/ext4/ext4.h',
             'fs/ext4/ext4_jbd2.h',
             'fs/ext4/inode.c',
@@ -67,20 +68,67 @@ class TargetedTest(unittest.TestCase):
             'drivers/s390/scsi/zfcp_reqlist.h',
             'lib/iomap.c',
             'lib/llist.c',
+            'new_file',
         }
         self.assertSequenceEqual(
             expected_value,
             targeted.get_src_files(patches),
         )
-        with tempfile.NamedTemporaryFile() as tmpfile:
-            tmpfile.write(b'Unrecognized format patch')
-            tmpfile.flush()
-            patches = [tmpfile.name]
-            self.assertRaises(
-                targeted.UnrecognizedPatchFormat,
-                targeted.get_src_files,
-                patches,
-            )
+        bad_patch_map = {
+            # Empty
+            b'':
+            targeted.UnrecognizedPatchFormat,
+
+            # No diff headers
+            b'text':
+            targeted.UnrecognizedPatchFormat,
+
+            # Both files /dev/null
+            b'--- /dev/null\n'
+            b'+++ /dev/null':
+            targeted.UnrecognizedPatchFormat,
+
+            # Headers without files
+            b'--- \n'
+            b'+++ /dev/null':
+            targeted.UnrecognizedPatchFormat,
+            b'--- /dev/null\n'
+            b'+++ ':
+            targeted.UnrecognizedPatchFormat,
+
+            # No directory
+            b'--- abc\n'
+            b'+++ ghi/jkl':
+            targeted.UnrecognizedPatchPathFormat,
+            b'--- abc/def\n'
+            b'+++ jkl':
+            targeted.UnrecognizedPatchPathFormat,
+
+            # Directory diff
+            b'--- abc/def\n'
+            b'+++ ghi/jkl/':
+            targeted.UnrecognizedPatchPathFormat,
+            b'--- abc/def/\n'
+            b'+++ ghi/jkl':
+            targeted.UnrecognizedPatchPathFormat,
+
+            # An absolute path to a file
+            b'--- /abc/def\n'
+            b'+++ ghi/jkl':
+            targeted.UnrecognizedPatchPathFormat,
+            b'--- abc/def\n'
+            b'+++ /ghi/jkl':
+            targeted.UnrecognizedPatchPathFormat,
+        }
+        for bad_patch, exception in bad_patch_map.items():
+            with tempfile.NamedTemporaryFile() as bad_patch_file:
+                bad_patch_file.write(bad_patch)
+                bad_patch_file.flush()
+                self.assertRaises(
+                    exception,
+                    targeted.get_src_files,
+                    [bad_patch_file.name],
+                )
 
     def test_get_test_cases(self):
         """Check getting test cases according to sources given"""

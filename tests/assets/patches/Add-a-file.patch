@@ -1,0 +1,20 @@
+From 956d2eb7be2a0302216439c0ccdac13a5c7d5771 Mon Sep 17 00:00:00 2001
+From: Nikolai Kondrashov <Nikolai.Kondrashov@redhat.com>
+Date: Wed, 21 Nov 2018 13:44:36 +0200
+Subject: [PATCH 1/1] Add new file
+
+---
+ new_file | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 new_file
+
+diff --git a/new_file b/new_file
+new file mode 100644
+index 000000000000..152706f2256e
+--- /dev/null
++++ b/new_file
+@@ -0,0 +1 @@
++Wonderful new file
+-- 
+2.19.1
+
