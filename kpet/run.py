@@ -88,6 +88,7 @@ def main(args):
             'DESCRIPTION': args.description,
             'ARCH': args.arch,
             'KURL': args.kernel,
+            'TREE': args.tree,
         }
         generate(template, template_params, args.mboxes, args.db, args.output)
     elif args.action == 'print-test-cases':

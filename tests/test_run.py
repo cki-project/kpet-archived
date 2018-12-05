@@ -78,7 +78,8 @@ class RunTest(unittest.TestCase):
                         'DESCRIPTION':
                         'description',
                         'ARCH': 'arch',
-                        'KURL': 'kernel'
+                        'KURL': 'kernel',
+                        'TREE': 'rhel7'
                     },
                     [],
                     'db',
