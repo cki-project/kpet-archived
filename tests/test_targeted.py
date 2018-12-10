@@ -69,6 +69,8 @@ class TargetedTest(unittest.TestCase):
             'lib/iomap.c',
             'lib/llist.c',
             'new_file',
+            'Documentation/video-output.txt',
+            'Documentation/video_output.txt',
         }
         self.assertSequenceEqual(
             expected_value,

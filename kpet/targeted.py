@@ -78,7 +78,9 @@ def get_src_files(patch_path_list):
     """
     pattern = re.compile(r'^---$|'
                          r'^--- (\S+)(\s.*)?$\n'
-                         r'^\+\+\+ (\S+)(\s.*)?$',
+                         r'^\+\+\+ (\S+)(\s.*)?$|'
+                         r'^rename from (\S+)$\n'
+                         r'^rename to (\S+)$',
                          re.MULTILINE)
     file_set = set()
     for patch_path in patch_path_list:
@@ -89,14 +91,20 @@ def get_src_files(patch_path_list):
                 if match.group(0) == "---":
                     patch_file_set = set()
                 else:
-                    old_file = __get_src_file_path(match.group(1))
-                    new_file = __get_src_file_path(match.group(3))
-                    if not old_file and not new_file:
-                        raise UnrecognizedPatchFormat(patch_content)
-                    if old_file:
-                        patch_file_set.add(old_file)
-                    if new_file:
-                        patch_file_set.add(new_file)
+                    (change_old, _, change_new, _, rename_old, rename_new) = \
+                        match.groups()
+                    if change_old and change_new:
+                        old_file = __get_src_file_path(change_old)
+                        new_file = __get_src_file_path(change_new)
+                        if not old_file and not new_file:
+                            raise UnrecognizedPatchFormat(patch_content)
+                        if old_file:
+                            patch_file_set.add(old_file)
+                        if new_file:
+                            patch_file_set.add(new_file)
+                    else:
+                        patch_file_set.add(rename_old)
+                        patch_file_set.add(rename_new)
             if patch_file_set:
                 file_set |= patch_file_set
             else:
