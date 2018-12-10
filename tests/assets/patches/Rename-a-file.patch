@@ -1,0 +1,17 @@
+From fc24807a2e6c8e98e01874ae592277becd0399e6 Mon Sep 17 00:00:00 2001
+From: Nikolai Kondrashov <Nikolai.Kondrashov@redhat.com>
+Date: Tue, 11 Dec 2018 11:23:41 +0200
+Subject: [PATCH] Documentation: Rename video-output.txt to video_output.txt
+
+---
+ Documentation/{video-output.txt => video_output.txt} | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ rename Documentation/{video-output.txt => video_output.txt} (100%)
+
+diff --git a/Documentation/video-output.txt b/Documentation/video_output.txt
+similarity index 100%
+rename from Documentation/video-output.txt
+rename to Documentation/video_output.txt
+-- 
+2.19.2
+
