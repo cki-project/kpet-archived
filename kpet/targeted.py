@@ -25,6 +25,27 @@ class UnrecognizedPatchPathFormat(Exception):
     """Raised when can't extract source file path from a diff header"""
 
 
+class TestCase(object):
+    """ A class for testname and soaking data parsed."""
+    # pylint: disable=useless-object-inheritance
+    def __init__(self, testname, soak_data):
+        self.testname = testname
+        self.soak_data = soak_data
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return self.testname
+
+    def __eq__(self, other):
+        return self.testname == other.testname and \
+               self.soak_data == other.soak_data
+
+    def __hash__(self):
+        return hash(self.testname)
+
+
 def get_patterns_by_layout(layout, dbdir):
     """
     Return patterns of layout.
@@ -35,12 +56,21 @@ def get_patterns_by_layout(layout, dbdir):
         List of tuple (regex, testcase-name)
     """
     patterns = []
+    soaks = []
     for _, path in layout.items():
         pattern_file = os.path.join(dbdir, 'layout', path)
+
         with open(pattern_file) as file_handler:
             pattern_parsed = json.load(file_handler)
-        patterns.extend(pattern_parsed['patterns'])
-    return patterns
+
+        addition = pattern_parsed['patterns']
+        patterns.extend(addition)
+        try:
+            soaks.append(pattern_parsed['soaking'])
+        except KeyError:
+            soaks.extend([None] * len(addition))
+
+    return patterns, soaks
 
 
 def __get_src_file_path(diff_header_path):
@@ -133,21 +163,22 @@ def get_test_cases(src_files, dbdir):
     Args:
         src_files: List of kernel source files
         dbdir:  Path to the kpet-db
-    Returns:
-        All test cases applicable to the src_files. It'll return all of them
-        if src_files is empty.
+    Returns: TestCase objects, all test cases applicable to the src_files.
+        It'll return all of them if src_files is empty.
     """
     layout = get_layout(dbdir)
-    patterns = get_patterns_by_layout(layout, dbdir)
+    patterns, soaks = get_patterns_by_layout(layout, dbdir)
 
     test_cases = set()
-    for pattern_item in patterns:
+    for pattern_item, soak_item in zip(patterns, soaks):
         if not src_files:
-            test_cases.add(pattern_item['testcase_name'])
+            test_cases.add(TestCase(pattern_item['testcase_name'], soak_item))
         else:
             for src_path in src_files:
                 if re.match(pattern_item['pattern'], src_path):
-                    test_cases.add(pattern_item['testcase_name'])
+                    test_cases.add(TestCase(pattern_item['testcase_name'],
+                                            soak_item))
+
     return test_cases
 
 
@@ -171,15 +202,22 @@ def get_tasks(test_names, dbdir):
     """
     Get the corresponding "task" template path for every test name passed.
     Args:
-        test_names: List of test names
+        testcase: A list of TestCase objects with
         dbdir:      Path to the kpet-db
     Returns:
         A set of paths to "task" template files.
     """
-    result = set()
-    for testcase in get_all_test_cases(dbdir):
-        if testcase['name'] in test_names:
-            result.add(testcase['tasks'])
+    result = []
+    processed = set()
+    testcases_all = list(get_all_test_cases(dbdir))
+
+    for test_name in test_names:
+        for testcase in testcases_all:
+            name = testcase['name']
+            if test_name == name and name not in processed:
+                processed.add(name)
+                result.append(testcase['tasks'])
+
     return result
 
 

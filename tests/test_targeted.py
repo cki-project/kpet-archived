@@ -37,9 +37,10 @@ class TargetedTest(unittest.TestCase):
             {'pattern': '^fs/xfs/.*', 'testcase_name': 'fs/xfs'},
             {'pattern': '^fs/[^/]*[ch]', 'testcase_name': 'fs/xfs'},
         ]
+        actual_value, _ = targeted.get_patterns_by_layout(layout, self.db_dir)
         self.assertListEqual(
             expected_value,
-            targeted.get_patterns_by_layout(layout, self.db_dir)
+            actual_value,
         )
 
     def test_get_src_files(self):
@@ -134,21 +135,27 @@ class TargetedTest(unittest.TestCase):
 
     def test_get_test_cases(self):
         """Check getting test cases according to sources given"""
+        testcases = targeted.get_test_cases([], self.db_dir)
+
         self.assertSequenceEqual(
-            set({'fs/xfs', 'default/ltplite', 'fs/ext4'}),
-            targeted.get_test_cases([], self.db_dir)
+            sorted(['fs/xfs', 'default/ltplite', 'fs/ext4']),
+            sorted([t.testname for t in testcases])
         )
+
         src_files = {
             'fs/xfs/xfs_log.c',
         }
+        testcases = targeted.get_test_cases(src_files, self.db_dir)
         self.assertSequenceEqual(
-            set({'fs/xfs', 'default/ltplite'}),
-            targeted.get_test_cases(src_files, self.db_dir)
+            sorted(['fs/xfs', 'default/ltplite']),
+            sorted([t.testname for t in testcases])
         )
+
         src_files.add('fs/ext4/ext4.h')
+        testcases = targeted.get_test_cases(src_files, self.db_dir)
         self.assertSequenceEqual(
-            set({'fs/xfs', 'default/ltplite', 'fs/ext4'}),
-            targeted.get_test_cases(src_files, self.db_dir)
+            sorted(['fs/xfs', 'default/ltplite', 'fs/ext4']),
+            sorted([t.testname for t in testcases])
         )
 
     def test_get_all_test_cases(self):
@@ -177,15 +184,15 @@ class TargetedTest(unittest.TestCase):
     def test_get_tasks(self):
         """Check tasks template paths are returned by test name"""
         self.assertSequenceEqual(
-            {'fs/xml/xfstests-ext4-4k.xml'},
+            ['fs/xml/xfstests-ext4-4k.xml'],
             targeted.get_tasks(['fs/ext4'], self.db_dir)
         )
         self.assertSequenceEqual(
-            {'default/xml/ltplite.xml', 'fs/xml/xfstests-ext4-4k.xml'},
+            ['fs/xml/xfstests-ext4-4k.xml', 'default/xml/ltplite.xml'],
             targeted.get_tasks(['fs/ext4', 'default/ltplite'], self.db_dir)
         )
         self.assertSequenceEqual(
-            {},
+            [],
             targeted.get_tasks([], self.db_dir)
         )
 
@@ -210,3 +217,7 @@ class TargetedTest(unittest.TestCase):
             {},
             targeted.get_partitions(['fs/ext4'], self.db_dir)
         )
+
+    def test_testcase_class(self):
+        """ Ensure that TestCase returns str when expected."""
+        self.assertEqual(targeted.TestCase('test', None).__repr__(), 'test')

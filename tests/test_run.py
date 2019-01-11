@@ -17,6 +17,7 @@ import tempfile
 import unittest
 import mock
 from kpet import run, utils, exceptions
+from kpet import targeted
 
 
 class RunTest(unittest.TestCase):
@@ -95,9 +96,13 @@ class RunTest(unittest.TestCase):
         """
         Check print_test_cases prints the suggested test cases.
         """
-        mock_get_test_cases.return_value = ['default/ltplite', 'fs/xfs']
+        mock_get_test_cases.return_value = [
+            targeted.TestCase('default/ltplite', []),
+            targeted.TestCase('fs/xfs', [])
+        ]
         with mock.patch('sys.stdout') as mock_stdout:
             run.print_test_cases("", "")
+
         self.assertEqual('default/ltplite',
                          mock_stdout.write.call_args_list[0][0][0])
         self.assertEqual('fs/xfs',
@@ -108,6 +113,23 @@ class RunTest(unittest.TestCase):
         """
         Check get_test_cases returns the suggested test cases.
         """
-        mock_get_test_cases.return_value = ['default/ltplite', 'fs/xfs']
+        mock_get_test_cases.return_value = [
+            targeted.TestCase('default/ltplite', []),
+            targeted.TestCase('fs/xfs', [])
+        ]
         test_cases = run.get_test_cases("", "")
         self.assertEqual(mock_get_test_cases.return_value, test_cases)
+
+    def test_get_soaking_inner(self):
+        """ Ensure that get_soaking_inner() works."""
+        tasks = ['test', 'jest', 'quest']
+        is_soaking = [1, 0, None]
+
+        result = run.get_soaking_inner('test', tasks, is_soaking)
+        self.assertEqual(result, 'soaking="1"')
+
+        result = run.get_soaking_inner('jest', tasks, is_soaking)
+        self.assertEqual(result, 'soaking="0"')
+
+        result = run.get_soaking_inner('quest', tasks, is_soaking)
+        self.assertEqual(result, '')

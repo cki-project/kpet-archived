@@ -16,6 +16,9 @@ from __future__ import print_function
 import tempfile
 import shutil
 import os
+
+from jinja2 import Markup
+
 from kpet import utils, targeted
 
 
@@ -30,7 +33,8 @@ def get_test_cases(patches, dbdir):
     try:
         patches = utils.patch2localfile(patches, tmpdir)
         src_files = targeted.get_src_files(patches)
-        return sorted(targeted.get_test_cases(src_files, dbdir))
+        return sorted(targeted.get_test_cases(src_files, dbdir),
+                      key=lambda e: e.testname)
     finally:
         shutil.rmtree(tmpdir)
 
@@ -46,6 +50,25 @@ def print_test_cases(patches, dbdir):
         print(test_case)
 
 
+def get_soaking_inner(test_case, tasks, is_soaking):
+    """ Function called by jinja templating to add 'soaking="{val}"' based
+        on the data we have from json.
+
+        Args:
+            test_case:  name of the testcase to get data for
+            tasks:
+            is_soaking: soaking dict from patterns.json of a test
+    """
+    idx = tasks.index(test_case)
+
+    val = is_soaking[idx]
+
+    if val in (0, 1):
+        return Markup('soaking="' + str(val) + '"')
+
+    return ''
+
+
 def generate(template, template_params, patches, dbdir, output):
     """
     Generate an xml output compatible with beaker.
@@ -57,9 +80,18 @@ def generate(template, template_params, patches, dbdir, output):
         dbdir:           Path to the kpet-db
         output:          Output file where beaker xml will be rendered
     """
-    test_names = get_test_cases(patches, dbdir)
+    testcases = get_test_cases(patches, dbdir)
+    test_names = [t.testname for t in testcases]
+    tasks = targeted.get_tasks(test_names, dbdir)
+
+    is_soaking = [(t.soak_data if t.soak_data else '')
+                  for t in testcases]
+
+    get_soaking = lambda x: get_soaking_inner(x, tasks, is_soaking)  # noqa
+    # E731: I need this wrapper, so I can unit test get_soaking_inner
+
     template_params['TEST_CASES'] = sorted(
-        targeted.get_tasks(test_names, dbdir)
+        tasks
     )
     template_params['TEST_CASES_HOST_REQUIRES'] = sorted(
         targeted.get_host_requires(
@@ -73,6 +105,12 @@ def generate(template, template_params, patches, dbdir, output):
             dbdir
         )
     )
+    try:
+        template.environment.globals['get_soaking'] = get_soaking
+    except TypeError:
+        # ignore this, get_soaking cannot be mocked
+        pass
+
     content = template.render(template_params)
     if not output:
         print(content)
