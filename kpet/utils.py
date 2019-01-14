@@ -13,6 +13,7 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Utils used across kpet's commands"""
 import os
+from contextlib import contextmanager
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -21,6 +22,20 @@ import tempfile
 import requests
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from kpet.exceptions import ActionNotFound
+
+
+@contextmanager
+def tempfile_from_string(data):
+    """ Create a temporary file wrapped in contextmanager. The file is placed
+        in /tmp/<temporaryName> and destroyed once we exit context manager.
+    """
+    temp = tempfile.NamedTemporaryFile(delete=False)
+    temp.write(data)
+    temp.close()
+    try:
+        yield temp.name
+    finally:
+        os.unlink(temp.name)
 
 
 def get_jinja_template(tree, dbdir):

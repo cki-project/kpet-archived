@@ -17,7 +17,7 @@ import argparse
 import os
 import sys
 import logging
-from kpet import run, tree
+from kpet import run, tree, tests
 
 
 # (argparse uses help as parameter) pylint: disable=redefined-builtin
@@ -141,6 +141,55 @@ def build_tree_command(cmds_parser, common_parser):
     )
 
 
+def build_tests_comamnd(cmds_parser, common_parser):
+    """Build the argument parser for the enable command"""
+    _, action_subparser = _build_command(
+        cmds_parser,
+        common_parser,
+        "tests",
+        help='Modify tests, default action is "enable".',
+    )
+    tests_parser = action_subparser.add_parser(
+        "enable",
+        help='(re)Enable a test',
+        parents=[common_parser],
+    )
+
+    tests_disable_parser = action_subparser.add_parser(
+        "disable",
+        help='Disable a test',
+        parents=[common_parser],
+    )
+
+    tests_disable_parser.add_argument(
+        "test",
+        help='Test name to disable or enable.'
+    )
+
+    tests_parser.add_argument(
+        "test",
+        help='Test name to disable or enable.'
+    )
+
+    tests_disable_parser.add_argument(
+        "--branch",
+        "-b",
+        help='If set, disable/enable test remotely on a specified branch,'
+             ' instead of locally. Set env GITLAB_URL, GITLAB_PRIVATE_TOKEN'
+             ' accordingly.',
+        default=None
+    )
+
+    tests_parser.add_argument(
+        "--branch",
+        "-b",
+        help='If set, disable/enable test remotely on a specified branch,'
+             ' instead of locally. Set env GITLAB_URL, GITLAB_PRIVATE_TOKEN'
+             ' accordingly.',
+        default=None
+    )
+
+
 def exec_command(args, commands):
     """Call the associated command handler"""
     try:
@@ -175,11 +224,13 @@ def main(args=None):
     build_run_command(cmds_parser, common_parser)
     build_tree_command(cmds_parser, common_parser)
     build_arch_command(cmds_parser, common_parser)
+    build_tests_comamnd(cmds_parser, common_parser)
 
     args = parser.parse_args(args)
     commands = {
         'help': [parser.print_help],
         'run': [run.main, args],
         'tree': [tree.main, args],
+        'tests': [tests.main, args]
     }
     exec_command(args, commands)
