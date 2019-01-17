@@ -79,7 +79,8 @@ class RunTest(unittest.TestCase):
                         'description',
                         'ARCH': 'arch',
                         'KURL': 'kernel',
-                        'TREE': 'rhel7'
+                        'TREE': 'rhel7',
+                        'getenv': os.getenv,
                     },
                     [],
                     'db',

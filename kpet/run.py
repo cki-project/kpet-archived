@@ -15,6 +15,7 @@
 from __future__ import print_function
 import tempfile
 import shutil
+import os
 from kpet import utils, targeted
 
 
@@ -89,6 +90,7 @@ def main(args):
             'ARCH': args.arch,
             'KURL': args.kernel,
             'TREE': args.tree,
+            'getenv': os.getenv,
         }
         generate(template, template_params, args.mboxes, args.db, args.output)
     elif args.action == 'print-test-cases':
