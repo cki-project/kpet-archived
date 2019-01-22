@@ -41,7 +41,7 @@ def get_jinja_template(tree, dbdir):
     jinja_env = Environment(
         loader=FileSystemLoader(template_dirs),
         autoescape=select_autoescape(
-            enabled_extensions=('html', 'xml'),
+            enabled_extensions=('xml'),
             default_for_string=True,
         ),
     )
