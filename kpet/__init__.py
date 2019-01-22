@@ -63,6 +63,11 @@ def build_run_command(cmds_parser, common_parser):
         help='Path where will be saved the xml, default is stdout'
     )
     generate_parser.add_argument(
+        '--pw-cookie',
+        default=None,
+        help='Patchwork session cookie in case a login is required'
+    )
+    generate_parser.add_argument(
         '-t',
         '--tree',
         required=True,
@@ -108,6 +113,11 @@ def build_run_command(cmds_parser, common_parser):
         nargs='*',
         default=[],
         help='List of patches URLs/paths'
+    )
+    print_test_cases_parser.add_argument(
+        '--pw-cookie',
+        default=None,
+        help='Patchwork session cookie in case a login is required'
     )
 
 

@@ -19,34 +19,40 @@ import os
 from kpet import utils, targeted
 
 
-def get_test_cases(patches, dbdir):
+def get_test_cases(patches, dbdir, pw_cookie=None):
     """
     Return test cases by querying layout according list of patch files.
     Args:
-        patches: List of patches, they can be local files or remote urls
-        dbdir:   Path to the kpet-db
+        patches:   List of patches, they can be local files or remote urls
+        dbdir:     Path to the kpet-db
+        pw_cookie: Session cookie to Patchwork instance if login is required,
+                   None otherwise
     """
     tmpdir = tempfile.mkdtemp(suffix='kpet')
     try:
-        patches = utils.patch2localfile(patches, tmpdir)
+        patches = utils.patch2localfile(patches, tmpdir, pw_cookie)
         src_files = targeted.get_src_files(patches)
         return sorted(targeted.get_test_cases(src_files, dbdir))
     finally:
         shutil.rmtree(tmpdir)
 
 
-def print_test_cases(patches, dbdir):
+def print_test_cases(patches, dbdir, pw_cookie=None):
     """
     Print test cases by querying layout according list of patch files.
     Args:
-        patches: List of patches, they can be local files or remote urls
-        dbdir:   Path to the kpet-db
+        patches:   List of patches, they can be local files or remote urls
+        dbdir:     Path to the kpet-db
+        pw_cookie: Session cookie to Patchwork instance if login is required,
+                   None otherwise
     """
-    for test_case in get_test_cases(patches, dbdir):
+    for test_case in get_test_cases(patches, dbdir, pw_cookie):
         print(test_case)
 
 
-def generate(template, template_params, patches, dbdir, output):
+# pylint: disable=too-many-arguments
+def generate(template, template_params, patches, dbdir, output,
+             pw_cookie=None):
     """
     Generate an xml output compatible with beaker.
     Args:
@@ -56,8 +62,10 @@ def generate(template, template_params, patches, dbdir, output):
         patches:         List of patches, can be local files or remote urls
         dbdir:           Path to the kpet-db
         output:          Output file where beaker xml will be rendered
+        pw_cookie:       Session cookie to Patchwork instance if login is
+                         required, None otherwise
     """
-    test_names = get_test_cases(patches, dbdir)
+    test_names = get_test_cases(patches, dbdir, pw_cookie)
     template_params['TEST_CASES'] = sorted(
         targeted.get_property('tasks', test_names, dbdir, required=True)
     )
@@ -89,8 +97,9 @@ def main(args):
             'TREE': args.tree,
             'getenv': os.getenv,
         }
-        generate(template, template_params, args.mboxes, args.db, args.output)
+        generate(template, template_params, args.mboxes, args.db, args.output,
+                 args.pw_cookie)
     elif args.action == 'print-test-cases':
-        print_test_cases(args.patches, args.db)
+        print_test_cases(args.patches, args.db, args.pw_cookie)
     else:
         utils.raise_action_not_found(args.action, args.command)
