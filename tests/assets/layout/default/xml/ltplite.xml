@@ -1,3 +1,3 @@
 <task name="/kernel/distribution/ltp/lite" role="STANDALONE">
-	<fetch url="https://github.com/RH-FMK/tests-beaker/archive/staging.zip#distribution/ltp/lite"/>
+	<fetch url="https://github.com/CKI-project/tests-beaker/archive/staging.zip#distribution/ltp/lite"/>
 </task>
