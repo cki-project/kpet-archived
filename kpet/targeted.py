@@ -167,55 +167,27 @@ def get_all_test_cases(dbdir):
             yield testcase
 
 
-def get_tasks(test_names, dbdir):
+def get_property(property_name, test_names, dbdir, required=False):
     """
-    Get the corresponding "task" template path for every test name passed.
+    Get the property for every test name passed.
     Args:
-        test_names: List of test names
-        dbdir:      Path to the kpet-db
+        property_name: Property name e.g. hostRequires, tasks, partitions, etc
+        test_names:    List of test names
+        dbdir:         Path to the kpet-db
+        required:      True if the property is mandatory, otherwise False
+    Raises:
+        KeyError:      When the property is not found and it is required.
     Returns:
-        A set of paths to "task" template files.
+        A set of the property values.
     """
     result = set()
     for testcase in get_all_test_cases(dbdir):
         if testcase['name'] in test_names:
-            result.add(testcase['tasks'])
-    return result
-
-
-def get_host_requires(test_names, dbdir):
-    """
-    Get the corresponding "hostRequires" template path for every test name
-    passed.
-    Args:
-        test_names: List of test names
-        dbdir:      Path to the kpet-db
-    Returns:
-        A set of paths to "hostRequires" template files.
-    """
-    result = set()
-    for testcase in get_all_test_cases(dbdir):
-        if testcase['name'] in test_names:
-            host_requires = testcase.get('hostRequires', None)
-            if host_requires:
-                result.add(host_requires)
-    return result
-
-
-def get_partitions(test_names, dbdir):
-    """
-    Get the corresponding "partitions" template path for every test name
-    passed.
-    Args:
-        test_names: List of test names
-        dbdir:      Path to the kpet-db
-    Returns:
-        A set of paths to "partitions" template files.
-    """
-    result = set()
-    for testcase in get_all_test_cases(dbdir):
-        if testcase['name'] in test_names:
-            partitions = testcase.get('partitions', None)
-            if partitions:
-                result.add(partitions)
+            try:
+                property_value = testcase[property_name]
+            except KeyError:
+                if required:
+                    raise
+                continue
+            result.add(property_value)
     return result

@@ -174,39 +174,28 @@ class TargetedTest(unittest.TestCase):
             list(targeted.get_all_test_cases(self.db_dir))
         )
 
-    def test_get_tasks(self):
-        """Check tasks template paths are returned by test name"""
+    def test_get_property(self):
+        """Check properties are returned by test name"""
         self.assertSequenceEqual(
             {'fs/xml/xfstests-ext4-4k.xml'},
-            targeted.get_tasks(['fs/ext4'], self.db_dir)
+            targeted.get_property('tasks', ['fs/ext4'], self.db_dir)
         )
         self.assertSequenceEqual(
             {'default/xml/ltplite.xml', 'fs/xml/xfstests-ext4-4k.xml'},
-            targeted.get_tasks(['fs/ext4', 'default/ltplite'], self.db_dir)
+            targeted.get_property('tasks', ['fs/ext4', 'default/ltplite'],
+                                  self.db_dir)
         )
-        self.assertSequenceEqual(
-            {},
-            targeted.get_tasks([], self.db_dir)
-        )
-
-    def test_get_host_requires(self):
-        """Check host requires template paths are returned by test name"""
-        self.assertSequenceEqual(
-            {'fs/xml/hostrequires.xml'},
-            targeted.get_host_requires(['fs/ext4'], self.db_dir)
-        )
-        self.assertSequenceEqual(
-            {},
-            targeted.get_host_requires(['fs/xfs'], self.db_dir)
-        )
-
-    def test_get_partitions(self):
-        """Check partitions template paths are returned by test name"""
         self.assertSequenceEqual(
             {'fs/xml/partitions.xml'},
-            targeted.get_partitions(['fs/xfs'], self.db_dir)
+            targeted.get_property('partitions', ['fs/xfs'], self.db_dir)
         )
         self.assertSequenceEqual(
             {},
-            targeted.get_partitions(['fs/ext4'], self.db_dir)
+            targeted.get_property('tasks', [], self.db_dir)
         )
+        self.assertSequenceEqual(
+            {},
+            targeted.get_property('unknown', ['fs/xfs'], self.db_dir)
+        )
+        self.assertRaises(KeyError, targeted.get_property, 'unknown',
+                          ['fs/xfs'], self.db_dir, required=True)

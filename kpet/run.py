@@ -59,19 +59,13 @@ def generate(template, template_params, patches, dbdir, output):
     """
     test_names = get_test_cases(patches, dbdir)
     template_params['TEST_CASES'] = sorted(
-        targeted.get_tasks(test_names, dbdir)
+        targeted.get_property('tasks', test_names, dbdir, required=True)
     )
     template_params['TEST_CASES_HOST_REQUIRES'] = sorted(
-        targeted.get_host_requires(
-            test_names,
-            dbdir
-        )
+        targeted.get_property('hostRequires', test_names, dbdir)
     )
     template_params['TEST_CASES_PARTITIONS'] = sorted(
-        targeted.get_partitions(
-            test_names,
-            dbdir
-        )
+        targeted.get_property('partitions', test_names, dbdir)
     )
     content = template.render(template_params)
     if not output:
