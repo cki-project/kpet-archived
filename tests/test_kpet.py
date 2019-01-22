@@ -106,9 +106,6 @@ class ArgumentParserTest(unittest.TestCase):
         successfully
         """
         dbdir = os.path.join(os.path.dirname(__file__), 'assets')
-        args = ['run', 'generate', '-t', 'rhel7', '-k',
-                'url']
-        self.assertRaises(SystemExit, kpet.main, args)
         args = ['--db', dbdir, 'run', 'generate', '-t', 'rhel7', '-k',
                 'url']
         mock_jinja_template = mock.Mock()
