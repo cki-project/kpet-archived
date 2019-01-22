@@ -66,6 +66,7 @@ class RunTest(unittest.TestCase):
         mock_args.arch = 'arch'
         mock_args.db = 'db'
         mock_args.output = None
+        mock_args.pw_cookie = None
         mock_args.description = 'description'
         mock_args.mboxes = []
         with mock.patch('kpet.run.generate') as mock_generate:
@@ -84,6 +85,7 @@ class RunTest(unittest.TestCase):
                     },
                     [],
                     'db',
+                    None,
                     None
                 )
 

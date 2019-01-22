@@ -12,6 +12,10 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Utils used across kpet's commands"""
+try:
+    import cookielib
+except ImportError:
+    import http.cookiejar as cookielib
 import os
 try:
     from urllib.parse import urlparse
@@ -46,13 +50,23 @@ def get_jinja_template(tree, dbdir):
     return template
 
 
-def patch2localfile(patches, workdir):
+def patch2localfile(patches, workdir, cookie=None):
     """Convert all patches in local files"""
     result = []
     for patch in patches:
         # check if it's an url
         if urlparse(patch).scheme:
-            response = requests.get(patch)
+            # Create a Patchwork session cookie if specified
+            cookie_jar = None
+            if cookie:
+                domain = patch.rsplit('patch', 1)[0].strip('/').split('/')[-1]
+                cookie = cookielib.Cookie(0, 'sessionid', cookie, None, False,
+                                          domain, False, False, '/', False,
+                                          False, None, False, None, None, {})
+                cookie_jar = cookielib.CookieJar()
+                cookie_jar.set_cookie(cookie)
+
+            response = requests.get(patch, cookies=cookie_jar)
             response.raise_for_status()
             tmpfile = tempfile.mktemp(dir=workdir)
             with open(tmpfile, 'wb') as file_handler:

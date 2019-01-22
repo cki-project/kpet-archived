@@ -49,7 +49,8 @@ class UtilsTest(unittest.TestCase):
                 ['http://mypatch.org', '/localfile'],
                 tmpdir
             )
-            mock_request_get.assert_called_with('http://mypatch.org')
+            mock_request_get.assert_called_with('http://mypatch.org',
+                                                cookies=None)
             with open(patches[0]) as file_handler:
                 file_content = file_handler.read()
             self.assertEqual('some content', file_content)
