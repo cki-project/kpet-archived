@@ -177,8 +177,8 @@ def main(args=None):
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         '--db',
-        help='Location of database of kernel trees and tests',
-        required=True,
+        help='Location of database of kernel trees and tests, default "."',
+        default='.',
     )
     cmds_parser = parser.add_subparsers(title="Command", dest="command")
 
