@@ -67,6 +67,9 @@ def generate(template, template_params, patches, dbdir, output):
     template_params['TEST_CASES_PARTITIONS'] = sorted(
         targeted.get_property('partitions', test_names, dbdir)
     )
+    template_params['TEST_CASES_KICKSTART'] = sorted(
+        targeted.get_property('kickstart', test_names, dbdir)
+    )
     content = template.render(template_params)
     if not output:
         print(content)
