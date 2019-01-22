@@ -11,7 +11,7 @@ system. You can execute it directly from the repository `./bin/kpet` or you can
 install it via pip and use it directly from your `PATH`.
 
 ```bash
-$ pip install --user git+https://github.com/RH-FMK/kpet
+$ pip install --user git+https://github.com/CKI-project/kpet
 ```
 
 Install KPET Database
