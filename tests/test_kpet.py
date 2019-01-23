@@ -100,7 +100,8 @@ class ArgumentParserTest(unittest.TestCase):
                 mock.call('Not implemented yet'),
             )
 
-    def test_main(self):
+    @mock.patch('distutils.spawn.find_executable', return_value=None)
+    def test_main(self, mock_find_executable):
         """
         Check --db is required and also run generate command executes
         successfully

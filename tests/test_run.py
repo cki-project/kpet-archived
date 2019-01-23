@@ -22,7 +22,8 @@ from kpet import run, utils, exceptions
 
 class RunTest(unittest.TestCase):
     """Test cases for run module."""
-    def test_generate(self):
+    @mock.patch('distutils.spawn.find_executable', return_value=None)
+    def test_generate(self, mock_find_executable):
         """
         Check the success case, if it raises the proper exception when
         the type is not found and if it saves the output in a file instead

@@ -102,7 +102,7 @@ def generate(template, template_params, patches, dbdir, output,
     template_params['TEST_CASES_KICKSTART'] = sorted(
         targeted.get_property('kickstart', test_names, dbdir)
     )
-    content = template.render(template_params)
+    content = pretty_xml(template.render(template_params))
     if not output:
         print(content)
     else:
