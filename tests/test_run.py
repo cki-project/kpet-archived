@@ -15,6 +15,7 @@
 import os
 import tempfile
 import unittest
+import subprocess
 import mock
 from kpet import run, utils, exceptions
 
@@ -113,3 +114,20 @@ class RunTest(unittest.TestCase):
         mock_get_test_cases.return_value = ['default/ltplite', 'fs/xfs']
         test_cases = run.get_test_cases("", "")
         self.assertEqual(mock_get_test_cases.return_value, test_cases)
+
+    @mock.patch('subprocess.Popen')
+    @mock.patch('distutils.spawn.find_executable')
+    def test_pretty_xml(self, mock_find_executable, mock_popen):
+        """
+        Check command (xmllint mocked) is called if it is available and content
+        is modified.
+        """
+        mock_find_executable.return_value = None
+        self.assertEqual('foobar', run.pretty_xml('foobar'))
+
+        mock_find_executable.return_value = 'binary'
+        mock_popen().communicate.return_value = (b'stdout', b'')
+        self.assertRaises(subprocess.CalledProcessError, run.pretty_xml, 'bar')
+
+        mock_popen().poll.return_value = 0
+        self.assertEqual('stdout', run.pretty_xml('foobar'))

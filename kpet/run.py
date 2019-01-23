@@ -16,6 +16,8 @@ from __future__ import print_function
 import tempfile
 import shutil
 import os
+import subprocess
+import distutils
 from kpet import utils, targeted
 
 
@@ -48,6 +50,28 @@ def print_test_cases(patches, dbdir, pw_cookie=None):
     """
     for test_case in get_test_cases(patches, dbdir, pw_cookie):
         print(test_case)
+
+
+def pretty_xml(xml_content):
+    """
+    Check, reformat and reindent the xml content if xmllint is available,
+    otherwise return the content unchanged.
+    Args:
+        xml_content: Jinja template rendered
+    Returns:
+        An xml reformatted and reindented if xmllint is available.
+    """
+    cmd = distutils.spawn.find_executable('xmllint')
+    if not cmd:
+        return xml_content
+    args = [cmd, '--format', '-']
+    proc = subprocess.Popen(args, stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE)
+    proc.stdin.write(xml_content.encode('utf-8'))
+    stdout, _ = proc.communicate()
+    if proc.poll() != 0:
+        raise subprocess.CalledProcessError(proc.returncode, ' '.join(args))
+    return stdout.decode('utf-8')
 
 
 # pylint: disable=too-many-arguments
