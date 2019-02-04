@@ -177,25 +177,45 @@ class TargetedTest(unittest.TestCase):
     def test_get_property(self):
         """Check properties are returned by test name"""
         self.assertSequenceEqual(
-            {'fs/xml/xfstests-ext4-4k.xml'},
+            ['fs/xml/xfstests-ext4-4k.xml'],
             targeted.get_property('tasks', ['fs/ext4'], self.db_dir)
         )
         self.assertSequenceEqual(
-            {'default/xml/ltplite.xml', 'fs/xml/xfstests-ext4-4k.xml'},
+            ['default/xml/ltplite.xml', 'fs/xml/xfstests-ext4-4k.xml'],
             targeted.get_property('tasks', ['fs/ext4', 'default/ltplite'],
                                   self.db_dir)
         )
         self.assertSequenceEqual(
-            {'fs/xml/partitions.xml'},
+            ['fs/xml/partitions.xml'],
             targeted.get_property('partitions', ['fs/xfs'], self.db_dir)
         )
         self.assertSequenceEqual(
-            {},
+            [],
             targeted.get_property('tasks', [], self.db_dir)
         )
         self.assertSequenceEqual(
-            {},
+            [],
             targeted.get_property('unknown', ['fs/xfs'], self.db_dir)
         )
         self.assertRaises(KeyError, targeted.get_property, 'unknown',
                           ['fs/xfs'], self.db_dir, required=True)
+
+    def test_is_waived_test(self):
+        """ Check if is_waived_test works. Use waived asset."""
+        testcase = {'tasks': 'fs/nfs/connectathon/xml/task-connectathon-waived'
+                             '.xml'}
+
+        self.assertTrue(targeted.is_waived_test(testcase, self.db_dir))
+
+    def test_is_notwaived_test(self):
+        """ Check if is_waived_test works. Use asset without waived param."""
+        testcase = {'tasks': 'fs/nfs/connectathon/xml/task-connectathon.xml'}
+
+        self.assertFalse(targeted.is_waived_test(testcase, self.db_dir))
+
+    def test_is_notwaived_test_mangled(self):
+        """ Check if is_waived_test works. Use a mangled asset."""
+        testcase = {'tasks': 'fs/nfs/connectathon/xml/task-connectathon-'
+                             'mangled.xml'}
+
+        self.assertFalse(targeted.is_waived_test(testcase, self.db_dir))

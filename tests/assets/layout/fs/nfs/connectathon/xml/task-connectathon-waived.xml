@@ -1,0 +1,7 @@
+<task name="NFS Connectathon" role="STANDALONE">
+	<fetch url="{{ TESTS_BEAKER_ZIP_URL }}#filesystems/nfs/connectathon"/>
+    <params>
+        <param name="CI" value="yes"/>
+	    <param name="_WAIVED" value="true"/>
+    </params>
+</task>

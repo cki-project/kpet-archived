@@ -16,6 +16,9 @@ import os
 import json
 import re
 
+from xml.etree.ElementTree import ParseError, fromstring
+from jinja2 import Environment
+
 
 class UnrecognizedPatchFormat(Exception):
     """Raised when can't extract any source file from a patch"""
@@ -23,6 +26,38 @@ class UnrecognizedPatchFormat(Exception):
 
 class UnrecognizedPatchPathFormat(Exception):
     """Raised when can't extract source file path from a diff header"""
+
+
+def is_waived_test(testcase, dbdir):
+    """ Determines if the testcase is waived or not.
+        Args:
+            testcase: a dict
+            dbdir: path to kpet-db
+        Returns:
+            bool
+    """
+    is_task_waived = False
+
+    path = os.path.join(dbdir, 'layout', testcase['tasks'])
+
+    with open(path, 'r') as file_handle:
+        data = file_handle.read()
+        data = Environment().from_string(data).render()
+        try:
+            xml_root = fromstring(data)
+        except ParseError:
+            return False
+
+        for param in xml_root.findall('.//param'):
+            try:
+                if param.attrib.get('name').lower() == '_waived' and \
+                        param.attrib.get('value').lower() == 'true':
+                    is_task_waived = True
+                    break
+            except (AttributeError, ValueError):
+                pass
+
+    return is_task_waived
 
 
 def get_patterns_by_layout(layout, dbdir):
@@ -170,6 +205,9 @@ def get_all_test_cases(dbdir):
 def get_property(property_name, test_names, dbdir, required=False):
     """
     Get the property for every test name passed.
+    This function ensures that waived tests are at the end of the job
+    and that the ordering is otherwise unchanged.
+
     Args:
         property_name: Property name e.g. hostRequires, tasks, partitions, etc
         test_names:    List of test names
@@ -180,14 +218,27 @@ def get_property(property_name, test_names, dbdir, required=False):
     Returns:
         A set of the property values.
     """
-    result = set()
-    for testcase in get_all_test_cases(dbdir):
-        if testcase['name'] in test_names:
-            try:
-                property_value = testcase[property_name]
-            except KeyError:
-                if required:
-                    raise
-                continue
-            result.add(property_value)
-    return result
+    def _get_property(cases):
+        result = []
+        for testcase in cases:
+            if testcase['name'] in test_names:
+                try:
+                    property_value = testcase[property_name]
+                except KeyError:
+                    if required:
+                        raise
+                    continue
+                if property_value not in result:
+                    result.append(property_value)
+        return result
+
+    all_testcases = list(get_all_test_cases(dbdir))
+    # sort into waived/unwaived
+    waived = [x for x in all_testcases if is_waived_test(x, dbdir)]
+    unwaived = [x for x in all_testcases if not is_waived_test(x, dbdir)]
+
+    # sort separately
+    unwaived_results = sorted(_get_property(unwaived))
+    waived_results = sorted(_get_property(waived))
+
+    return unwaived_results + waived_results
