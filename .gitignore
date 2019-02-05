@@ -5,3 +5,4 @@ kpet.egg-info
 .tox/
 .coverage
 .eggs/
+.idea
