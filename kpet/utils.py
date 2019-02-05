@@ -50,7 +50,7 @@ def get_jinja_template(tree, dbdir):
     return template
 
 
-def patch2localfile(patches, workdir, cookie=None):
+def patch2localfile(patches, workdir, session_cookie=None):
     """Convert all patches in local files"""
     result = []
     for patch in patches:
@@ -58,11 +58,12 @@ def patch2localfile(patches, workdir, cookie=None):
         if urlparse(patch).scheme:
             # Create a Patchwork session cookie if specified
             cookie_jar = None
-            if cookie:
+            if session_cookie:
                 domain = patch.rsplit('patch', 1)[0].strip('/').split('/')[-1]
-                cookie = cookielib.Cookie(0, 'sessionid', cookie, None, False,
-                                          domain, False, False, '/', False,
-                                          False, None, False, None, None, {})
+                cookie = cookielib.Cookie(0, 'sessionid', session_cookie, None,
+                                          False, domain, False, False, '/',
+                                          False, False, None, False, None,
+                                          None, {})
                 cookie_jar = cookielib.CookieJar()
                 cookie_jar.set_cookie(cookie)
 
