@@ -171,30 +171,31 @@ class TargetedTest(unittest.TestCase):
         ]
         self.assertListEqual(
             expected_value,
-            list(targeted.get_all_test_cases(self.db_dir))
+            [testcase for testcase, _ in
+             list(targeted.get_all_test_cases(self.db_dir))]
         )
 
     def test_get_property(self):
         """Check properties are returned by test name"""
         self.assertSequenceEqual(
-            {'fs/xml/xfstests-ext4-4k.xml'},
+            ['fs/xml/xfstests-ext4-4k.xml'],
             targeted.get_property('tasks', ['fs/ext4'], self.db_dir)
         )
         self.assertSequenceEqual(
-            {'default/xml/ltplite.xml', 'fs/xml/xfstests-ext4-4k.xml'},
+            ['default/xml/ltplite.xml', 'fs/xml/xfstests-ext4-4k.xml'],
             targeted.get_property('tasks', ['fs/ext4', 'default/ltplite'],
                                   self.db_dir)
         )
         self.assertSequenceEqual(
-            {'fs/xml/partitions.xml'},
+            ['fs/xml/partitions.xml'],
             targeted.get_property('partitions', ['fs/xfs'], self.db_dir)
         )
         self.assertSequenceEqual(
-            {},
+            [],
             targeted.get_property('tasks', [], self.db_dir)
         )
         self.assertSequenceEqual(
-            {},
+            [],
             targeted.get_property('unknown', ['fs/xfs'], self.db_dir)
         )
         self.assertRaises(KeyError, targeted.get_property, 'unknown',

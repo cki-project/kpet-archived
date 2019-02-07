@@ -113,3 +113,14 @@ class RunTest(unittest.TestCase):
         mock_get_test_cases.return_value = ['default/ltplite', 'fs/xfs']
         test_cases = run.get_test_cases("", "")
         self.assertEqual(mock_get_test_cases.return_value, test_cases)
+
+    def test_get_waived_inner(self):
+        """ Ensure that get_waived_inner() works."""
+        tasks = ['test', 'jest']
+        is_waived = [1, 0]
+
+        result = run.get_waived_inner('test', tasks, is_waived)
+        self.assertEqual(result, '<param name="_WAIVED" value="True"/>')
+
+        result = run.get_waived_inner('jest', tasks, is_waived)
+        self.assertEqual(result, '<param name="_WAIVED" value="False"/>')

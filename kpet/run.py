@@ -16,6 +16,9 @@ from __future__ import print_function
 import tempfile
 import shutil
 import os
+
+from jinja2 import Markup
+
 from kpet import utils, targeted
 
 
@@ -50,6 +53,22 @@ def print_test_cases(patches, dbdir, pw_cookie=None):
         print(test_case)
 
 
+def get_waived_inner(test_case, tasks, is_waived):
+    """ Function called by jinja templating to add <param /> based
+        on the data we have from json.
+
+        Args:
+            test_case:  name of the testcase to get data for
+            tasks:
+            is_waived: soaking value from patterns.json of a test
+    """
+    idx = tasks.index(test_case)
+
+    val = is_waived[idx]
+
+    return Markup('<param name="_WAIVED" value="%s"/>' % (bool(val)))
+
+
 # pylint: disable=too-many-arguments
 def generate(template, template_params, patches, dbdir, output,
              pw_cookie=None):
@@ -66,8 +85,21 @@ def generate(template, template_params, patches, dbdir, output,
                          required, None otherwise
     """
     test_names = get_test_cases(patches, dbdir, pw_cookie)
+
+    tasks = targeted.get_property('tasks', test_names, dbdir, required=True)
+    template_params['TEST_CASES'] = tasks
+
+    is_waived = targeted.get_property('waived', test_names, dbdir)
+    tasks = targeted.get_property('tasks', test_names, dbdir, required=True)
+
+    tasks = sorted(tasks, key=lambda x: is_waived[tasks.index(x)])
+    is_waived = sorted(is_waived, key=lambda x: x == 1)
+
+    get_waived = lambda x: get_waived_inner(x, tasks, is_waived)  # noqa
+    # E731: I need this wrapper, so I can unit test get_waived_inner
+
     template_params['TEST_CASES'] = sorted(
-        targeted.get_property('tasks', test_names, dbdir, required=True)
+        tasks
     )
     template_params['TEST_CASES_HOST_REQUIRES'] = sorted(
         targeted.get_property('hostRequires', test_names, dbdir)
@@ -78,6 +110,12 @@ def generate(template, template_params, patches, dbdir, output,
     template_params['TEST_CASES_KICKSTART'] = sorted(
         targeted.get_property('kickstart', test_names, dbdir)
     )
+    try:
+        template.environment.globals['get_waived'] = get_waived
+    except TypeError:
+        # ignore this, get_waived cannot be mocked
+        pass
+
     content = template.render(template_params)
     if not output:
         print(content)

@@ -157,14 +157,15 @@ def get_all_test_cases(dbdir):
     Args:
         dbdir: Path to the kpet-db
     Returns:
-        A generator iterating over all test cases.
+        A generator iterating over all test cases and pattern items.
     """
     for _, path in get_layout(dbdir).items():
         pattern_file = os.path.join(dbdir, 'layout', path)
         with open(pattern_file) as file_handler:
             pattern = json.load(file_handler)
+
         for testcase in pattern['cases']:
-            yield testcase
+            yield testcase, pattern
 
 
 def get_property(property_name, test_names, dbdir, required=False):
@@ -180,14 +181,35 @@ def get_property(property_name, test_names, dbdir, required=False):
     Returns:
         A set of the property values.
     """
-    result = set()
-    for testcase in get_all_test_cases(dbdir):
+    def add_result(ffrom):
+        """ Insert value we get by ffrom[key] into result. Raise exception
+            if required=True. The function uses list 'result', but the result
+            in inserted only once. List is used instead of a set to preserve
+            order.
+
+            Returns: True if anything was inserted
+        """
+
+        try:
+            property_value = ffrom[property_name]
+        except KeyError:
+            if required:
+                raise
+            return False
+        if property_value not in result:
+            result.append(property_value)
+            return True
+
+        return False
+
+    result = []
+
+    for testcase, pattern in list(get_all_test_cases(dbdir)):
         if testcase['name'] in test_names:
-            try:
-                property_value = testcase[property_name]
-            except KeyError:
-                if required:
-                    raise
-                continue
-            result.add(property_value)
+            if property_name == 'waived':
+                if not add_result(pattern):
+                    result.append(0)
+            else:
+                add_result(testcase)
+
     return result

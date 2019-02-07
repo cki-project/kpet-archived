@@ -61,12 +61,14 @@ class ArgumentParserTest(unittest.TestCase):
         self.assertEqual('bar', args.kernel)
         self.assertListEqual(['mbox1', 'mbox2'], args.mboxes)
 
-    def test_exec_command(self):
+    @mock.patch('logging.error')
+    def test_exec_command(self, mock_logging):
         """
         Check the success case, command in question raises an exception,
         that SystemExit is ignored and when a command is not implemented prints
         `Not implemented yet` on stderr
         """
+        # pylint: disable=unused-argument
         mock_command = mock.Mock()
         commands = {
             'foobar': [mock_command, 'foo', 'bar'],
