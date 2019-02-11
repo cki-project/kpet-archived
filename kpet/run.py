@@ -19,12 +19,12 @@ import os
 from kpet import utils, targeted, data
 
 
-def get_test_cases(patches, dbdir, pw_cookie=None):
+def get_test_cases(patches, database, pw_cookie=None):
     """
     Return test cases by querying layout according list of patch files.
     Args:
         patches:   List of patches, they can be local files or remote urls
-        dbdir:     Path to the kpet-db
+        database:  Database instance
         pw_cookie: Session cookie to Patchwork instance if login is required,
                    None otherwise
     """
@@ -32,21 +32,21 @@ def get_test_cases(patches, dbdir, pw_cookie=None):
     try:
         patches = utils.patch2localfile(patches, tmpdir, pw_cookie)
         src_files = targeted.get_src_files(patches)
-        return sorted(targeted.get_test_cases(src_files, dbdir))
+        return sorted(targeted.get_test_cases(src_files, database.dir_path))
     finally:
         shutil.rmtree(tmpdir)
 
 
-def print_test_cases(patches, dbdir, pw_cookie=None):
+def print_test_cases(patches, database, pw_cookie=None):
     """
     Print test cases by querying layout according list of patch files.
     Args:
         patches:   List of patches, they can be local files or remote urls
-        dbdir:     Path to the kpet-db
+        database:  Database instance
         pw_cookie: Session cookie to Patchwork instance if login is required,
                    None otherwise
     """
-    for test_case in get_test_cases(patches, dbdir, pw_cookie):
+    for test_case in get_test_cases(patches, database, pw_cookie):
         print(test_case)
 
 
@@ -65,7 +65,7 @@ def generate(template, template_params, patches, database, output,
         pw_cookie:       Session cookie to Patchwork instance if login is
                          required, None otherwise
     """
-    test_names = get_test_cases(patches, database.dir_path, pw_cookie)
+    test_names = get_test_cases(patches, database, pw_cookie)
     template_params['TEST_CASES'] = sorted(
         targeted.get_property('tasks', test_names, database.dir_path,
                               required=True)
@@ -104,6 +104,6 @@ def main(args):
         generate(template, template_params, args.mboxes, database,
                  args.output, args.pw_cookie)
     elif args.action == 'print-test-cases':
-        print_test_cases(args.patches, args.db, args.pw_cookie)
+        print_test_cases(args.patches, database, args.pw_cookie)
     else:
         utils.raise_action_not_found(args.action, args.command)
