@@ -102,8 +102,7 @@ class ArgumentParserTest(unittest.TestCase):
 
     def test_main(self):
         """
-        Check --db is required and also run generate command executes
-        successfully
+        Check run generate command executes successfully
         """
         dbdir = os.path.join(os.path.dirname(__file__), 'assets')
         args = ['--db', dbdir, 'run', 'generate', '-t', 'rhel7', '-k',
