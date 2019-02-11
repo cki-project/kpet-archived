@@ -12,8 +12,6 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Targeted testing - matching patches to applicable test cases"""
-import os
-import json
 import re
 
 
@@ -94,21 +92,6 @@ def get_src_files(patch_path_list):
     return file_set
 
 
-def get_layout(dbdir):
-    """
-    Load layout from a database.
-    Args:
-        dbdir: Path to the kpet-db
-    Returns:
-        Layout object loaded from the database.
-    """
-    path = os.path.join(dbdir, 'layout', 'layout.json')
-    with open(path) as handle:
-        obj = json.load(handle)
-    assert obj['schema']['version'] == 1
-    return obj['testsuites']
-
-
 def get_test_cases(src_files, database):
     """
     Get test case names by querying database according to source files.
@@ -133,22 +116,6 @@ def get_test_cases(src_files, database):
     return testcases
 
 
-def get_all_test_cases(database):
-    """
-    Get a generator iterating over all testcases defined in the database.
-    Args:
-        database:   Database instance
-    Returns:
-        A generator iterating over all test cases.
-    """
-    for _, path in get_layout(database.dir_path).items():
-        pattern_file = os.path.join(database.dir_path, 'layout', path)
-        with open(pattern_file) as file_handler:
-            pattern = json.load(file_handler)
-        for testcase in pattern['cases']:
-            yield testcase
-
-
 def get_property(property_name, test_names, database, required=False):
     """
     Get the property for every test name passed.
@@ -163,15 +130,16 @@ def get_property(property_name, test_names, database, required=False):
         A set of the property values.
     """
     result = set()
-    for testcase in get_all_test_cases(database):
-        if testcase['name'] in test_names:
-            try:
-                property_value = testcase[property_name]
-            except KeyError:
-                if required:
-                    raise
-                continue
 
-            if property_value is not None:
-                result.add(property_value)
+    for testsuite in database.testsuites.values():
+        for testcase in testsuite.cases:
+            if testcase['name'] in test_names:
+                try:
+                    property_value = testcase[property_name]
+                except KeyError:
+                    if required:
+                        raise
+                    continue
+                if property_value is not None:
+                    result.add(property_value)
     return result

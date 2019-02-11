@@ -134,29 +134,6 @@ class TargetedTest(unittest.TestCase):
             targeted.get_test_cases(src_files, database)
         )
 
-    def test_get_all_test_cases(self):
-        """Check all test cases in the database are returned"""
-        expected_value = [
-            {
-                'name': 'default/ltplite',
-                'tasks': 'default/xml/ltplite.xml',
-            },
-            {
-                'name': 'fs/ext4',
-                'tasks': 'fs/xml/xfstests-ext4-4k.xml',
-                'hostRequires': 'fs/xml/hostrequires.xml',
-            },
-            {
-                'name': 'fs/xfs',
-                'tasks': 'fs/xml/xfstests-xfs-4k-finobt.xml',
-                "partitions": 'fs/xml/partitions.xml',
-            },
-        ]
-        self.assertListEqual(
-            expected_value,
-            list(targeted.get_all_test_cases(data.Base(self.db_dir)))
-        )
-
     def test_get_property(self):
         """Check properties are returned by test name"""
         database = data.Base(self.db_dir)
