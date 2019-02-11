@@ -158,5 +158,3 @@ class TargetedTest(unittest.TestCase):
             {},
             targeted.get_property('unknown', ['fs/xfs'], database)
         )
-        self.assertRaises(KeyError, targeted.get_property, 'unknown',
-                          ['fs/xfs'], database, required=True)

@@ -67,8 +67,7 @@ def generate(template, template_params, patches, database, output,
     """
     test_names = get_test_cases(patches, database, pw_cookie)
     template_params['TEST_CASES'] = sorted(
-        targeted.get_property('tasks', test_names, database,
-                              required=True)
+        targeted.get_property('tasks', test_names, database)
     )
     template_params['TEST_CASES_HOST_REQUIRES'] = sorted(
         targeted.get_property('hostRequires', test_names, database)

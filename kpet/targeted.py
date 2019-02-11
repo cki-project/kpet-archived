@@ -116,30 +116,22 @@ def get_test_cases(src_files, database):
     return testcases
 
 
-def get_property(property_name, test_names, database, required=False):
+def get_property(property_name, test_names, database):
     """
     Get the property for every test name passed.
     Args:
         property_name: Property name e.g. hostRequires, tasks, partitions, etc
         test_names:    List of test names
         database:      Database instance
-        required:      True if the property is mandatory, otherwise False
-    Raises:
-        KeyError:      When the property is not found and it is required.
     Returns:
         A set of the property values.
     """
     result = set()
-
     for testsuite in database.testsuites.values():
         for testcase in testsuite.cases:
             if testcase['name'] in test_names:
-                try:
+                if property_name in testcase:
                     property_value = testcase[property_name]
-                except KeyError:
-                    if required:
-                        raise
-                    continue
-                if property_value is not None:
-                    result.add(property_value)
+                    if property_value is not None:
+                        result.add(property_value)
     return result
