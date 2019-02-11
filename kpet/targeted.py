@@ -25,22 +25,18 @@ class UnrecognizedPatchPathFormat(Exception):
     """Raised when can't extract source file path from a diff header"""
 
 
-def get_patterns_by_layout(layout, dbdir):
+def get_patterns(database):
     """
-    Return patterns of layout.
+    Retrieve all testcase patterns.
     Args:
-        layout: The content of the layout.json file of the corresponding db
-        dbdir:  Path to the kpet-db
+        database:   Database instance
     Returns:
         A list of dictionaries with two fields: "testcase_name" and "pattern"
-        - test case name string and a regex string correspondingly.
+        - test case name string and a compiled regex correspondingly.
     """
     patterns = []
-    for _, path in layout.items():
-        pattern_file = os.path.join(dbdir, 'layout', path)
-        with open(pattern_file) as file_handler:
-            pattern_parsed = json.load(file_handler)
-        patterns.extend(pattern_parsed['patterns'])
+    for suite in database.testsuites.values():
+        patterns.extend(suite.patterns)
     return patterns
 
 
@@ -130,26 +126,26 @@ def get_layout(dbdir):
 
 def get_test_cases(src_files, database):
     """
-    Get test cases by querying layout according to source files.
+    Get test case names by querying database according to source files.
     Args:
         src_files: List of kernel source files
         database:  Database instance
     Returns:
-        All test cases applicable to the src_files. It'll return all of them
-        if src_files is empty.
+        All names of test cases applicable to the src_files. It'll return all
+        of them if src_files is empty.
     """
-    layout = get_layout(database.dir_path)
-    patterns = get_patterns_by_layout(layout, database.dir_path)
+    patterns = get_patterns(database)
 
-    test_cases = set()
-    for pattern_item in patterns:
+    testcases = set()
+    for pattern in patterns:
         if not src_files:
-            test_cases.add(pattern_item['testcase_name'])
+            testcases.add(pattern['testcase_name'])
         else:
             for src_path in src_files:
-                if re.match(pattern_item['pattern'], src_path):
-                    test_cases.add(pattern_item['testcase_name'])
-    return test_cases
+                if pattern['pattern'].match(src_path):
+                    testcases.add(pattern['testcase_name'])
+
+    return testcases
 
 
 def get_all_test_cases(database):

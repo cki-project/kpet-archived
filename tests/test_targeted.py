@@ -12,8 +12,8 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Test cases for targeted module"""
+import re
 import os
-import json
 import tempfile
 import unittest
 from kpet import targeted, data
@@ -25,21 +25,19 @@ class TargetedTest(unittest.TestCase):
         """Set common attributes used later on the test cases"""
         self.db_dir = os.path.join(os.path.dirname(__file__), 'assets')
 
-    def test_get_patterns_by_layout(self):
-        """Check patterns are readed from the layout"""
-        layout_path = os.path.join(self.db_dir, 'layout', 'layout.json')
-        with open(layout_path) as file_handler:
-            layout = json.load(file_handler)['testsuites']
+    def test_get_patterns(self):
+        """Check testcase patterns are read from the database"""
         expected_value = [
-            {'pattern': '.*', 'testcase_name': 'default/ltplite'},
-            {'pattern': '^fs/ext4/.*', 'testcase_name': 'fs/ext4'},
-            {'pattern': '^fs/jbd2/.*', 'testcase_name': 'fs/ext4'},
-            {'pattern': '^fs/xfs/.*', 'testcase_name': 'fs/xfs'},
-            {'pattern': '^fs/[^/]*[ch]', 'testcase_name': 'fs/xfs'},
+            {'pattern': re.compile('.*'), 'testcase_name': 'default/ltplite'},
+            {'pattern': re.compile('^fs/ext4/.*'), 'testcase_name': 'fs/ext4'},
+            {'pattern': re.compile('^fs/jbd2/.*'), 'testcase_name': 'fs/ext4'},
+            {'pattern': re.compile('^fs/xfs/.*'), 'testcase_name': 'fs/xfs'},
+            {'pattern': re.compile('^fs/[^/]*[ch]'),
+             'testcase_name': 'fs/xfs'},
         ]
         self.assertListEqual(
             expected_value,
-            targeted.get_patterns_by_layout(layout, self.db_dir)
+            targeted.get_patterns(data.Base(self.db_dir))
         )
 
     def test_get_src_files(self):
