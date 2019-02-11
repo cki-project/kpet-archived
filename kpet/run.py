@@ -32,7 +32,7 @@ def get_test_cases(patches, database, pw_cookie=None):
     try:
         patches = utils.patch2localfile(patches, tmpdir, pw_cookie)
         src_files = targeted.get_src_files(patches)
-        return sorted(targeted.get_test_cases(src_files, database.dir_path))
+        return sorted(targeted.get_test_cases(src_files, database))
     finally:
         shutil.rmtree(tmpdir)
 
@@ -67,17 +67,17 @@ def generate(template, template_params, patches, database, output,
     """
     test_names = get_test_cases(patches, database, pw_cookie)
     template_params['TEST_CASES'] = sorted(
-        targeted.get_property('tasks', test_names, database.dir_path,
+        targeted.get_property('tasks', test_names, database,
                               required=True)
     )
     template_params['TEST_CASES_HOST_REQUIRES'] = sorted(
-        targeted.get_property('hostRequires', test_names, database.dir_path)
+        targeted.get_property('hostRequires', test_names, database)
     )
     template_params['TEST_CASES_PARTITIONS'] = sorted(
-        targeted.get_property('partitions', test_names, database.dir_path)
+        targeted.get_property('partitions', test_names, database)
     )
     template_params['TEST_CASES_KICKSTART'] = sorted(
-        targeted.get_property('kickstart', test_names, database.dir_path)
+        targeted.get_property('kickstart', test_names, database)
     )
     content = template.render(template_params)
     if not output:

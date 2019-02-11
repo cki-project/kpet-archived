@@ -16,7 +16,7 @@ import os
 import json
 import tempfile
 import unittest
-from kpet import targeted
+from kpet import targeted, data
 
 
 class TargetedTest(unittest.TestCase):
@@ -134,21 +134,22 @@ class TargetedTest(unittest.TestCase):
 
     def test_get_test_cases(self):
         """Check getting test cases according to sources given"""
+        database = data.Base(self.db_dir)
         self.assertSequenceEqual(
             set({'fs/xfs', 'default/ltplite', 'fs/ext4'}),
-            targeted.get_test_cases([], self.db_dir)
+            targeted.get_test_cases([], database)
         )
         src_files = {
             'fs/xfs/xfs_log.c',
         }
         self.assertSequenceEqual(
             set({'fs/xfs', 'default/ltplite'}),
-            targeted.get_test_cases(src_files, self.db_dir)
+            targeted.get_test_cases(src_files, database)
         )
         src_files.add('fs/ext4/ext4.h')
         self.assertSequenceEqual(
             set({'fs/xfs', 'default/ltplite', 'fs/ext4'}),
-            targeted.get_test_cases(src_files, self.db_dir)
+            targeted.get_test_cases(src_files, database)
         )
 
     def test_get_all_test_cases(self):
@@ -171,31 +172,32 @@ class TargetedTest(unittest.TestCase):
         ]
         self.assertListEqual(
             expected_value,
-            list(targeted.get_all_test_cases(self.db_dir))
+            list(targeted.get_all_test_cases(data.Base(self.db_dir)))
         )
 
     def test_get_property(self):
         """Check properties are returned by test name"""
+        database = data.Base(self.db_dir)
         self.assertSequenceEqual(
             {'fs/xml/xfstests-ext4-4k.xml'},
-            targeted.get_property('tasks', ['fs/ext4'], self.db_dir)
+            targeted.get_property('tasks', ['fs/ext4'], database)
         )
         self.assertSequenceEqual(
             {'default/xml/ltplite.xml', 'fs/xml/xfstests-ext4-4k.xml'},
             targeted.get_property('tasks', ['fs/ext4', 'default/ltplite'],
-                                  self.db_dir)
+                                  database)
         )
         self.assertSequenceEqual(
             {'fs/xml/partitions.xml'},
-            targeted.get_property('partitions', ['fs/xfs'], self.db_dir)
+            targeted.get_property('partitions', ['fs/xfs'], database)
         )
         self.assertSequenceEqual(
             {},
-            targeted.get_property('tasks', [], self.db_dir)
+            targeted.get_property('tasks', [], database)
         )
         self.assertSequenceEqual(
             {},
-            targeted.get_property('unknown', ['fs/xfs'], self.db_dir)
+            targeted.get_property('unknown', ['fs/xfs'], database)
         )
         self.assertRaises(KeyError, targeted.get_property, 'unknown',
-                          ['fs/xfs'], self.db_dir, required=True)
+                          ['fs/xfs'], database, required=True)
