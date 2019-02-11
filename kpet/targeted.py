@@ -127,18 +127,18 @@ def get_layout(dbdir):
     return obj['testsuites']
 
 
-def get_test_cases(src_files, dbdir):
+def get_test_cases(src_files, database):
     """
     Get test cases by querying layout according to source files.
     Args:
         src_files: List of kernel source files
-        dbdir:  Path to the kpet-db
+        database:  Database instance
     Returns:
         All test cases applicable to the src_files. It'll return all of them
         if src_files is empty.
     """
-    layout = get_layout(dbdir)
-    patterns = get_patterns_by_layout(layout, dbdir)
+    layout = get_layout(database.dir_path)
+    patterns = get_patterns_by_layout(layout, database.dir_path)
 
     test_cases = set()
     for pattern_item in patterns:
@@ -151,29 +151,29 @@ def get_test_cases(src_files, dbdir):
     return test_cases
 
 
-def get_all_test_cases(dbdir):
+def get_all_test_cases(database):
     """
     Get a generator iterating over all testcases defined in the database.
     Args:
-        dbdir: Path to the kpet-db
+        database:   Database instance
     Returns:
         A generator iterating over all test cases.
     """
-    for _, path in get_layout(dbdir).items():
-        pattern_file = os.path.join(dbdir, 'layout', path)
+    for _, path in get_layout(database.dir_path).items():
+        pattern_file = os.path.join(database.dir_path, 'layout', path)
         with open(pattern_file) as file_handler:
             pattern = json.load(file_handler)
         for testcase in pattern['cases']:
             yield testcase
 
 
-def get_property(property_name, test_names, dbdir, required=False):
+def get_property(property_name, test_names, database, required=False):
     """
     Get the property for every test name passed.
     Args:
         property_name: Property name e.g. hostRequires, tasks, partitions, etc
         test_names:    List of test names
-        dbdir:         Path to the kpet-db
+        database:      Database instance
         required:      True if the property is mandatory, otherwise False
     Raises:
         KeyError:      When the property is not found and it is required.
@@ -181,7 +181,7 @@ def get_property(property_name, test_names, dbdir, required=False):
         A set of the property values.
     """
     result = set()
-    for testcase in get_all_test_cases(dbdir):
+    for testcase in get_all_test_cases(database):
         if testcase['name'] in test_names:
             try:
                 property_value = testcase[property_name]
