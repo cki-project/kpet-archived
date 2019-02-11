@@ -16,7 +16,7 @@ from __future__ import print_function
 import tempfile
 import shutil
 import os
-from kpet import utils, targeted
+from kpet import utils, targeted, data
 
 
 def get_test_cases(patches, dbdir, pw_cookie=None):
@@ -88,6 +88,8 @@ def generate(template, template_params, patches, dbdir, output,
 
 def main(args):
     """Main function for the `run` command"""
+    if not data.Base.is_dir_valid(args.db):
+        raise Exception("\"{}\" is not a database directory".format(args.db))
     if args.action == 'generate':
         template = utils.get_jinja_template(args.tree, args.db)
         template_params = {
