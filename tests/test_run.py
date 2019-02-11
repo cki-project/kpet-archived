@@ -16,7 +16,7 @@ import os
 import tempfile
 import unittest
 import mock
-from kpet import run, utils, exceptions
+from kpet import run, utils, data, exceptions
 
 
 class RunTest(unittest.TestCase):
@@ -33,9 +33,10 @@ class RunTest(unittest.TestCase):
             'ARCH': 'baz',
         }
         dbdir = os.path.join(os.path.dirname(__file__), 'assets')
+        database = data.Base(dbdir)
         template = utils.get_jinja_template('rhel7', dbdir)
         with mock.patch('sys.stdout') as mock_stdout:
-            run.generate(template, template_params, [], dbdir, None)
+            run.generate(template, template_params, [], database, None)
         with open(os.path.join(dbdir, 'rhel7_rendered.xml')) as file_handler:
             content_expected = file_handler.read()
         self.assertEqual(
@@ -44,7 +45,7 @@ class RunTest(unittest.TestCase):
         )
 
         tmpfile = tempfile.mktemp()
-        run.generate(template, template_params, [], dbdir, tmpfile)
+        run.generate(template, template_params, [], database, tmpfile)
         with open(tmpfile) as tmp_handler:
             content = tmp_handler.read()
         self.assertEqual(
@@ -64,7 +65,7 @@ class RunTest(unittest.TestCase):
         mock_args.tree = 'rhel7'
         mock_args.kernel = 'kernel'
         mock_args.arch = 'arch'
-        mock_args.db = 'db'
+        mock_args.db = os.path.join(os.path.dirname(__file__), 'assets')
         mock_args.output = None
         mock_args.pw_cookie = None
         mock_args.description = 'description'
@@ -84,7 +85,7 @@ class RunTest(unittest.TestCase):
                         'getenv': os.getenv,
                     },
                     [],
-                    'db',
+                    mock.ANY,
                     None,
                     None
                 )
