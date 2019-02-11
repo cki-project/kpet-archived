@@ -25,21 +25,6 @@ class UnrecognizedPatchPathFormat(Exception):
     """Raised when can't extract source file path from a diff header"""
 
 
-def get_patterns(database):
-    """
-    Retrieve all testcase patterns.
-    Args:
-        database:   Database instance
-    Returns:
-        A list of dictionaries with two fields: "testcase_name" and "pattern"
-        - test case name string and a compiled regex correspondingly.
-    """
-    patterns = []
-    for suite in database.testsuites.values():
-        patterns.extend(suite.patterns)
-    return patterns
-
-
 def __get_src_file_path(diff_header_path):
     """
     Extract source file path from a path from a ---/+++ diff header.
@@ -134,16 +119,16 @@ def get_test_cases(src_files, database):
         All names of test cases applicable to the src_files. It'll return all
         of them if src_files is empty.
     """
-    patterns = get_patterns(database)
-
     testcases = set()
-    for pattern in patterns:
-        if not src_files:
-            testcases.add(pattern['testcase_name'])
-        else:
-            for src_path in src_files:
-                if pattern['pattern'].match(src_path):
-                    testcases.add(pattern['testcase_name'])
+
+    for suite in database.testsuites.values():
+        for pattern in suite.patterns:
+            if not src_files:
+                testcases.add(pattern['testcase_name'])
+            else:
+                for src_path in src_files:
+                    if pattern['pattern'].match(src_path):
+                        testcases.add(pattern['testcase_name'])
 
     return testcases
 
