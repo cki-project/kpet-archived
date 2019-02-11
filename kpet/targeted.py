@@ -32,7 +32,8 @@ def get_patterns_by_layout(layout, dbdir):
         layout: The content of the layout.json file of the corresponding db
         dbdir:  Path to the kpet-db
     Returns:
-        List of tuple (regex, testcase-name)
+        A list of dictionaries with two fields: "testcase_name" and "pattern"
+        - test case name string and a regex string correspondingly.
     """
     patterns = []
     for _, path in layout.items():
