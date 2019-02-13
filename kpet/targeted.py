@@ -189,5 +189,7 @@ def get_property(property_name, test_names, dbdir, required=False):
                 if required:
                     raise
                 continue
-            result.add(property_value)
+
+            if property_value is not None:
+                result.add(property_value)
     return result
