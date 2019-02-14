@@ -27,10 +27,8 @@ class Invalid(Exception):
         super().__init__(fmt.format(*args))
 
     def __str__(self):
-        # pylint: disable=no-member
         return super().__str__() + \
-               (":\n" + str(self.__context__)
-                if hasattr(self, "__context__") and self.__context__ else "")
+               (":\n" + str(self.__context__) if self.__context__ else "")
 
 
 class Node:
