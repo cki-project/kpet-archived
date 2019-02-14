@@ -57,7 +57,7 @@ class Object:   # pylint: disable=too-few-public-methods
 class TestSuite(Object):    # pylint: disable=too-few-public-methods
     """Test suite"""
     def __init__(self, data):
-        super(TestSuite, self).__init__(
+        super().__init__(
             StrictStruct(
                 description=String(),
                 version=String(),
@@ -102,7 +102,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         """
         Initialize a database object.
         """
-        super(Base, self).__init__(
+        super().__init__(
             ScopedYAMLFile(
                 StrictStruct(
                     schema=StrictStruct(version=Int()),
