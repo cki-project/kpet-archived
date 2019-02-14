@@ -12,15 +12,9 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Utils used across kpet's commands"""
-try:
-    import cookielib
-except ImportError:
-    import http.cookiejar as cookielib
+import http.cookiejar as cookiejar
 import os
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
+from urllib.parse import urlparse
 import tempfile
 import requests
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -60,11 +54,11 @@ def patch2localfile(patches, workdir, session_cookie=None):
             cookie_jar = None
             if session_cookie:
                 domain = patch.rsplit('patch', 1)[0].strip('/').split('/')[-1]
-                cookie = cookielib.Cookie(0, 'sessionid', session_cookie, None,
+                cookie = cookiejar.Cookie(0, 'sessionid', session_cookie, None,
                                           False, domain, False, False, '/',
                                           False, False, None, False, None,
                                           None, {})
-                cookie_jar = cookielib.CookieJar()
+                cookie_jar = cookiejar.CookieJar()
                 cookie_jar.set_cookie(cookie)
 
             response = requests.get(patch, cookies=cookie_jar)
