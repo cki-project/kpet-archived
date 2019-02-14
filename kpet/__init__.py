@@ -12,7 +12,6 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Main entry point and command line parsing"""
-from __future__ import print_function
 import argparse
 import os
 import sys
