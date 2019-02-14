@@ -50,11 +50,11 @@ class Invalid(Exception):
     """Invalid data exception"""
 
     def __init__(self, fmt, *args):
-        super(Invalid, self).__init__(fmt.format(*args))
+        super().__init__(fmt.format(*args))
 
     def __str__(self):
         # pylint: disable=no-member
-        return super(Invalid, self).__str__() + \
+        return super().__str__() + \
                (":\n" + str(self.__context__)
                 if hasattr(self, "__context__") and self.__context__ else "")
 
@@ -114,25 +114,25 @@ class Node:
 class String(Node):
     """String schema"""
     def __init__(self):
-        super(String, self).__init__(str)
+        super().__init__(str)
 
 
 class Int(Node):
     """Integer number schema"""
     def __init__(self):
-        super(Int, self).__init__(int)
+        super().__init__(int)
 
 
 class Float(Node):
     """Floating-point number schema"""
     def __init__(self):
-        super(Float, self).__init__(float)
+        super().__init__(float)
 
 
 class Boolean(Node):
     """Boolean schema"""
     def __init__(self):
-        super(Boolean, self).__init__(bool)
+        super().__init__(bool)
 
 
 class Regex(String):
@@ -140,7 +140,7 @@ class Regex(String):
     Regular expression string schema.
     """
     def validate(self, data):
-        super(Regex, self).validate(data)
+        super().validate(data)
         try:
             re.compile(data)
         except _ReError:
@@ -171,7 +171,7 @@ class YAMLFile(String):
     """
     def __init__(self, contents_schema):
         assert isinstance(contents_schema, Node)
-        super(YAMLFile, self).__init__()
+        super().__init__()
         self.contents_schema = contents_schema
 
     def recognize(self):
@@ -224,11 +224,11 @@ class List(Node):
     """
     def __init__(self, element_schema):
         assert isinstance(element_schema, Node)
-        super(List, self).__init__(list)
+        super().__init__(list)
         self.element_schema = element_schema
 
     def validate(self, data):
-        super(List, self).validate(data)
+        super().validate(data)
         for index, value in enumerate(data):
             try:
                 self.element_schema.validate(value)
@@ -250,11 +250,11 @@ class Dict(Node):
     """
     def __init__(self, value_schema):
         assert isinstance(value_schema, Node)
-        super(Dict, self).__init__(dict)
+        super().__init__(dict)
         self.value_schema = value_schema
 
     def validate(self, data):
-        super(Dict, self).validate(data)
+        super().validate(data)
         for key, value in data.items():
             if not isinstance(key, str):
                 raise Invalid("Key \"{}\" is {}, expecting a string",
@@ -293,7 +293,7 @@ class Struct(Dict):
         """
         assert required is None or isinstance(required, dict)
         assert optional is None or isinstance(optional, dict)
-        super(Struct, self).__init__(Node(object))
+        super().__init__(Node(object))
         if required is None:
             required = {}
         if optional is None:
@@ -308,7 +308,7 @@ class Struct(Dict):
         self.optional = optional
 
     def validate(self, data):
-        super(Struct, self).validate(data)
+        super().validate(data)
         for name, schema in self.required.items():
             if name not in data:
                 raise Invalid("Member \"{}\" is missing", name)
@@ -355,7 +355,7 @@ class StrictStruct(Struct):
     Struct schema with required keys only.
     """
     def __init__(self, **kwargs):
-        super(StrictStruct, self).__init__(required=kwargs)
+        super().__init__(required=kwargs)
 
 
 class Class(Node):
@@ -364,7 +364,7 @@ class Class(Node):
     as the creation argument.
     """
     def __init__(self, instance_type):
-        super(Class, self).__init__(object)
+        super().__init__(object)
         self.instance_type = instance_type
 
     def recognize(self):
