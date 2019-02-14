@@ -17,7 +17,7 @@ import re
 import os
 import yaml
 
-# pylint: disable=raising-format-tuple,useless-object-inheritance
+# pylint: disable=raising-format-tuple
 
 
 # The type returned by re.compile(). Different between Python 2 and 3
@@ -59,7 +59,7 @@ class Invalid(Exception):
                 if hasattr(self, "__context__") and self.__context__ else "")
 
 
-class Node(object):
+class Node:
     """
     Abstract node schema validating the data to be an instance of specified
     type and resolving to the same.

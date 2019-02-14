@@ -17,10 +17,10 @@ import os
 from kpet.schema import Invalid, Int, Struct, StrictStruct, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class
 
-# pylint: disable=raising-format-tuple,useless-object-inheritance
+# pylint: disable=raising-format-tuple
 
 
-class Object(object):   # pylint: disable=too-few-public-methods
+class Object:   # pylint: disable=too-few-public-methods
     """An abstract data object"""
     def __init__(self, schema, data):
         """
