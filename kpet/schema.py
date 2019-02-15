@@ -20,6 +20,32 @@ import yaml
 # pylint: disable=raising-format-tuple
 
 
+# The type returned by re.compile(). Different between Python 2 and 3
+_RE = type(re.compile(""))
+
+
+def _get_re_error_type():
+    """
+    Get the type of the exception produced when an invalid regular expression
+    is compiled.
+
+    Returns:
+        The "invalid regular expression" exception type.
+    Raises:
+        Exception   when the type cannot be discovered.
+    """
+    try:
+        re.compile("(")
+    except Exception as exc:    # pylint: disable=broad-except
+        return type(exc)
+    raise Exception("\"Invalid regex\" exception type not found")
+
+
+# The exception type produced by re.compile() on invalid regex.
+# Different between Python 2 and 3, and unavailable directly in Python 2
+_ReError = _get_re_error_type()
+
+
 class Invalid(Exception):
     """Invalid data exception"""
 
@@ -115,11 +141,11 @@ class Regex(String):
         super().validate(data)
         try:
             re.compile(data)
-        except re.error:
+        except _ReError:
             raise Invalid("Invalid regular expression")
 
     def recognize(self):
-        return Node(re.Pattern)
+        return Node(_RE)
 
     def resolve(self, data):
         self.validate(data)
