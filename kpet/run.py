@@ -15,6 +15,7 @@
 import tempfile
 import shutil
 import os
+from functools import reduce
 from kpet import utils, targeted, data
 
 
@@ -76,6 +77,11 @@ def generate(template, template_params, patches, database, output,
     )
     template_params['TEST_CASES_KICKSTART'] = sorted(
         targeted.get_property('kickstart', test_names, database)
+    )
+    template_params['IGNORE_PANIC'] = reduce(
+        lambda x, y: x or y,
+        targeted.get_property('ignore_panic', test_names, database),
+        False
     )
     content = template.render(template_params)
     if not output:

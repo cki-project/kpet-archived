@@ -15,7 +15,7 @@
 
 import os
 from kpet.schema import Invalid, Int, Struct, StrictStruct, \
-    List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class
+    List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
 # pylint: disable=raising-format-tuple
 
@@ -70,6 +70,7 @@ class TestSuite(Object):    # pylint: disable=too-few-public-methods
                             tasks=String()
                         ),
                         optional=dict(
+                            ignore_panic=Boolean(),
                             hostRequires=String(),
                             partitions=String(),
                             kickstart=String()
