@@ -138,16 +138,17 @@ class TargetedTest(unittest.TestCase):
         """Check properties are returned by test name"""
         database = data.Base(self.db_dir)
         self.assertSequenceEqual(
-            {'fs/xml/xfstests-ext4-4k.xml'},
+            {'suites/fs/xml/xfstests-ext4-4k.xml'},
             targeted.get_property('tasks', ['fs/ext4'], database)
         )
         self.assertSequenceEqual(
-            {'default/xml/ltplite.xml', 'fs/xml/xfstests-ext4-4k.xml'},
+            {'suites/default/xml/ltplite.xml',
+             'suites/fs/xml/xfstests-ext4-4k.xml'},
             targeted.get_property('tasks', ['fs/ext4', 'default/ltplite'],
                                   database)
         )
         self.assertSequenceEqual(
-            {'fs/xml/partitions.xml'},
+            {'suites/fs/xml/partitions.xml'},
             targeted.get_property('partitions', ['fs/xfs'], database)
         )
         self.assertSequenceEqual(

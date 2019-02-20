@@ -4,7 +4,7 @@ patterns:
         testcase_name: default/ltplite
 cases:
     -   name: default/ltplite
-        tasks: default/xml/ltplite.xml
+        tasks: suites/default/xml/ltplite.xml
 maintainers:
     -   'Rachel Sibley <rasibley@redhat.com>'
     -   'Fendy Tjahjadi <ftjahjad@redhat.com>'

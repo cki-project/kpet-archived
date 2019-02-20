@@ -1,0 +1,5 @@
+schema:
+    version: 1
+testsuites:
+    default: suites/default/patterns.yaml
+    fs: suites/fs/patterns.yaml

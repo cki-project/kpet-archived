@@ -9,12 +9,12 @@ patterns:
     -   pattern: ^fs/[^/]*[ch]
         testcase_name: fs/xfs
 cases:
-    -   hostRequires: fs/xml/hostrequires.xml
+    -   hostRequires: suites/fs/xml/hostrequires.xml
         name: fs/ext4
-        tasks: fs/xml/xfstests-ext4-4k.xml
+        tasks: suites/fs/xml/xfstests-ext4-4k.xml
     -   name: fs/xfs
-        partitions: fs/xml/partitions.xml
-        tasks: fs/xml/xfstests-xfs-4k-finobt.xml
+        partitions: suites/fs/xml/partitions.xml
+        tasks: suites/fs/xml/xfstests-xfs-4k-finobt.xml
 maintainers:
     -   'Xiong Zhou <xzhou@redhat.com>'
 version: "1.0"
