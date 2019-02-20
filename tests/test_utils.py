@@ -18,7 +18,6 @@ import shutil
 import unittest
 import requests
 import mock
-import jinja2
 from kpet import utils
 
 
@@ -58,16 +57,3 @@ class UtilsTest(unittest.TestCase):
             self.assertRaises(requests.HTTPError, utils.patch2localfile,
                               ['http://mypatch.org', '/localfile'], tmpdir)
         shutil.rmtree(tmpdir)
-
-    def test_get_jinja_template(self):
-        """
-        Check the success case and if it raises the proper exception when
-        the template is not found
-        """
-        template = utils.get_jinja_template('rhel7', self.root_dir)
-        self.assertEqual(
-            'trees/rhel7.xml',
-            template.name,
-        )
-        self.assertRaises(jinja2.exceptions.TemplateNotFound,
-                          utils.get_jinja_template, 'not-found', self.root_dir)

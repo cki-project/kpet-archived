@@ -97,7 +97,9 @@ def main(args):
         raise Exception("\"{}\" is not a database directory".format(args.db))
     database = data.Base(args.db)
     if args.action == 'generate':
-        template = utils.get_jinja_template(args.tree, args.db)
+        if args.tree not in database.trees:
+            raise Exception("Tree \"{}\" not found".format(args.tree))
+        template = database.get_tree_template(args.tree)
         template_params = {
             'DESCRIPTION': args.description,
             'ARCH': args.arch,

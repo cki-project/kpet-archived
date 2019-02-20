@@ -107,10 +107,6 @@ class ArgumentParserTest(unittest.TestCase):
         dbdir = os.path.join(os.path.dirname(__file__), 'assets')
         args = ['--db', dbdir, 'run', 'generate', '-t', 'rhel7', '-k',
                 'url']
-        mock_jinja_template = mock.Mock()
-        mock_jinja_template().render.return_value = 'whiteboard'
         with mock.patch('sys.stdout') as mock_stdout:
-            with mock.patch('kpet.utils.get_jinja_template',
-                            mock_jinja_template):
-                kpet.main(args)
-        self.assertIn('whiteboard', mock_stdout.write.call_args_list[0][0][0])
+            kpet.main(args)
+        self.assertIn('<job>', mock_stdout.write.call_args_list[0][0][0])

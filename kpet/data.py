@@ -14,6 +14,7 @@
 """KPET data"""
 
 import os
+import jinja2
 from kpet.schema import Invalid, Int, Struct, StrictStruct, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
@@ -108,10 +109,32 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             ScopedYAMLFile(
                 StrictStruct(
                     schema=StrictStruct(version=Int()),
-                    testsuites=Dict(YAMLFile(Class(TestSuite)))
+                    testsuites=Dict(YAMLFile(Class(TestSuite))),
+                    trees=Dict(String())
                 )
             ),
             dir_path + "/index.yaml"
         )
 
         self.dir_path = dir_path
+
+    def get_tree_template(self, tree_name):
+        """
+        Get the Jinja template instance for the tree with the specified name.
+        The tree with such name must exist.
+
+        Args:
+            tree_name:  Name of the tree to get the template instance for.
+
+        Returns:
+            The tree instance.
+        """
+        assert tree_name in self.trees
+        jinja_env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader([self.dir_path]),
+            autoescape=jinja2.select_autoescape(
+                enabled_extensions=('xml'),
+                default_for_string=True,
+            ),
+        )
+        return jinja_env.get_template(self.trees[tree_name])
