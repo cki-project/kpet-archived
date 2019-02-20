@@ -103,6 +103,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         """
         Initialize a database object.
         """
+        assert self.is_dir_valid(dir_path)
         super().__init__(
             ScopedYAMLFile(
                 StrictStruct(
