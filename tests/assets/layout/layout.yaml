@@ -1,9 +1,5 @@
-{
-    "schema": {
-        "version": 1
-    },
-    "testsuites": {
-        "default": "default/patterns.yaml",
-        "fs": "fs/patterns.yaml"
-    }
-}
+schema:
+    version: 1
+testsuites:
+    default: default/patterns.yaml
+    fs: fs/patterns.yaml

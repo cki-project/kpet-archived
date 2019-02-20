@@ -1,21 +1,12 @@
-{
-    "description": "layout of ltplite for KPET",
-    "patterns": [
-        {
-            "pattern": ".*",
-            "testcase_name": "default/ltplite"
-        }
-    ],
-    "cases": [
-        {
-            "name": "default/ltplite",
-            "tasks": "default/xml/ltplite.xml"
-        }
-    ],
-    "maintainers": [
-        "Rachel Sibley <rasibley@redhat.com>",
-        "Fendy Tjahjadi <ftjahjad@redhat.com>",
-        "Vector Li <huanli@redhat.com>"
-    ],
-    "version": "1.0"
-}
+description: 'layout of ltplite for KPET'
+patterns:
+    -   pattern: .*
+        testcase_name: default/ltplite
+cases:
+    -   name: default/ltplite
+        tasks: default/xml/ltplite.xml
+maintainers:
+    -   'Rachel Sibley <rasibley@redhat.com>'
+    -   'Fendy Tjahjadi <ftjahjad@redhat.com>'
+    -   'Vector Li <huanli@redhat.com>'
+version: "1.0"
