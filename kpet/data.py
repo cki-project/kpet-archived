@@ -85,9 +85,6 @@ class TestSuite(Object):    # pylint: disable=too-few-public-methods
 class Base(Object):     # pylint: disable=too-few-public-methods
     """Database"""
 
-    # A list of possible path suffixes containing the database
-    suffix_list = ["/layout/layout.json", "/layout/layout.yaml", "/index.yaml"]
-
     @staticmethod
     def is_dir_valid(dir_path):
         """
@@ -100,19 +97,12 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             True if the directory is a valid database directory,
             False otherwise.
         """
-        for suffix in Base.suffix_list:
-            if os.path.isfile(dir_path + suffix):
-                return True
-        return False
+        return os.path.isfile(dir_path + "/index.yaml")
 
     def __init__(self, dir_path):
         """
         Initialize a database object.
         """
-        for suffix in self.suffix_list:
-            if os.path.isfile(dir_path + suffix):
-                break
-
         super().__init__(
             ScopedYAMLFile(
                 StrictStruct(
@@ -120,7 +110,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                     testsuites=Dict(YAMLFile(Class(TestSuite)))
                 )
             ),
-            dir_path + suffix
+            dir_path + "/index.yaml"
         )
 
         self.dir_path = dir_path
