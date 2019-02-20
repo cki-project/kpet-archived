@@ -30,7 +30,8 @@ def get_jinja_template(tree, dbdir):
     Returns:
         A jinja template instance
     """
-    template_dirs = [os.path.join(dbdir, 'trees')]
+    template_dirs = [dbdir]
+    template_dirs.append(os.path.join(dbdir, 'trees'))
     template_dirs.append(os.path.join(dbdir, 'layout'))
     jinja_env = Environment(
         loader=FileSystemLoader(template_dirs),
@@ -39,7 +40,7 @@ def get_jinja_template(tree, dbdir):
             default_for_string=True,
         ),
     )
-    template_file = "{}.xml".format(tree)
+    template_file = "trees/{}.xml".format(tree)
     template = jinja_env.get_template(template_file)
     return template
 

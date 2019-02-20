@@ -66,7 +66,7 @@ class UtilsTest(unittest.TestCase):
         """
         template = utils.get_jinja_template('rhel7', self.root_dir)
         self.assertEqual(
-            'rhel7.xml',
+            'trees/rhel7.xml',
             template.name,
         )
         self.assertRaises(jinja2.exceptions.TemplateNotFound,

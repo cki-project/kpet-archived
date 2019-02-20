@@ -86,7 +86,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
     """Database"""
 
     # A list of possible path suffixes containing the database
-    suffix_list = ["/layout/layout.json", "/layout/layout.yaml"]
+    suffix_list = ["/layout/layout.json", "/layout/layout.yaml", "/index.yaml"]
 
     @staticmethod
     def is_dir_valid(dir_path):
