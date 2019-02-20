@@ -13,7 +13,6 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Utils used across kpet's commands"""
 import http.cookiejar as cookiejar
-import os
 from urllib.parse import urlparse
 import tempfile
 import requests
@@ -30,11 +29,8 @@ def get_jinja_template(tree, dbdir):
     Returns:
         A jinja template instance
     """
-    template_dirs = [dbdir]
-    template_dirs.append(os.path.join(dbdir, 'trees'))
-    template_dirs.append(os.path.join(dbdir, 'layout'))
     jinja_env = Environment(
-        loader=FileSystemLoader(template_dirs),
+        loader=FileSystemLoader([dbdir]),
         autoescape=select_autoescape(
             enabled_extensions=('xml'),
             default_for_string=True,
