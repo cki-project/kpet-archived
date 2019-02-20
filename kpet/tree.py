@@ -12,42 +12,16 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Module where the `tree` command is implemented"""
-import os
-import errno
-from kpet import utils
-
-
-class TemplateDirNotFound(Exception):
-    """Raised when template dir is not found under the dbdir"""
-
-
-def list_tree(db_path):
-    """
-    List all the trees a.k.a templates available sorted on the current db.
-
-    Args:
-        db_path: path to kpet-db
-    """
-    template_dir = os.path.join(db_path, 'templates')
-    try:
-        files = sorted(os.listdir(template_dir))
-    except OSError as error:
-        if error.errno == errno.ENOENT:
-            raise TemplateDirNotFound(
-                'Missing `templates` folder on {}'.format(db_path)
-            )
-        else:
-            raise
-    for filename in files:
-        if not filename.endswith('.xml'):
-            continue
-        tree, _ = os.path.splitext(filename)
-        print(tree)
+from kpet import utils, data
 
 
 def main(args):
     """Main function for the `tree` command"""
+    if not data.Base.is_dir_valid(args.db):
+        raise Exception("\"{}\" is not a database directory".format(args.db))
+    database = data.Base(args.db)
     if args.action == 'list':
-        list_tree(args.db)
+        for tree in sorted(database.trees.keys()):
+            print(tree)
     else:
         utils.raise_action_not_found(args.action, args.command)

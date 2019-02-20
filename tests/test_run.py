@@ -16,7 +16,7 @@ import os
 import tempfile
 import unittest
 import mock
-from kpet import run, utils, data, exceptions
+from kpet import run, data, exceptions
 
 
 class RunTest(unittest.TestCase):
@@ -34,7 +34,7 @@ class RunTest(unittest.TestCase):
         }
         dbdir = os.path.join(os.path.dirname(__file__), 'assets')
         database = data.Base(dbdir)
-        template = utils.get_jinja_template('rhel7', dbdir)
+        template = database.get_tree_template('rhel7')
         with mock.patch('sys.stdout') as mock_stdout:
             run.generate(template, template_params, [], database, None)
         with open(os.path.join(dbdir, 'rhel7_rendered.xml')) as file_handler:
@@ -59,7 +59,6 @@ class RunTest(unittest.TestCase):
         Check generate function is called and that ActionNotFound is
         raised when the action is not found.
         """
-        mock_jinja_template = mock.Mock()
         mock_args = mock.Mock()
         mock_args.action = 'generate'
         mock_args.tree = 'rhel7'
@@ -71,24 +70,22 @@ class RunTest(unittest.TestCase):
         mock_args.description = 'description'
         mock_args.mboxes = []
         with mock.patch('kpet.run.generate') as mock_generate:
-            with mock.patch('kpet.utils.get_jinja_template',
-                            mock_jinja_template):
-                run.main(mock_args)
-                mock_generate.assert_called_with(
-                    mock_jinja_template(),
-                    {
-                        'DESCRIPTION':
-                        'description',
-                        'ARCH': 'arch',
-                        'KURL': 'kernel',
-                        'TREE': 'rhel7',
-                        'getenv': os.getenv,
-                    },
-                    [],
-                    mock.ANY,
-                    None,
-                    None
-                )
+            run.main(mock_args)
+            mock_generate.assert_called_with(
+                mock.ANY,
+                {
+                    'DESCRIPTION':
+                    'description',
+                    'ARCH': 'arch',
+                    'KURL': 'kernel',
+                    'TREE': 'rhel7',
+                    'getenv': os.getenv,
+                },
+                [],
+                mock.ANY,
+                None,
+                None
+            )
 
         mock_args.action = 'action-not-found'
         self.assertRaises(exceptions.ActionNotFound, run.main, mock_args)

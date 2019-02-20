@@ -16,29 +16,7 @@ import http.cookiejar as cookiejar
 from urllib.parse import urlparse
 import tempfile
 import requests
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 from kpet.exceptions import ActionNotFound
-
-
-def get_jinja_template(tree, dbdir):
-    """
-    Get a jinja template instance by tree
-    Args:
-        tree:   The kernel "tree" name
-        dbdir:  Path to the kpet-db
-    Returns:
-        A jinja template instance
-    """
-    jinja_env = Environment(
-        loader=FileSystemLoader([dbdir]),
-        autoescape=select_autoescape(
-            enabled_extensions=('xml'),
-            default_for_string=True,
-        ),
-    )
-    template_file = "trees/{}.xml".format(tree)
-    template = jinja_env.get_template(template_file)
-    return template
 
 
 def patch2localfile(patches, workdir, session_cookie=None):
