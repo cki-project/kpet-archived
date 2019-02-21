@@ -54,6 +54,26 @@ class Object:   # pylint: disable=too-few-public-methods
             setattr(self, member_name, data.get(member_name, None))
 
 
+class TestCase(Object):     # pylint: disable=too-few-public-methods
+    """Test case"""
+    def __init__(self, data):
+        super().__init__(
+            Struct(
+                required=dict(
+                    name=String(),
+                    tasks=String()
+                ),
+                optional=dict(
+                    ignore_panic=Boolean(),
+                    hostRequires=String(),
+                    partitions=String(),
+                    kickstart=String()
+                )
+            ),
+            data
+        )
+
+
 class TestSuite(Object):    # pylint: disable=too-few-public-methods
     """Test suite"""
     def __init__(self, data):
@@ -63,20 +83,7 @@ class TestSuite(Object):    # pylint: disable=too-few-public-methods
                 version=String(),
                 patterns=List(StrictStruct(pattern=Regex(),
                                            testcase_name=String())),
-                cases=List(
-                    Struct(
-                        required=dict(
-                            name=String(),
-                            tasks=String()
-                        ),
-                        optional=dict(
-                            ignore_panic=Boolean(),
-                            hostRequires=String(),
-                            partitions=String(),
-                            kickstart=String()
-                        )
-                    )
-                )
+                cases=List(Class(TestCase))
             ),
             data
         )
