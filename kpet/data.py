@@ -51,8 +51,7 @@ class Object:   # pylint: disable=too-few-public-methods
         for member_name in schema.required.keys():
             setattr(self, member_name, data[member_name])
         for member_name in schema.optional.keys():
-            if member_name in data:
-                setattr(self, member_name, data[member_name])
+            setattr(self, member_name, data.get(member_name, None))
 
 
 class TestSuite(Object):    # pylint: disable=too-few-public-methods
