@@ -302,6 +302,8 @@ class Struct(Dict):
         for key, value in optional.items():
             assert isinstance(key, str)
             assert isinstance(value, Node)
+        assert not (set(required.keys()) & set(optional.keys())), \
+            "Some keys are both required and optional"
         self.required = required
         self.optional = optional
 
