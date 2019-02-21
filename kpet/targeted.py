@@ -129,9 +129,8 @@ def get_property(property_name, test_names, database):
     result = set()
     for testsuite in database.testsuites.values():
         for testcase in testsuite.cases:
-            if testcase['name'] in test_names:
-                if property_name in testcase:
-                    property_value = testcase[property_name]
-                    if property_value is not None:
-                        result.add(property_value)
+            if testcase.name in test_names:
+                property_value = getattr(testcase, property_name)
+                if property_value is not None:
+                    result.add(property_value)
     return result

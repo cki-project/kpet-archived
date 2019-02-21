@@ -155,7 +155,5 @@ class TargetedTest(unittest.TestCase):
             {},
             targeted.get_property('tasks', [], database)
         )
-        self.assertSequenceEqual(
-            {},
+        with self.assertRaises(AttributeError):
             targeted.get_property('unknown', ['fs/xfs'], database)
-        )
