@@ -36,7 +36,7 @@ class RunTest(unittest.TestCase):
         database = data.Base(dbdir)
         template = database.get_tree_template('rhel7')
         with mock.patch('sys.stdout') as mock_stdout:
-            run.generate(template, template_params, [], database, None)
+            run.generate(template, template_params, [], database, True, None)
         with open(os.path.join(dbdir, 'rhel7_rendered.xml')) as file_handler:
             content_expected = file_handler.read()
         self.assertEqual(
@@ -45,7 +45,7 @@ class RunTest(unittest.TestCase):
         )
 
         tmpfile = tempfile.mktemp()
-        run.generate(template, template_params, [], database, tmpfile)
+        run.generate(template, template_params, [], database, True, tmpfile)
         with open(tmpfile) as tmp_handler:
             content = tmp_handler.read()
         self.assertEqual(
@@ -65,6 +65,7 @@ class RunTest(unittest.TestCase):
         mock_args.kernel = 'kernel'
         mock_args.arch = 'arch'
         mock_args.db = os.path.join(os.path.dirname(__file__), 'assets')
+        mock_args.no_lint = None
         mock_args.output = None
         mock_args.pw_cookie = None
         mock_args.description = 'description'
@@ -83,6 +84,7 @@ class RunTest(unittest.TestCase):
                 },
                 [],
                 mock.ANY,
+                True,
                 None,
                 None
             )
