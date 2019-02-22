@@ -5,3 +5,6 @@ kpet.egg-info
 .tox/
 .coverage
 .eggs/
+build
+dist
+.idea
