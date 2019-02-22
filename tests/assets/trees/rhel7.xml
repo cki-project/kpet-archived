@@ -61,6 +61,7 @@
         {% include test_case %}
       {% endfor %}
       {% endblock task %}
+    </recipe>
     {% endblock recipeSet %}
   </recipeSet>
 </job>

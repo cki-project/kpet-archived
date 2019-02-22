@@ -14,8 +14,10 @@
 """Module where the `run` command is implemented"""
 import tempfile
 import shutil
+import sys
 import os
 from functools import reduce
+from lxml import etree
 from kpet import utils, targeted, data
 
 
@@ -51,7 +53,7 @@ def print_test_cases(patches, database, pw_cookie=None):
 
 
 # pylint: disable=too-many-arguments
-def generate(template, template_params, patches, database, output,
+def generate(template, template_params, patches, database, lint, output,
              pw_cookie=None):
     """
     Generate an xml output compatible with beaker.
@@ -61,6 +63,7 @@ def generate(template, template_params, patches, database, output,
                          whiteboard description, etc.
         patches:         List of patches, can be local files or remote urls
         database:        Database instance
+        lint:            Lint and reformat the output XML, if True.
         output:          Output file where beaker xml will be rendered
         pw_cookie:       Session cookie to Patchwork instance if login is
                          required, None otherwise
@@ -83,9 +86,18 @@ def generate(template, template_params, patches, database, output,
         targeted.get_property('ignore_panic', test_names, database),
         False
     )
+    # Render the content
     content = template.render(template_params)
+    # Lint and reformat the content if requested
+    if lint:
+        parser = etree.XMLParser(remove_blank_text=True, encoding="utf-8")
+        doc = etree.XML(content, parser)
+        content = etree.tostring(doc, encoding="utf-8",
+                                 xml_declaration=True,
+                                 pretty_print=True).decode("utf-8")
+    # Output the content
     if not output:
-        print(content)
+        sys.stdout.write(content)
     else:
         with open(output, 'w') as file_handler:
             file_handler.write(content)
@@ -108,7 +120,7 @@ def main(args):
             'getenv': os.getenv,
         }
         generate(template, template_params, args.mboxes, database,
-                 args.output, args.pw_cookie)
+                 not args.no_lint, args.output, args.pw_cookie)
     elif args.action == 'print-test-cases':
         print_test_cases(args.patches, database, args.pw_cookie)
     else:

@@ -97,6 +97,11 @@ def build_run_command(cmds_parser, common_parser):
         help='Patch series cover letter mbox URL/path'
     )
     generate_parser.add_argument(
+        '--no-lint',
+        action='store_true',
+        help='Do not lint and reformat output XML'
+    )
+    generate_parser.add_argument(
         'mboxes',
         nargs='*',
         default=[],

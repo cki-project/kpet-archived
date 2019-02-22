@@ -1,36 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
 <job>
   <whiteboard>Foo</whiteboard>
   <recipeSet>
-    
-      <recipe kernel_options="selinux=0">
+    <recipe kernel_options="selinux=0">
       <hostRequires>
-        
         <or>
           <labcontroller op="=" value="example1.com"/>
           <labcontroller op="=" value="example2.com"/>
           <labcontroller op="=" value="example3.com"/>
         </or>
-        
-          				<and>
-					<cpu_count op="&gt;" value="2"/>
-					<hypervisor op="=" value=""/>
-					<key_value key="DISKSPACE" op="&gt;=" value="50000"/>
-				</and>
-				<system_type value="Machine"/>
-        
-        
+        <and>
+          <cpu_count op="&gt;" value="2"/>
+          <hypervisor op="=" value=""/>
+          <key_value key="DISKSPACE" op="&gt;=" value="50000"/>
+        </and>
+        <system_type value="Machine"/>
       </hostRequires>
       <repos/>
       <partitions>
-        
-        
-          				<partition fs="xfs" name="/mnt/xfstests/mnt1" size="15" type="part"/>
-				<partition fs="xfs" name="/mnt/xfstests/mnt2" size="15" type="part"/>
-        
-        
+        <partition fs="xfs" name="/mnt/xfstests/mnt1" size="15" type="part"/>
+        <partition fs="xfs" name="/mnt/xfstests/mnt2" size="15" type="part"/>
       </partitions>
       <ks_appends/>
-      
       <task name="/distribution/install" role="STANDALONE">
         <params/>
       </task>
@@ -63,16 +54,9 @@
           <param name="KPKG_URL" value="bar"/>
         </params>
       </task>
-      
-        <task name="/kernel/distribution/ltp/lite" role="STANDALONE">
-	<fetch url="https://github.com/CKI-project/tests-beaker/archive/staging.zip#distribution/ltp/lite"/>
-</task>
-      
-        
-      
-        
-      
-      
-    
+      <task name="/kernel/distribution/ltp/lite" role="STANDALONE">
+        <fetch url="https://github.com/CKI-project/tests-beaker/archive/staging.zip#distribution/ltp/lite"/>
+      </task>
+    </recipe>
   </recipeSet>
 </job>
