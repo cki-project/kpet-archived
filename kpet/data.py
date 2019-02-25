@@ -14,7 +14,6 @@
 """KPET data"""
 
 import os
-from functools import reduce
 import jinja2
 from lxml import etree
 from kpet.schema import Invalid, Int, Struct, StrictStruct, \
@@ -260,30 +259,11 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         assert isinstance(arch_name, str)
         assert isinstance(kernel_location, str)
 
-        case_set = self.match_case_set(src_path_set)
-
-        def get_property(name):
-            value_set = set()
-            for case in case_set:
-                value = getattr(case, name)
-                if value is not None:
-                    value_set.add(value)
-            return sorted(value_set)
-
         params = dict(
             DESCRIPTION=description,
             KURL=kernel_location,
             ARCH=arch_name,
             TREE=tree_name,
-            TEST_CASES=get_property('tasks'),
-            TEST_CASES_HOST_REQUIRES=get_property('hostRequires'),
-            TEST_CASES_PARTITIONS=get_property('partitions'),
-            TEST_CASES_KICKSTART=get_property('kickstart'),
-            IGNORE_PANIC=reduce(
-                lambda x, y: x or y,
-                get_property('ignore_panic'),
-                False
-            ),
             SRC_PATH_SET=src_path_set,
             SUITE_SET=set(self.testsuites.values()),
             match_suite_set=self.match_suite_set,
