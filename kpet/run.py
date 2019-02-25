@@ -14,93 +14,24 @@
 """Module where the `run` command is implemented"""
 import tempfile
 import shutil
-import sys
-import os
-from functools import reduce
-from lxml import etree
 from kpet import utils, targeted, data
 
 
-def get_test_cases(patches, database, pw_cookie=None):
+def get_src_files(patches, pw_cookie=None):
     """
-    Return test cases by querying layout according list of patch files.
+    Get the set of files modified by a list of patches.
+
     Args:
         patches:   List of patches, they can be local files or remote urls
-        database:  Database instance
         pw_cookie: Session cookie to Patchwork instance if login is required,
                    None otherwise
     """
     tmpdir = tempfile.mkdtemp(suffix='kpet')
     try:
         patches = utils.patch2localfile(patches, tmpdir, pw_cookie)
-        src_files = targeted.get_src_files(patches)
-        return sorted(targeted.get_test_cases(src_files, database))
+        return targeted.get_src_files(patches)
     finally:
         shutil.rmtree(tmpdir)
-
-
-def print_test_cases(patches, database, pw_cookie=None):
-    """
-    Print test cases by querying layout according list of patch files.
-    Args:
-        patches:   List of patches, they can be local files or remote urls
-        database:  Database instance
-        pw_cookie: Session cookie to Patchwork instance if login is required,
-                   None otherwise
-    """
-    for test_case in get_test_cases(patches, database, pw_cookie):
-        print(test_case)
-
-
-# pylint: disable=too-many-arguments
-def generate(template, template_params, patches, database, lint, output,
-             pw_cookie=None):
-    """
-    Generate an xml output compatible with beaker.
-    Args:
-        template:        Jinja template instance
-        template_params: A dictionary with template parameters such as arch,
-                         whiteboard description, etc.
-        patches:         List of patches, can be local files or remote urls
-        database:        Database instance
-        lint:            Lint and reformat the output XML, if True.
-        output:          Output file where beaker xml will be rendered
-        pw_cookie:       Session cookie to Patchwork instance if login is
-                         required, None otherwise
-    """
-    test_names = get_test_cases(patches, database, pw_cookie)
-    template_params['TEST_CASES'] = sorted(
-        targeted.get_property('tasks', test_names, database)
-    )
-    template_params['TEST_CASES_HOST_REQUIRES'] = sorted(
-        targeted.get_property('hostRequires', test_names, database)
-    )
-    template_params['TEST_CASES_PARTITIONS'] = sorted(
-        targeted.get_property('partitions', test_names, database)
-    )
-    template_params['TEST_CASES_KICKSTART'] = sorted(
-        targeted.get_property('kickstart', test_names, database)
-    )
-    template_params['IGNORE_PANIC'] = reduce(
-        lambda x, y: x or y,
-        targeted.get_property('ignore_panic', test_names, database),
-        False
-    )
-    # Render the content
-    content = template.render(template_params)
-    # Lint and reformat the content if requested
-    if lint:
-        parser = etree.XMLParser(remove_blank_text=True, encoding="utf-8")
-        doc = etree.XML(content, parser)
-        content = etree.tostring(doc, encoding="utf-8",
-                                 xml_declaration=True,
-                                 pretty_print=True).decode("utf-8")
-    # Output the content
-    if not output:
-        sys.stdout.write(content)
-    else:
-        with open(output, 'w') as file_handler:
-            file_handler.write(content)
 
 
 def main(args):
@@ -111,17 +42,19 @@ def main(args):
     if args.action == 'generate':
         if args.tree not in database.trees:
             raise Exception("Tree \"{}\" not found".format(args.tree))
-        template = database.get_tree_template(args.tree)
-        template_params = {
-            'DESCRIPTION': args.description,
-            'ARCH': args.arch,
-            'KURL': args.kernel,
-            'TREE': args.tree,
-            'getenv': os.getenv,
-        }
-        generate(template, template_params, args.mboxes, database,
-                 not args.no_lint, args.output, args.pw_cookie)
+        src_files = get_src_files(args.mboxes, args.pw_cookie)
+        run = data.Run(database, src_files)
+        content = run.generate(args.description, args.tree,
+                               args.arch, args.kernel, not args.no_lint)
+        if not args.output:
+            print(content)
+        else:
+            with open(args.output, 'w') as file_handler:
+                file_handler.write(content)
     elif args.action == 'print-test-cases':
-        print_test_cases(args.patches, database, args.pw_cookie)
+        src_files = get_src_files(args.patches, args.pw_cookie)
+        run = data.Run(database, src_files)
+        for case_name in sorted([case.name for case in run.get_case_set()]):
+            print(case_name)
     else:
         utils.raise_action_not_found(args.action, args.command)

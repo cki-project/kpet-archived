@@ -13,7 +13,6 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Test cases for run module"""
 import os
-import tempfile
 import unittest
 from io import StringIO
 
@@ -30,35 +29,16 @@ class RunTest(unittest.TestCase):
 
     def test_generate(self):
         """
-        Check the success case, if it raises the proper exception when
-        the type is not found and if it saves the output in a file instead
-        printing it on stdout.
+        Check the success case.
         """
-        template_params = {
-            'DESCRIPTION': 'Foo',
-            'KURL': 'bar',
-            'ARCH': 'baz',
-        }
         database = data.Base(self.dbdir)
-        template = database.get_tree_template('rhel7')
-        with mock.patch('sys.stdout') as mock_stdout:
-            run.generate(template, template_params, [], database, True, None)
+        datarun = data.Run(database, set())
+        content = datarun.generate(description='Foo', tree_name='rhel7',
+                                   arch_name='baz', kernel_location='bar',
+                                   lint=True)
         with open(os.path.join(self.dbdir, 'rhel7_rendered.xml')) as fhandle:
             content_expected = fhandle.read()
-        self.assertEqual(
-            mock.call(content_expected),
-            mock_stdout.write.call_args_list[0],
-        )
-
-        tmpfile = tempfile.mktemp()
-        run.generate(template, template_params, [], database, True, tmpfile)
-        with open(tmpfile) as tmp_handler:
-            content = tmp_handler.read()
-        self.assertEqual(
-            content_expected,
-            content,
-        )
-        os.remove(tmpfile)
+        self.assertEqual(content_expected, content)
 
     def test_main(self):
         """
@@ -76,25 +56,6 @@ class RunTest(unittest.TestCase):
         mock_args.pw_cookie = None
         mock_args.description = 'description'
         mock_args.mboxes = []
-        with mock.patch('kpet.run.generate') as mock_generate:
-            run.main(mock_args)
-            mock_generate.assert_called_with(
-                mock.ANY,
-                {
-                    'DESCRIPTION':
-                    'description',
-                    'ARCH': 'arch',
-                    'KURL': 'kernel',
-                    'TREE': 'rhel7',
-                    'getenv': os.getenv,
-                },
-                [],
-                mock.ANY,
-                True,
-                None,
-                None
-            )
-
         mock_args.action = 'action-not-found'
         self.assertRaises(exceptions.ActionNotFound, run.main, mock_args)
 
@@ -166,14 +127,3 @@ class RunTest(unittest.TestCase):
             mock_stdout.write.call_args_list[4],
             mock.call('fs/xfs'),
         )
-
-    @mock.patch('sys.stdout', new_callable=StringIO)
-    def test_get_test_cases_print(self, mock_stdout):
-        """Check method prints output as it should."""
-        database = data.Base(self.dbdir)
-
-        run.print_test_cases([], database)
-
-        expected = ["default/ltplite", "fs/ext4", "fs/xfs"]
-
-        self.assertEqual(mock_stdout.getvalue().splitlines(), expected)

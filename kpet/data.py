@@ -14,7 +14,9 @@
 """KPET data"""
 
 import os
+from functools import reduce
 import jinja2
+from lxml import etree
 from kpet.schema import Invalid, Int, Struct, StrictStruct, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
@@ -142,6 +144,24 @@ class TestSuite(Object):    # pylint: disable=too-few-public-methods
         return bool(self.match_case_set(src_path_set))
 
 
+class TestSuiteRun:     # pylint: disable=too-few-public-methods
+    """An execution of a test suite"""
+
+    def __init__(self, testsuite, src_path_set):
+        """
+        Initialize a test suite run.
+
+        Args:
+            testsuite:      The executed testsuite.
+            src_path_set:   The set of paths to source files, which the test
+                            suite execution should cover. Affects the
+                            selection of test cases to run.
+        """
+        self.description = testsuite.description
+        self.version = testsuite.version
+        self.case_set = testsuite.match_case_set(src_path_set)
+
+
 class Base(Object):     # pylint: disable=too-few-public-methods
     """Database"""
 
@@ -215,3 +235,91 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             ),
         )
         return jinja_env.get_template(self.trees[tree_name])
+
+
+class Run:
+    """A specific execution of tests in the database"""
+
+    def __init__(self, database, src_path_set):
+        """
+        Initialize a test run.
+
+        Args:
+            database:           The database to get test data from.
+            src_path_set:       A set of paths to source files the executed
+                                tests should cover, empty set for all files.
+                                Affects the selection of test suites and test
+                                cases to run.
+        """
+        assert isinstance(database, Base)
+        self.database = database
+        self.suite_run_set = {TestSuiteRun(suite, src_path_set) for suite
+                              in database.match_suite_set(src_path_set)}
+
+    def get_case_set(self):
+        """
+        Get the set of test cases, which would be executed by the run.
+
+        Returns:
+            A set of test cases.
+        """
+        case_set = set()
+        for suite_run in self.suite_run_set:
+            case_set |= suite_run.case_set
+        return case_set
+
+    # pylint: disable=too-many-arguments
+    def generate(self, description, tree_name, arch_name,
+                 kernel_location, lint):
+        """
+        Generate Beaker XML which would execute the run.
+
+        Args:
+            description:        The run description string.
+            tree_name:          Name of the kernel tree to run against.
+            arch_name:          The name of the architecture to run on.
+            kernel_location:    Kernel location string (a tarball or RPM URL).
+            lint:               Lint and reformat the XML output, if True.
+        Returns:
+            The beaker XML string.
+        """
+        assert isinstance(description, str)
+        assert isinstance(tree_name, str)
+        assert tree_name in self.database.trees
+        assert isinstance(arch_name, str)
+        assert isinstance(kernel_location, str)
+
+        case_set = self.get_case_set()
+
+        def get_property(name):
+            value_set = set()
+            for case in case_set:
+                value = getattr(case, name)
+                if value is not None:
+                    value_set.add(value)
+            return sorted(value_set)
+
+        params = dict(
+            DESCRIPTION=description,
+            KURL=kernel_location,
+            ARCH=arch_name,
+            TREE=tree_name,
+            TEST_CASES=get_property('tasks'),
+            TEST_CASES_HOST_REQUIRES=get_property('hostRequires'),
+            TEST_CASES_PARTITIONS=get_property('partitions'),
+            TEST_CASES_KICKSTART=get_property('kickstart'),
+            IGNORE_PANIC=reduce(
+                lambda x, y: x or y,
+                get_property('ignore_panic'),
+                False
+            ),
+            getenv=os.getenv,
+        )
+        text = self.database.get_tree_template(tree_name).render(params)
+        if lint:
+            parser = etree.XMLParser(remove_blank_text=True, encoding="utf-8")
+            tree = etree.XML(text, parser)
+            text = etree.tostring(tree, encoding="utf-8",
+                                  xml_declaration=True,
+                                  pretty_print=True).decode("utf-8")
+        return text
