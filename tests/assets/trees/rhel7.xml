@@ -10,16 +10,16 @@
           <labcontroller op="=" value="example2.com"/>
           <labcontroller op="=" value="example3.com"/>
         </or>
-        {% for test_case_requires in TEST_CASES_HOST_REQUIRES %}
-          {% include test_case_requires %}
+        {% for case in match_case_set(SRC_PATH_SET) if case.hostRequires %}
+          {% include case.hostRequires %}
         {% endfor %}
         {% endblock hostRequires %}
       </hostRequires>
       <repos/>
       <partitions>
         {% block partitions %}
-        {% for test_case_partitions in TEST_CASES_PARTITIONS %}
-          {% include test_case_partitions %}
+        {% for case in match_case_set(SRC_PATH_SET) if case.partitions %}
+          {% include case.partitions %}
         {% endfor %}
         {% endblock partitions %}
       </partitions>
@@ -57,8 +57,8 @@
           <param name="KPKG_URL" value="{{ KURL }}"/>
         </params>
       </task>
-      {% for test_case in TEST_CASES %}
-        {% include test_case %}
+      {% for case in match_case_set(SRC_PATH_SET) if case.tasks %}
+        {% include case.tasks %}
       {% endfor %}
       {% endblock task %}
     </recipe>
