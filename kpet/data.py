@@ -132,6 +132,9 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         assert tree_name in self.trees
         jinja_env = jinja2.Environment(
             loader=jinja2.FileSystemLoader([self.dir_path]),
+            trim_blocks=True,
+            keep_trailing_newline=True,
+            lstrip_blocks=True,
             autoescape=jinja2.select_autoescape(
                 enabled_extensions=('xml'),
                 default_for_string=True,
