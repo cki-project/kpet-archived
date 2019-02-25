@@ -284,6 +284,10 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                 get_property('ignore_panic'),
                 False
             ),
+            SRC_PATH_SET=src_path_set,
+            SUITE_SET=set(self.testsuites.values()),
+            match_suite_set=self.match_suite_set,
+            match_case_set=self.match_case_set,
             getenv=os.getenv,
         )
         text = self.get_tree_template(tree_name).render(params)
