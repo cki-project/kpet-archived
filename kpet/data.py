@@ -14,7 +14,9 @@
 """KPET data"""
 
 import os
+from functools import reduce
 import jinja2
+from lxml import etree
 from kpet.schema import Invalid, Int, Struct, StrictStruct, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
@@ -232,3 +234,63 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             ),
         )
         return jinja_env.get_template(self.trees[tree_name])
+
+    # pylint: disable=too-many-arguments
+    def generate_run(self, description, tree_name, arch_name,
+                     kernel_location, src_path_set, lint):
+        """
+        Generate Beaker XML which would execute tests in the database.
+
+        Args:
+            description:        The run description string.
+            tree_name:          Name of the kernel tree to run against.
+            arch_name:          The name of the architecture to run on.
+            kernel_location:    Kernel location string (a tarball or RPM URL).
+            src_path_set:       A set of paths to source files the executed
+                                tests should cover, empty set for all files.
+                                Affects the selection of test suites and test
+                                cases to run.
+            lint:               Lint and reformat the XML output, if True.
+        Returns:
+            The beaker XML string.
+        """
+        assert isinstance(description, str)
+        assert isinstance(tree_name, str)
+        assert tree_name in self.trees
+        assert isinstance(arch_name, str)
+        assert isinstance(kernel_location, str)
+
+        case_set = self.match_case_set(src_path_set)
+
+        def get_property(name):
+            value_set = set()
+            for case in case_set:
+                value = getattr(case, name)
+                if value is not None:
+                    value_set.add(value)
+            return sorted(value_set)
+
+        params = dict(
+            DESCRIPTION=description,
+            KURL=kernel_location,
+            ARCH=arch_name,
+            TREE=tree_name,
+            TEST_CASES=get_property('tasks'),
+            TEST_CASES_HOST_REQUIRES=get_property('hostRequires'),
+            TEST_CASES_PARTITIONS=get_property('partitions'),
+            TEST_CASES_KICKSTART=get_property('kickstart'),
+            IGNORE_PANIC=reduce(
+                lambda x, y: x or y,
+                get_property('ignore_panic'),
+                False
+            ),
+            getenv=os.getenv,
+        )
+        text = self.get_tree_template(tree_name).render(params)
+        if lint:
+            parser = etree.XMLParser(remove_blank_text=True, encoding="utf-8")
+            tree = etree.XML(text, parser)
+            text = etree.tostring(tree, encoding="utf-8",
+                                  xml_declaration=True,
+                                  pretty_print=True).decode("utf-8")
+        return text
