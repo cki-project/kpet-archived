@@ -313,6 +313,7 @@ class Run:
                 get_property('ignore_panic'),
                 False
             ),
+            SUITE_SET=self.suite_run_set,
             getenv=os.getenv,
         )
         text = self.database.get_tree_template(tree_name).render(params)
