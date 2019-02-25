@@ -88,6 +88,59 @@ class TestSuite(Object):    # pylint: disable=too-few-public-methods
             data
         )
 
+    def get_case(self, name):
+        """
+        Get a test case by name.
+
+        Args:
+            name:   Name of the test case to get.
+
+        Returns:
+            The matching test case, or None if not found.
+        """
+        for case in self.cases:
+            if case.name == name:
+                return case
+        return None
+
+    def match_case_set(self, src_path_set):
+        """
+        Return test cases responsible for testing any files in a set.
+
+        Args:
+            src_path_set:   A set of source file paths to match cases against,
+                            or an empty set for all source files.
+
+        Returns:
+            A set of test cases responsible for testing at least some of the
+            specified files.
+        """
+        if src_path_set:
+            case_set = set()
+            for pattern in self.patterns:
+                for src_path in src_path_set:
+                    if pattern['pattern'].match(src_path):
+                        case = self.get_case(pattern['testcase_name'])
+                        if case:
+                            case_set.add(case)
+        else:
+            case_set = set(self.cases)
+        return case_set
+
+    def matches(self, src_path_set):
+        """
+        Check if the suite is responsible for testing any files in a set.
+
+        Args:
+            src_path_set:   A set of source file paths to check against,
+                            or an empty set for all files.
+
+        Returns:
+            True if the suite is responsible for testing at least some of
+            the specified files.
+        """
+        return bool(self.match_case_set(src_path_set))
+
 
 class Base(Object):     # pylint: disable=too-few-public-methods
     """Database"""
@@ -123,6 +176,38 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         )
 
         self.dir_path = dir_path
+
+    def match_suite_set(self, src_path_set):
+        """
+        Return test suites responsible for testing any files in a set.
+
+        Args:
+            src_path_set:   A set of source file paths to match suites
+                            against, or an empty set for all files.
+
+        Returns:
+            A set of test suites responsible for testing at least some of the
+            specified files.
+        """
+        return {suite for suite in self.testsuites.values()
+                if suite.matches(src_path_set)}
+
+    def match_case_set(self, src_path_set):
+        """
+        Return test cases responsible for testing any files in a set.
+
+        Args:
+            src_path_set:   A set of source file paths to match cases against,
+                            or an empty set for all source files.
+
+        Returns:
+            A set of test cases responsible for testing at least some of the
+            specified files.
+        """
+        case_set = set()
+        for suite in self.testsuites.values():
+            case_set |= suite.match_case_set(src_path_set)
+        return case_set
 
     def get_tree_template(self, tree_name):
         """
