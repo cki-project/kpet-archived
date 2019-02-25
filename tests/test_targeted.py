@@ -15,7 +15,7 @@
 import os
 import tempfile
 import unittest
-from kpet import targeted, data
+from kpet import targeted
 
 
 class TargetedTest(unittest.TestCase):
@@ -113,47 +113,3 @@ class TargetedTest(unittest.TestCase):
                     targeted.get_src_files,
                     [bad_patch_file.name],
                 )
-
-    def test_get_test_cases(self):
-        """Check getting test cases according to sources given"""
-        database = data.Base(self.db_dir)
-        self.assertSequenceEqual(
-            set({'fs/xfs', 'default/ltplite', 'fs/ext4'}),
-            targeted.get_test_cases([], database)
-        )
-        src_files = {
-            'fs/xfs/xfs_log.c',
-        }
-        self.assertSequenceEqual(
-            set({'fs/xfs', 'default/ltplite'}),
-            targeted.get_test_cases(src_files, database)
-        )
-        src_files.add('fs/ext4/ext4.h')
-        self.assertSequenceEqual(
-            set({'fs/xfs', 'default/ltplite', 'fs/ext4'}),
-            targeted.get_test_cases(src_files, database)
-        )
-
-    def test_get_property(self):
-        """Check properties are returned by test name"""
-        database = data.Base(self.db_dir)
-        self.assertSequenceEqual(
-            {'suites/fs/xml/xfstests-ext4-4k.xml'},
-            targeted.get_property('tasks', ['fs/ext4'], database)
-        )
-        self.assertSequenceEqual(
-            {'suites/default/xml/ltplite.xml',
-             'suites/fs/xml/xfstests-ext4-4k.xml'},
-            targeted.get_property('tasks', ['fs/ext4', 'default/ltplite'],
-                                  database)
-        )
-        self.assertSequenceEqual(
-            {'suites/fs/xml/partitions.xml'},
-            targeted.get_property('partitions', ['fs/xfs'], database)
-        )
-        self.assertSequenceEqual(
-            {},
-            targeted.get_property('tasks', [], database)
-        )
-        with self.assertRaises(AttributeError):
-            targeted.get_property('unknown', ['fs/xfs'], database)
