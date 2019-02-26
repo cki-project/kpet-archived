@@ -109,6 +109,77 @@ class Node:
         return data
 
 
+class Ancestry(Node):
+    """
+    A schema describing a succession of accepted schema versions and means to
+    inherit the legacy data. Validates against one of the schema versions.
+    Resolves to the data matching the last schema.
+    """
+    def __init__(self, *args):
+        """
+        Initialize an ancestry schema.
+
+        Args:
+            args:   A list of schemas and functions which could be used to
+                    convert the data, in the order of succession. Can be mixed
+                    in any order, except the first and the last items must be
+                    schemas. Cannot be empty. Converter functions must accept
+                    the original data argument and return the converted data.
+        """
+        assert args
+        assert isinstance(args[0], Node)
+        assert isinstance(args[-1], Node)
+        super().__init__(object)
+        self.ancestry = args
+
+    def validate(self, data):
+        super().validate(data)
+        last_exc = None
+        # For each schema/converter in the ancestry
+        for item in self.ancestry:
+            # If it's a schema
+            if isinstance(item, Node):
+                try:
+                    item.validate(data)
+                    return
+                except Invalid as exc:
+                    last_exc = exc
+        raise last_exc
+
+    def recognize(self):
+        return self.ancestry[-1].recognize()
+
+    def resolve(self, data):
+        # Last valid schema
+        last_valid_schema = None
+        # Last validation failure
+        last_exc = None
+        # We find the first matching schema, then proceed converting and
+        # validating until we get to the last schema.
+        # For each schema/converter in the ancestry
+        for item in self.ancestry:
+            # If it's a schema
+            if isinstance(item, Node):
+                try:
+                    # Validate the data
+                    item.validate(data)
+                    last_valid_schema = item
+                except Invalid as exc:
+                    # If we already got a valid schema
+                    if last_valid_schema:
+                        raise exc
+                    last_exc = exc
+            # Else it's a conversion function, and if we found valid schema
+            elif last_valid_schema:
+                # Convert the data for the next schema/converter
+                data = item(data)
+        # If no schema matched
+        if not last_valid_schema:
+            raise last_exc
+        # Resolve the data with the last schema
+        return last_valid_schema.resolve(data)
+
+
 class String(Node):
     """String schema"""
     def __init__(self):
