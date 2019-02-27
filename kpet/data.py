@@ -62,13 +62,13 @@ class TestCase(Object):     # pylint: disable=too-few-public-methods
             Struct(
                 required=dict(
                     name=String(),
-                    tasks=String()
                 ),
                 optional=dict(
                     ignore_panic=Boolean(),
                     hostRequires=String(),
                     partitions=String(),
-                    kickstart=String()
+                    kickstart=String(),
+                    tasks=String(),
                 )
             ),
             data
@@ -79,12 +79,21 @@ class TestSuite(Object):    # pylint: disable=too-few-public-methods
     """Test suite"""
     def __init__(self, data):
         super().__init__(
-            StrictStruct(
-                description=String(),
-                version=String(),
-                patterns=List(StrictStruct(pattern=Regex(),
-                                           testcase_name=String())),
-                cases=List(Class(TestCase))
+            Struct(
+                required=dict(
+                    description=String(),
+                    version=String(),
+                    patterns=List(StrictStruct(pattern=Regex(),
+                                               testcase_name=String())),
+                    cases=List(Class(TestCase))
+                ),
+                optional=dict(
+                    tasks=String(),
+                    ignore_panic=Boolean(),
+                    hostRequires=String(),
+                    partitions=String(),
+                    kickstart=String()
+                )
             ),
             data
         )
