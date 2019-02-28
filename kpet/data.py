@@ -16,7 +16,7 @@
 import os
 import jinja2
 from lxml import etree
-from kpet.schema import Invalid, Int, Struct, StrictStruct, \
+from kpet.schema import Invalid, Int, Struct, StrictStruct, Ancestry, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
 # pylint: disable=raising-format-tuple
@@ -55,7 +55,7 @@ class Object:   # pylint: disable=too-few-public-methods
             setattr(self, member_name, data.get(member_name, None))
 
 
-class TestCase(Object):     # pylint: disable=too-few-public-methods
+class Case(Object):     # pylint: disable=too-few-public-methods
     """Test case"""
     def __init__(self, data):
         super().__init__(
@@ -75,17 +75,33 @@ class TestCase(Object):     # pylint: disable=too-few-public-methods
         )
 
 
-class TestSuite(Object):    # pylint: disable=too-few-public-methods
+class Suite(Object):    # pylint: disable=too-few-public-methods
     """Test suite"""
     def __init__(self, data):
+        def convert_pattern(old_data):
+            """Convert pattern data from old to new format"""
+            data = old_data.copy()
+            data['case_name'] = data.pop("testcase_name")
+            return data
+
         super().__init__(
             Struct(
                 required=dict(
                     description=String(),
                     version=String(),
-                    patterns=List(StrictStruct(pattern=Regex(),
-                                               testcase_name=String())),
-                    cases=List(Class(TestCase))
+                    patterns=List(
+                        Ancestry(
+                            # Old schema
+                            StrictStruct(pattern=Regex(),
+                                         testcase_name=String()),
+                            # Conversion function
+                            convert_pattern,
+                            # New schema
+                            StrictStruct(pattern=Regex(),
+                                         case_name=String())
+                        )
+                    ),
+                    cases=List(Class(Case))
                 ),
                 optional=dict(
                     tasks=String(),
@@ -130,7 +146,7 @@ class TestSuite(Object):    # pylint: disable=too-few-public-methods
             for pattern in self.patterns:
                 for src_path in src_path_set:
                     if pattern['pattern'].match(src_path):
-                        case = self.get_case(pattern['testcase_name'])
+                        case = self.get_case(pattern['case_name'])
                         if case:
                             case_set.add(case)
         else:
@@ -174,12 +190,30 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         Initialize a database object.
         """
         assert self.is_dir_valid(dir_path)
+
+        def convert(old_data):
+            """Convert data from old to new format"""
+            data = old_data.copy()
+            data['suites'] = data.pop("testsuites")
+            return data
+
         super().__init__(
             ScopedYAMLFile(
-                StrictStruct(
-                    schema=StrictStruct(version=Int()),
-                    testsuites=Dict(YAMLFile(Class(TestSuite))),
-                    trees=Dict(String())
+                Ancestry(
+                    # Old schema
+                    StrictStruct(
+                        schema=StrictStruct(version=Int()),
+                        testsuites=Dict(YAMLFile(Class(Suite))),
+                        trees=Dict(String())
+                    ),
+                    # Conversion function
+                    convert,
+                    # New schema
+                    StrictStruct(
+                        schema=StrictStruct(version=Int()),
+                        suites=Dict(YAMLFile(Class(Suite))),
+                        trees=Dict(String())
+                    ),
                 )
             ),
             dir_path + "/index.yaml"
@@ -199,7 +233,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             A set of test suites responsible for testing at least some of the
             specified files.
         """
-        return {suite for suite in self.testsuites.values()
+        return {suite for suite in self.suites.values()
                 if suite.matches(src_path_set)}
 
     def match_case_set(self, src_path_set):
@@ -215,7 +249,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             specified files.
         """
         case_set = set()
-        for suite in self.testsuites.values():
+        for suite in self.suites.values():
             case_set |= suite.match_case_set(src_path_set)
         return case_set
 
@@ -274,7 +308,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             ARCH=arch_name,
             TREE=tree_name,
             SRC_PATH_SET=src_path_set,
-            SUITE_SET=set(self.testsuites.values()),
+            SUITE_SET=set(self.suites.values()),
             match_suite_set=self.match_suite_set,
             match_case_set=self.match_case_set,
             getenv=os.getenv,
