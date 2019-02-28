@@ -1,5 +1,7 @@
 KPET - Kernel Patch-Evaluated Testing
 =====================================
+![KPET logo](logo.png)
+
 KPET is a framework which will execute targeted testing based on changes introduced
 in the patch, e.g. a network driver or similar would trigger network related testing
 to be invoked, or a filesystem change would invoke filesystem testing.  
