@@ -3,6 +3,6 @@ schema:
 trees:
     rhel7: trees/rhel7.xml
     rhel8: trees/rhel8.xml
-testsuites:
+suites:
     default: suites/default/patterns.yaml
     fs: suites/fs/patterns.yaml

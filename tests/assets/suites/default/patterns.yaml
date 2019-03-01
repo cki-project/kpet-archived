@@ -1,7 +1,7 @@
 description: 'layout of ltplite for KPET'
 patterns:
     -   pattern: .*
-        testcase_name: default/ltplite
+        case_name: default/ltplite
 cases:
     -   name: default/ltplite
         tasks: suites/default/xml/ltplite.xml
