@@ -14,7 +14,7 @@
 """KPET data"""
 
 import os
-from kpet.schema import Invalid, Int, Struct, StrictStruct, \
+from kpet.schema import Invalid, Struct, StrictStruct, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
 # pylint: disable=raising-format-tuple
@@ -80,7 +80,6 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
             Struct(
                 required=dict(
                     description=String(),
-                    version=String(),
                     patterns=List(StrictStruct(pattern=Regex(),
                                                case_name=String())),
                     cases=List(Class(Case))
@@ -191,7 +190,6 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         super().__init__(
             ScopedYAMLFile(
                 StrictStruct(
-                    schema=StrictStruct(version=Int()),
                     suites=List(YAMLFile(Class(Suite))),
                     trees=Dict(String())
                 )
