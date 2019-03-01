@@ -16,7 +16,7 @@
 import os
 import jinja2
 from lxml import etree
-from kpet.schema import Invalid, Int, Struct, StrictStruct, \
+from kpet.schema import Invalid, Int, Struct, StrictStruct, Ancestry, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
 # pylint: disable=raising-format-tuple
@@ -175,12 +175,26 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         """
         assert self.is_dir_valid(dir_path)
 
+        def convert(old_data):
+            """Convert the data from old to new format"""
+            data = old_data.copy()
+            data['suites'] = list(data['suites'].values())
+            return data
+
         super().__init__(
             ScopedYAMLFile(
-                StrictStruct(
-                    schema=StrictStruct(version=Int()),
-                    suites=Dict(YAMLFile(Class(Suite))),
-                    trees=Dict(String())
+                Ancestry(
+                    StrictStruct(
+                        schema=StrictStruct(version=Int()),
+                        suites=Dict(YAMLFile(Class(Suite))),
+                        trees=Dict(String())
+                    ),
+                    convert,
+                    StrictStruct(
+                        schema=StrictStruct(version=Int()),
+                        suites=List(YAMLFile(Class(Suite))),
+                        trees=Dict(String())
+                    )
                 )
             ),
             dir_path + "/index.yaml"
@@ -200,7 +214,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             A set of test suites responsible for testing at least some of the
             specified files.
         """
-        return {suite for suite in self.suites.values()
+        return {suite for suite in self.suites
                 if suite.matches(src_path_set)}
 
     def match_case_set(self, src_path_set):
@@ -216,7 +230,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             specified files.
         """
         case_set = set()
-        for suite in self.suites.values():
+        for suite in self.suites:
             case_set |= suite.match_case_set(src_path_set)
         return case_set
 
@@ -275,7 +289,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             ARCH=arch_name,
             TREE=tree_name,
             SRC_PATH_SET=src_path_set,
-            SUITE_SET=set(self.suites.values()),
+            SUITE_SET=set(self.suites),
             match_suite_set=self.match_suite_set,
             match_case_set=self.match_case_set,
             getenv=os.getenv,
