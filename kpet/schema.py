@@ -21,6 +21,7 @@ import yaml
 
 
 # The type returned by re.compile(). Different between Python 2 and 3
+# TODO Switch to just using re.Pattern once upgraded to Python 3.7 or later
 _RE = type(re.compile(""))
 
 
@@ -43,6 +44,7 @@ def _get_re_error_type():
 
 # The exception type produced by re.compile() on invalid regex.
 # Different between Python 2 and 3, and unavailable directly in Python 2
+# TODO Switch to just using re.error once upgraded to Python 3.7 or later
 _ReError = _get_re_error_type()
 
 
