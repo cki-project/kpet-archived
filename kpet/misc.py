@@ -16,7 +16,10 @@ import http.cookiejar as cookiejar
 from urllib.parse import urlparse
 import tempfile
 import requests
-from kpet.exceptions import ActionNotFound
+
+
+class ActionNotFound(Exception):
+    """Raised when an action is not found"""
 
 
 def patch2localfile(patches, workdir, session_cookie=None):
