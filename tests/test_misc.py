@@ -11,18 +11,18 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-"""Test cases for utils module"""
+"""Test cases for misc module"""
 import os
 import tempfile
 import shutil
 import unittest
 import requests
 import mock
-from kpet import utils
+from kpet import misc
 
 
 class UtilsTest(unittest.TestCase):
-    """Test cases for utils."""
+    """Test cases for misc."""
     def setUp(self):
         """Set common attributes used later on the test cases"""
         self.root_dir = os.path.join(os.path.dirname(__file__), 'assets')
@@ -35,7 +35,7 @@ class UtilsTest(unittest.TestCase):
         invalid.
         """
         tmpdir = tempfile.mkdtemp()
-        patches = utils.patch2localfile(['/patch', '/another/patch'], tmpdir)
+        patches = misc.patch2localfile(['/patch', '/another/patch'], tmpdir)
         self.assertListEqual(
             ['/patch', '/another/patch'],
             patches
@@ -44,7 +44,7 @@ class UtilsTest(unittest.TestCase):
             response = mock.Mock()
             response.content = b'some content'
             mock_request_get.return_value = response
-            patches = utils.patch2localfile(
+            patches = misc.patch2localfile(
                 ['http://mypatch.org', '/localfile'],
                 tmpdir
             )
@@ -54,6 +54,6 @@ class UtilsTest(unittest.TestCase):
                 file_content = file_handler.read()
             self.assertEqual('some content', file_content)
             response.raise_for_status.side_effect = requests.HTTPError
-            self.assertRaises(requests.HTTPError, utils.patch2localfile,
+            self.assertRaises(requests.HTTPError, misc.patch2localfile,
                               ['http://mypatch.org', '/localfile'], tmpdir)
         shutil.rmtree(tmpdir)
