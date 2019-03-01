@@ -14,8 +14,6 @@
 """KPET data"""
 
 import os
-import jinja2
-from lxml import etree
 from kpet.schema import Invalid, Int, Struct, StrictStruct, Ancestry, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
@@ -233,72 +231,3 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         for suite in self.suites:
             case_set |= suite.match_case_set(src_path_set)
         return case_set
-
-    def get_tree_template(self, tree_name):
-        """
-        Get the Jinja template instance for the tree with the specified name.
-        The tree with such name must exist.
-
-        Args:
-            tree_name:  Name of the tree to get the template instance for.
-
-        Returns:
-            The tree instance.
-        """
-        assert tree_name in self.trees
-        jinja_env = jinja2.Environment(
-            loader=jinja2.FileSystemLoader([self.dir_path]),
-            trim_blocks=True,
-            keep_trailing_newline=True,
-            lstrip_blocks=True,
-            autoescape=jinja2.select_autoescape(
-                enabled_extensions=('xml'),
-                default_for_string=True,
-            ),
-        )
-        return jinja_env.get_template(self.trees[tree_name])
-
-    # pylint: disable=too-many-arguments
-    def generate_run(self, description, tree_name, arch_name,
-                     kernel_location, src_path_set, lint):
-        """
-        Generate Beaker XML which would execute tests in the database.
-
-        Args:
-            description:        The run description string.
-            tree_name:          Name of the kernel tree to run against.
-            arch_name:          The name of the architecture to run on.
-            kernel_location:    Kernel location string (a tarball or RPM URL).
-            src_path_set:       A set of paths to source files the executed
-                                tests should cover, empty set for all files.
-                                Affects the selection of test suites and test
-                                cases to run.
-            lint:               Lint and reformat the XML output, if True.
-        Returns:
-            The beaker XML string.
-        """
-        assert isinstance(description, str)
-        assert isinstance(tree_name, str)
-        assert tree_name in self.trees
-        assert isinstance(arch_name, str)
-        assert isinstance(kernel_location, str)
-
-        params = dict(
-            DESCRIPTION=description,
-            KURL=kernel_location,
-            ARCH=arch_name,
-            TREE=tree_name,
-            SRC_PATH_SET=src_path_set,
-            SUITE_SET=set(self.suites),
-            match_suite_set=self.match_suite_set,
-            match_case_set=self.match_case_set,
-            getenv=os.getenv,
-        )
-        text = self.get_tree_template(tree_name).render(params)
-        if lint:
-            parser = etree.XMLParser(remove_blank_text=True, encoding="utf-8")
-            tree = etree.XML(text, parser)
-            text = etree.tostring(tree, encoding="utf-8",
-                                  xml_declaration=True,
-                                  pretty_print=True).decode("utf-8")
-        return text
