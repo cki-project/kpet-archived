@@ -11,18 +11,18 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-"""Test cases for run module"""
+"""Test cases for run command module"""
 import os
 import unittest
 from io import StringIO
 
 import mock
 
-from kpet import run, data, exceptions
+from kpet import cmd_run, data, exceptions
 
 
-class RunTest(unittest.TestCase):
-    """Test cases for run module."""
+class CmdRunTest(unittest.TestCase):
+    """Test cases for run command module."""
 
     def setUp(self):
         self.dbdir = os.path.join(os.path.dirname(__file__), 'assets')
@@ -56,7 +56,7 @@ class RunTest(unittest.TestCase):
         mock_args.description = 'description'
         mock_args.mboxes = []
         mock_args.action = 'action-not-found'
-        self.assertRaises(exceptions.ActionNotFound, run.main, mock_args)
+        self.assertRaises(exceptions.ActionNotFound, cmd_run.main, mock_args)
 
     def test_invalid_dbdir(self):
         """Check invalid dbdir raises an exception."""
@@ -72,7 +72,7 @@ class RunTest(unittest.TestCase):
         mock_args.mboxes = []
 
         with self.assertRaises(Exception):
-            run.main(mock_args)
+            cmd_run.main(mock_args)
 
     @mock.patch('sys.stdout', new_callable=StringIO)
     def test_print_testcases(self, mock_stdout):
@@ -89,7 +89,7 @@ class RunTest(unittest.TestCase):
         mock_args.mboxes = []
         mock_args.patches = []
 
-        run.main(mock_args)
+        cmd_run.main(mock_args)
 
         expected = ["default/ltplite", "fs/ext4", "fs/xfs"]
 
@@ -110,7 +110,7 @@ class RunTest(unittest.TestCase):
         mock_args.mboxes = []
 
         with self.assertRaises(Exception):
-            run.main(mock_args)
+            cmd_run.main(mock_args)
 
     def _assert_standard_testcases(self, mock_stdout):
 
