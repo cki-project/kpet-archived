@@ -18,7 +18,7 @@ from io import StringIO
 
 import mock
 
-from kpet import cmd_run, data, exceptions
+from kpet import cmd_run, data, misc
 
 
 class CmdRunTest(unittest.TestCase):
@@ -56,7 +56,7 @@ class CmdRunTest(unittest.TestCase):
         mock_args.description = 'description'
         mock_args.mboxes = []
         mock_args.action = 'action-not-found'
-        self.assertRaises(exceptions.ActionNotFound, cmd_run.main, mock_args)
+        self.assertRaises(misc.ActionNotFound, cmd_run.main, mock_args)
 
     def test_invalid_dbdir(self):
         """Check invalid dbdir raises an exception."""

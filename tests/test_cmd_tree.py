@@ -15,8 +15,7 @@
 import os
 import unittest
 import mock
-from kpet import exceptions
-from kpet import cmd_tree
+from kpet import cmd_tree, misc
 
 
 class CmdTreeTest(unittest.TestCase):
@@ -29,7 +28,7 @@ class CmdTreeTest(unittest.TestCase):
         dbdir = os.path.join(os.path.dirname(__file__), 'assets')
         mock_args = mock.Mock()
         mock_args.db = dbdir
-        self.assertRaises(exceptions.ActionNotFound, cmd_tree.main, mock_args)
+        self.assertRaises(misc.ActionNotFound, cmd_tree.main, mock_args)
         mock_args.action = 'list'
         with mock.patch('sys.stdout') as mock_stdout:
             cmd_tree.main(mock_args)
