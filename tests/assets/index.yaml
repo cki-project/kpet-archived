@@ -4,5 +4,5 @@ trees:
     rhel7: trees/rhel7.xml
     rhel8: trees/rhel8.xml
 suites:
-    default: suites/default/patterns.yaml
-    fs: suites/fs/patterns.yaml
+    default: suites/default/index.yaml
+    fs: suites/fs/index.yaml

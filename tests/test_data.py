@@ -46,13 +46,13 @@ class DataTest(unittest.TestCase):
         path2assets = os.path.join(os.path.dirname(__file__), 'assets')
         shutil.copytree(path2assets, self.tmpdir)
 
-        patterns = os.path.join(self.tmpdir, 'suites/default/patterns.yaml')
+        suite = os.path.join(self.tmpdir, 'suites/default/index.yaml')
 
-        with open(patterns, 'r') as fhandle:
+        with open(suite, 'r') as fhandle:
             mydata = fhandle.read()
             mydata = mydata.replace('pattern: .*', 'pattern: .*[')
 
-            with open(patterns, 'a+') as fhandle2:
+            with open(suite, 'a+') as fhandle2:
                 fhandle2.write(mydata)
 
         with self.assertRaises(data.Invalid):
