@@ -14,7 +14,7 @@
 """Module where the `run` command is implemented"""
 import tempfile
 import shutil
-from kpet import utils, targeted, data
+from kpet import misc, targeted, data
 
 
 def get_src_files(patches, pw_cookie=None):
@@ -28,7 +28,7 @@ def get_src_files(patches, pw_cookie=None):
     """
     tmpdir = tempfile.mkdtemp(suffix='kpet')
     try:
-        patches = utils.patch2localfile(patches, tmpdir, pw_cookie)
+        patches = misc.patch2localfile(patches, tmpdir, pw_cookie)
         return targeted.get_src_files(patches)
     finally:
         shutil.rmtree(tmpdir)
@@ -62,4 +62,4 @@ def main(args):
         for case_name in case_name_list:
             print(case_name)
     else:
-        utils.raise_action_not_found(args.action, args.command)
+        misc.raise_action_not_found(args.action, args.command)

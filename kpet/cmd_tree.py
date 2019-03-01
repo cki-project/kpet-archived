@@ -12,7 +12,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Module where the `tree` command is implemented"""
-from kpet import utils, data
+from kpet import misc, data
 
 
 def main(args):
@@ -24,4 +24,4 @@ def main(args):
         for tree in sorted(database.trees.keys()):
             print(tree)
     else:
-        utils.raise_action_not_found(args.action, args.command)
+        misc.raise_action_not_found(args.action, args.command)
