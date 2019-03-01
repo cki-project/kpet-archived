@@ -1,13 +1,13 @@
 description: 'layout of xfs tests for KPET'
 patterns:
     -   pattern: ^fs/ext4/.*
-        testcase_name: fs/ext4
+        case_name: fs/ext4
     -   pattern: ^fs/jbd2/.*
-        testcase_name: fs/ext4
+        case_name: fs/ext4
     -   pattern: ^fs/xfs/.*
-        testcase_name: fs/xfs
+        case_name: fs/xfs
     -   pattern: ^fs/[^/]*[ch]
-        testcase_name: fs/xfs
+        case_name: fs/xfs
 cases:
     -   hostRequires: suites/fs/xml/hostrequires.xml
         name: fs/ext4

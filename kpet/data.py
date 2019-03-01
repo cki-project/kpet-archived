@@ -16,7 +16,7 @@
 import os
 import jinja2
 from lxml import etree
-from kpet.schema import Invalid, Int, Struct, StrictStruct, Ancestry, \
+from kpet.schema import Invalid, Int, Struct, StrictStruct, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
 # pylint: disable=raising-format-tuple
@@ -78,29 +78,13 @@ class Case(Object):     # pylint: disable=too-few-public-methods
 class Suite(Object):    # pylint: disable=too-few-public-methods
     """Test suite"""
     def __init__(self, data):
-        def convert_pattern(old_data):
-            """Convert pattern data from old to new format"""
-            data = old_data.copy()
-            data['case_name'] = data.pop("testcase_name")
-            return data
-
         super().__init__(
             Struct(
                 required=dict(
                     description=String(),
                     version=String(),
-                    patterns=List(
-                        Ancestry(
-                            # Old schema
-                            StrictStruct(pattern=Regex(),
-                                         testcase_name=String()),
-                            # Conversion function
-                            convert_pattern,
-                            # New schema
-                            StrictStruct(pattern=Regex(),
-                                         case_name=String())
-                        )
-                    ),
+                    patterns=List(StrictStruct(pattern=Regex(),
+                                               case_name=String())),
                     cases=List(Class(Case))
                 ),
                 optional=dict(
@@ -191,29 +175,12 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         """
         assert self.is_dir_valid(dir_path)
 
-        def convert(old_data):
-            """Convert data from old to new format"""
-            data = old_data.copy()
-            data['suites'] = data.pop("testsuites")
-            return data
-
         super().__init__(
             ScopedYAMLFile(
-                Ancestry(
-                    # Old schema
-                    StrictStruct(
-                        schema=StrictStruct(version=Int()),
-                        testsuites=Dict(YAMLFile(Class(Suite))),
-                        trees=Dict(String())
-                    ),
-                    # Conversion function
-                    convert,
-                    # New schema
-                    StrictStruct(
-                        schema=StrictStruct(version=Int()),
-                        suites=Dict(YAMLFile(Class(Suite))),
-                        trees=Dict(String())
-                    ),
+                StrictStruct(
+                    schema=StrictStruct(version=Int()),
+                    suites=Dict(YAMLFile(Class(Suite))),
+                    trees=Dict(String())
                 )
             ),
             dir_path + "/index.yaml"
