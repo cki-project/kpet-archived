@@ -11,16 +11,16 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-"""Test cases for run module"""
+"""Test cases for tree command module"""
 import os
 import unittest
 import mock
 from kpet import exceptions
-from kpet import tree
+from kpet import cmd_tree
 
 
-class TreeTest(unittest.TestCase):
-    """Test cases for tree module."""
+class CmdTreeTest(unittest.TestCase):
+    """Test cases for tree command module."""
     def test_list(self):
         """
         Check the proper exception is raised when action is not found, and if
@@ -29,10 +29,10 @@ class TreeTest(unittest.TestCase):
         dbdir = os.path.join(os.path.dirname(__file__), 'assets')
         mock_args = mock.Mock()
         mock_args.db = dbdir
-        self.assertRaises(exceptions.ActionNotFound, tree.main, mock_args)
+        self.assertRaises(exceptions.ActionNotFound, cmd_tree.main, mock_args)
         mock_args.action = 'list'
         with mock.patch('sys.stdout') as mock_stdout:
-            tree.main(mock_args)
+            cmd_tree.main(mock_args)
         expected = [
             mock.call('rhel7'),
             mock.call('\n'),
@@ -44,4 +44,4 @@ class TreeTest(unittest.TestCase):
             mock_stdout.write.call_args_list,
         )
         mock_args.db = '/notfounddir'
-        self.assertRaises(Exception, tree.main, mock_args)
+        self.assertRaises(Exception, cmd_tree.main, mock_args)
