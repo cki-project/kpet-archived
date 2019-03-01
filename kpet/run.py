@@ -36,7 +36,6 @@ class SuiteRun:
         """
         assert isinstance(suite, data.Suite)
         self.description = suite.description
-        self.version = suite.version
         self.tasks = suite.tasks
         self.ignore_panic = suite.ignore_panic
         self.hostRequires = suite.hostRequires  # pylint: disable=invalid-name
