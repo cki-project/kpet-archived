@@ -18,7 +18,7 @@ from io import StringIO
 
 import mock
 
-from kpet import cmd_run, data, misc
+from kpet import cmd_run, data, run, misc
 
 
 class CmdRunTest(unittest.TestCase):
@@ -32,9 +32,10 @@ class CmdRunTest(unittest.TestCase):
         Check the success case.
         """
         database = data.Base(self.dbdir)
-        content = database.generate_run(description='Foo', tree_name='rhel7',
-                                        arch_name='baz', kernel_location='bar',
-                                        src_path_set=(), lint=True)
+        baserun = run.Base(database, set())
+        content = baserun.generate(description='Foo', tree_name='rhel7',
+                                   arch_name='baz', kernel_location='bar',
+                                   lint=True)
         with open(os.path.join(self.dbdir, 'rhel7_rendered.xml')) as fhandle:
             content_expected = fhandle.read()
         self.assertEqual(content_expected, content)

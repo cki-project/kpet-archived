@@ -14,7 +14,7 @@
 """Module where the `run` command is implemented"""
 import tempfile
 import shutil
-from kpet import misc, targeted, data
+from kpet import misc, targeted, data, run
 
 
 def get_src_files(patches, pw_cookie=None):
@@ -43,12 +43,12 @@ def main(args):
         if args.tree not in database.trees:
             raise Exception("Tree \"{}\" not found".format(args.tree))
         src_files = get_src_files(args.mboxes, args.pw_cookie)
-        content = database.generate_run(description=args.description,
-                                        tree_name=args.tree,
-                                        arch_name=args.arch,
-                                        kernel_location=args.kernel,
-                                        src_path_set=src_files,
-                                        lint=not args.no_lint)
+        baserun = run.Base(database, src_files)
+        content = baserun.generate(description=args.description,
+                                   tree_name=args.tree,
+                                   arch_name=args.arch,
+                                   kernel_location=args.kernel,
+                                   lint=not args.no_lint)
         if not args.output:
             print(content)
         else:
