@@ -14,7 +14,7 @@
 """KPET data"""
 
 import os
-from kpet.schema import Invalid, Int, Struct, StrictStruct, Ancestry, \
+from kpet.schema import Invalid, Int, Struct, StrictStruct, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
 # pylint: disable=raising-format-tuple
@@ -188,26 +188,12 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         """
         assert self.is_dir_valid(dir_path)
 
-        def convert(old_data):
-            """Convert the data from old to new format"""
-            data = old_data.copy()
-            data['suites'] = list(data['suites'].values())
-            return data
-
         super().__init__(
             ScopedYAMLFile(
-                Ancestry(
-                    StrictStruct(
-                        schema=StrictStruct(version=Int()),
-                        suites=Dict(YAMLFile(Class(Suite))),
-                        trees=Dict(String())
-                    ),
-                    convert,
-                    StrictStruct(
-                        schema=StrictStruct(version=Int()),
-                        suites=List(YAMLFile(Class(Suite))),
-                        trees=Dict(String())
-                    )
+                StrictStruct(
+                    schema=StrictStruct(version=Int()),
+                    suites=List(YAMLFile(Class(Suite))),
+                    trees=Dict(String())
                 )
             ),
             dir_path + "/index.yaml"
