@@ -12,6 +12,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Module where the `run` command is implemented"""
+import sys
 import tempfile
 import shutil
 from kpet import misc, targeted, data, run
@@ -50,7 +51,7 @@ def main(args):
                                    kernel_location=args.kernel,
                                    lint=not args.no_lint)
         if not args.output:
-            print(content)
+            sys.stdout.write(content)
         else:
             with open(args.output, 'w') as file_handler:
                 file_handler.write(content)
