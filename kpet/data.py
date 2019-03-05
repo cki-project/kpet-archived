@@ -64,6 +64,7 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                 optional=dict(
                     host_type_regex=Regex(),
                     ignore_panic=Boolean(),
+                    specific=Boolean(),
                     hostRequires=String(),
                     partitions=String(),
                     kickstart=String(),
@@ -89,6 +90,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     host_type_regex=Regex(),
                     tasks=String(),
                     ignore_panic=Boolean(),
+                    specific=Boolean(),
                     hostRequires=String(),
                     partitions=String(),
                     kickstart=String()
@@ -112,12 +114,18 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                 return case
         return None
 
-    def match_case_list(self, src_path_set):
+    def match_case_list(self, specific, src_path_set):
         """
         Return a list of test cases responsible for testing any files in a
         set.
 
         Args:
+            specific:       The default for the "specific" flag, or None, if
+                            not set. The "specific" flag is either True, if
+                            a test case shouldn't be matching an empty set of
+                            source files, or False if it should. If neither
+                            this, nor suite's, nor case's "specific" flag is
+                            specified, it is assumed to be False.
             src_path_set:   A set of source file paths to match cases against,
                             or an empty set for all source files.
 
@@ -125,8 +133,8 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
             A list of test cases responsible for testing at least some of the
             specified files.
         """
+        case_list = list()
         if src_path_set:
-            case_list = list()
             for pattern in self.patterns:
                 for src_path in src_path_set:
                     if pattern['pattern'].match(src_path):
@@ -134,14 +142,28 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                         if case and case not in case_list:
                             case_list.append(case)
         else:
-            case_list = self.cases.copy()
+            for case in self.cases:
+                if case.specific is not None:
+                    case_specific = case.specific
+                elif self.specific is not None:
+                    case_specific = self.specific
+                else:
+                    case_specific = specific
+                if not case_specific:
+                    case_list.append(case)
         return case_list
 
-    def matches(self, src_path_set):
+    def matches(self, specific, src_path_set):
         """
         Check if the suite is responsible for testing any files in a set.
 
         Args:
+            specific:       The default for the "specific" flag, or None, if
+                            not set. The "specific" flag is either True, if
+                            a test case shouldn't be matching an empty set of
+                            source files, or False if it should. If neither
+                            this, nor suite's, nor case's "specific" flag is
+                            specified, it is assumed to be False.
             src_path_set:   A set of source file paths to check against,
                             or an empty set for all files.
 
@@ -149,7 +171,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
             True if the suite is responsible for testing at least some of
             the specified files.
         """
-        return bool(self.match_case_list(src_path_set))
+        return bool(self.match_case_list(specific, src_path_set))
 
 
 class HostType(Object):     # pylint: disable=too-few-public-methods
@@ -206,6 +228,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                         trees=Dict(String()),
                     ),
                     optional=dict(
+                        specific=Boolean(),
                         host_types=Dict(Class(HostType)),
                         host_type_regex=Regex()
                     )
@@ -229,7 +252,8 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             A list of test suites responsible for testing at least some of the
             specified files.
         """
-        return [suite for suite in self.suites if suite.matches(src_path_set)]
+        return [suite for suite in self.suites
+                if suite.matches(self.specific, src_path_set)]
 
     def match_case_list(self, src_path_set):
         """
@@ -246,5 +270,5 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         """
         case_list = list()
         for suite in self.suites:
-            case_list += suite.match_case_list(src_path_set)
+            case_list += suite.match_case_list(self.specific, src_path_set)
         return case_list

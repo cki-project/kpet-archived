@@ -94,7 +94,11 @@ class Base:     # pylint: disable=too-few-public-methods
                 Host(
                     data.DEFAULT_HOST_TYPE,
                     [
-                        Suite(suite, suite.match_case_list(src_path_set))
+                        Suite(
+                            suite,
+                            suite.match_case_list(database.specific,
+                                                  src_path_set)
+                        )
                         for suite in
                         database.match_suite_list(src_path_set)
                     ]
@@ -103,7 +107,8 @@ class Base:     # pylint: disable=too-few-public-methods
 
         # Build a pool of suites and cases
         pool_suites = [
-            (suite, suite.match_case_list(src_path_set))
+            (suite,
+             suite.match_case_list(database.specific, src_path_set))
             for suite
             in database.match_suite_list(src_path_set)
         ]
@@ -154,7 +159,10 @@ class Base:     # pylint: disable=too-few-public-methods
         self.src_path_set = src_path_set
         # TODO: Remove once templates no longer use it
         self.suites = [
-            Suite(suite, suite.match_case_list(src_path_set))
+            Suite(
+                suite,
+                suite.match_case_list(self.database.specific, src_path_set)
+            )
             for suite
             in self.database.match_suite_list(src_path_set)
         ]
