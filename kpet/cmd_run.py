@@ -59,7 +59,7 @@ def main(args):
         src_files = get_src_files(args.patches, args.pw_cookie)
         case_name_list = sorted([case.name
                                  for case
-                                 in database.match_case_set(src_files)])
+                                 in database.match_case_list(src_files)])
         for case_name in case_name_list:
             print(case_name)
     else:

@@ -89,11 +89,7 @@ class Base:     # pylint: disable=too-few-public-methods
             KURL=kernel_location,
             ARCH=arch_name,
             TREE=tree_name,
-            SRC_PATH_SET=self.src_path_set,
-            SUITE_SET=set(self.database.suites),
             SUITES=self.suites,
-            match_suite_set=self.database.match_suite_set,
-            match_case_set=self.database.match_case_set,
             getenv=os.getenv,
         )
 

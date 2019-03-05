@@ -135,20 +135,6 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
             case_list = self.cases.copy()
         return case_list
 
-    def match_case_set(self, src_path_set):
-        """
-        Return a set of test cases responsible for testing any files in a set.
-
-        Args:
-            src_path_set:   A set of source file paths to match cases against,
-                            or an empty set for all source files.
-
-        Returns:
-            A set of test cases responsible for testing at least some of the
-            specified files.
-        """
-        return set(self.match_case_list(src_path_set))
-
     def matches(self, src_path_set):
         """
         Check if the suite is responsible for testing any files in a set.
@@ -161,7 +147,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
             True if the suite is responsible for testing at least some of
             the specified files.
         """
-        return bool(self.match_case_set(src_path_set))
+        return bool(self.match_case_list(src_path_set))
 
 
 class Base(Object):     # pylint: disable=too-few-public-methods
@@ -214,21 +200,6 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         """
         return [suite for suite in self.suites if suite.matches(src_path_set)]
 
-    def match_suite_set(self, src_path_set):
-        """
-        Return a set of test suites responsible for testing any files in a
-        set.
-
-        Args:
-            src_path_set:   A set of source file paths to match suites
-                            against, or an empty set for all files.
-
-        Returns:
-            A set of test suites responsible for testing at least some of the
-            specified files.
-        """
-        return set(self.match_suite_list(src_path_set))
-
     def match_case_list(self, src_path_set):
         """
         Return a list of test cases responsible for testing any files in a
@@ -246,17 +217,3 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         for suite in self.suites:
             case_list += suite.match_case_list(src_path_set)
         return case_list
-
-    def match_case_set(self, src_path_set):
-        """
-        Return a set of test cases responsible for testing any files in a set.
-
-        Args:
-            src_path_set:   A set of source file paths to match cases against,
-                            or an empty set for all source files.
-
-        Returns:
-            A set of test cases responsible for testing at least some of the
-            specified files.
-        """
-        return set(self.match_case_list(src_path_set))
