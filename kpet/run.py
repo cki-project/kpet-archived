@@ -157,15 +157,6 @@ class Base:     # pylint: disable=too-few-public-methods
         assert isinstance(database, data.Base)
         self.database = database
         self.src_path_set = src_path_set
-        # TODO: Remove once templates no longer use it
-        self.suites = [
-            Suite(
-                suite,
-                suite.match_case_list(self.database.specific, src_path_set)
-            )
-            for suite
-            in self.database.match_suite_list(src_path_set)
-        ]
         self.hosts = self.__get_hosts(database, src_path_set)
 
     # pylint: disable=too-many-arguments
@@ -194,8 +185,6 @@ class Base:     # pylint: disable=too-few-public-methods
             KURL=kernel_location,
             ARCH=arch_name,
             TREE=tree_name,
-            # TODO: Remove once templates no longer use it
-            SUITES=self.suites,
             HOSTS=self.hosts,
             getenv=os.getenv,
         )
