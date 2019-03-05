@@ -1,3 +1,15 @@
+{% macro include_templates(template_field) -%}
+  {% for suite in SUITES %}
+    {% if suite[template_field] %}
+      {% include suite[template_field] %}
+    {% endif %}
+    {% for case in suite.cases %}
+      {% if case[template_field] %}
+        {% include case[template_field] %}
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+{% endmacro %}
 <job>
   <whiteboard>{{ DESCRIPTION }}</whiteboard>
   <recipeSet>
@@ -8,15 +20,11 @@
           <labcontroller op="=" value="example2.com"/>
           <labcontroller op="=" value="example3.com"/>
         </or>
-        {% for case in match_case_set(SRC_PATH_SET) if case.hostRequires %}
-          {% include case.hostRequires %}
-        {% endfor %}
+        {{- include_templates('hostRequires') -}}
       </hostRequires>
       <repos/>
       <partitions>
-        {% for case in match_case_set(SRC_PATH_SET) if case.partitions %}
-          {% include case.partitions %}
-        {% endfor %}
+        {{- include_templates('partitions') -}}
       </partitions>
       <ks_appends/>
       <task name="/distribution/install" role="STANDALONE">
@@ -51,9 +59,7 @@
           <param name="KPKG_URL" value="{{ KURL }}"/>
         </params>
       </task>
-      {% for case in match_case_set(SRC_PATH_SET) if case.tasks %}
-        {% include case.tasks %}
-      {% endfor %}
+      {{- include_templates('tasks') -}}
     </recipe>
   </recipeSet>
 </job>
