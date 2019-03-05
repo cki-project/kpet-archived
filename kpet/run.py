@@ -44,8 +44,99 @@ class Suite:    # pylint: disable=too-few-public-methods
         self.cases = cases
 
 
+class Host:     # pylint: disable=too-few-public-methods
+    """A host running test suites"""
+
+    # pylint: disable=redefined-builtin
+    def __init__(self, type, suites):
+        """
+        Initialize a host run.
+
+        Args:
+            type:       Type of the host.
+            suites:     List of suite runs to execute.
+        """
+        assert isinstance(type, data.HostType)
+        assert isinstance(suites, list)
+        for suite in suites:
+            assert isinstance(suite, Suite)
+
+        self.ignore_panic = type.ignore_panic
+        # pylint: disable=invalid-name
+        self.hostRequires = type.hostRequires
+        self.partitions = type.partitions
+        self.kickstart = type.kickstart
+        self.tasks = type.tasks
+        self.suites = suites
+
+
 class Base:     # pylint: disable=too-few-public-methods
     """A specific execution of tests in a database"""
+
+    @staticmethod
+    def __get_hosts(database, src_path_set):
+        """
+        Get a list of hosts to run.
+
+        Args:
+            database:           The database to get test data from.
+            src_path_set:       A set of paths to source files the executed
+                                tests should cover, empty set for all files.
+                                Affects the selection of test suites and test
+                                cases to run.
+        """
+        assert isinstance(database, data.Base)
+
+        # If no host types were defined
+        if database.host_types is None:
+            # Assign all suites and cases to a default host
+            return [
+                Host(
+                    data.DEFAULT_HOST_TYPE,
+                    [
+                        Suite(suite, suite.match_case_list(src_path_set))
+                        for suite in
+                        database.match_suite_list(src_path_set)
+                    ]
+                )
+            ]
+
+        # Build a pool of suites and cases
+        pool_suites = [
+            (suite, suite.match_case_list(src_path_set))
+            for suite
+            in database.match_suite_list(src_path_set)
+        ]
+
+        # Distribute suites and their cases to hosts
+        hosts = list()
+        for host_type_name, host_type in database.host_types.items():
+            # Create a suite run list
+            suites = list()
+            for pool_suite in pool_suites.copy():
+                suite, pool_cases = pool_suite
+                # Create case list from cases matching host type
+                cases = []
+                for case in pool_cases.copy():
+                    host_type_regex = \
+                        case.host_type_regex or \
+                        suite.host_type_regex or \
+                        database.host_type_regex
+                    if host_type_regex and \
+                       host_type_regex.match(host_type_name):
+                        cases.append(case)
+                        pool_cases.remove(case)
+                # Add the suite run to the list, if it has cases to run
+                if cases:
+                    suites.append(Suite(suite, cases))
+                # Remove suite from the pool, if it has no more cases
+                if not pool_cases:
+                    pool_suites.remove(pool_suite)
+            # Add host to list, if it has suites to run
+            if suites:
+                hosts.append(Host(host_type, suites))
+
+        return hosts
 
     def __init__(self, database, src_path_set):
         """
@@ -61,9 +152,13 @@ class Base:     # pylint: disable=too-few-public-methods
         assert isinstance(database, data.Base)
         self.database = database
         self.src_path_set = src_path_set
-        self.suites = [Suite(suite, suite.match_case_list(src_path_set))
-                       for suite
-                       in self.database.match_suite_list(src_path_set)]
+        # TODO: Remove once templates no longer use it
+        self.suites = [
+            Suite(suite, suite.match_case_list(src_path_set))
+            for suite
+            in self.database.match_suite_list(src_path_set)
+        ]
+        self.hosts = self.__get_hosts(database, src_path_set)
 
     # pylint: disable=too-many-arguments
     def generate(self, description, tree_name, arch_name,
@@ -91,7 +186,9 @@ class Base:     # pylint: disable=too-few-public-methods
             KURL=kernel_location,
             ARCH=arch_name,
             TREE=tree_name,
+            # TODO: Remove once templates no longer use it
             SUITES=self.suites,
+            HOSTS=self.hosts,
             getenv=os.getenv,
         )
 

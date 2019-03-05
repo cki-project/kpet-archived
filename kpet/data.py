@@ -62,6 +62,7 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                     name=String(),
                 ),
                 optional=dict(
+                    host_type_regex=Regex(),
                     ignore_panic=Boolean(),
                     hostRequires=String(),
                     partitions=String(),
@@ -85,6 +86,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     cases=List(Class(Case))
                 ),
                 optional=dict(
+                    host_type_regex=Regex(),
                     tasks=String(),
                     ignore_panic=Boolean(),
                     hostRequires=String(),
@@ -150,6 +152,29 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
         return bool(self.match_case_list(src_path_set))
 
 
+class HostType(Object):     # pylint: disable=too-few-public-methods
+    """Host type"""
+
+    def __init__(self, data):
+        """
+        Initialize a host type.
+        """
+        super().__init__(
+            Struct(optional=dict(
+                ignore_panic=Boolean(),
+                hostRequires=String(),
+                partitions=String(),
+                kickstart=String(),
+                tasks=String(),
+            )),
+            data
+        )
+
+
+# Host type to use when there are none defined
+DEFAULT_HOST_TYPE = HostType({})
+
+
 class Base(Object):     # pylint: disable=too-few-public-methods
     """Database"""
 
@@ -175,9 +200,15 @@ class Base(Object):     # pylint: disable=too-few-public-methods
 
         super().__init__(
             ScopedYAMLFile(
-                StrictStruct(
-                    suites=List(YAMLFile(Class(Suite))),
-                    trees=Dict(String())
+                Struct(
+                    required=dict(
+                        suites=List(YAMLFile(Class(Suite))),
+                        trees=Dict(String()),
+                    ),
+                    optional=dict(
+                        host_types=Dict(Class(HostType)),
+                        host_type_regex=Regex()
+                    )
                 )
             ),
             dir_path + "/index.yaml"
