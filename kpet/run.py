@@ -19,31 +19,6 @@ from lxml import etree
 from kpet import data
 
 
-# pylint: disable=too-few-public-methods,too-many-instance-attributes
-class SuiteRun:
-    """An execution of a test suite"""
-
-    def __init__(self, suite, src_path_set):
-        """
-        Initialize an instance of a test suite run.
-
-        Args:
-            suite:              The data for the suite to run.
-            src_path_set:       A set of paths to source files the executed
-                                tests should cover, empty set for all files.
-                                Affects the selection of test suites and test
-                                cases to run.
-        """
-        assert isinstance(suite, data.Suite)
-        self.description = suite.description
-        self.tasks = suite.tasks
-        self.ignore_panic = suite.ignore_panic
-        self.hostRequires = suite.hostRequires  # pylint: disable=invalid-name
-        self.partitions = suite.partitions
-        self.kickstart = suite.kickstart
-        self.cases = suite.match_case_list(src_path_set)
-
-
 class Base:     # pylint: disable=too-few-public-methods
     """A specific execution of tests in a database"""
 
