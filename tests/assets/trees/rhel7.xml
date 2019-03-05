@@ -1,10 +1,8 @@
-{% block jobDefinition %}<job>{% endblock %}
+<job>
   <whiteboard>{{ DESCRIPTION }}</whiteboard>
   <recipeSet>
-    {% block recipeSet %}
-      {% block recipeDefinition %}<recipe kernel_options="selinux=0">{% endblock %}
+    <recipe kernel_options="selinux=0">
       <hostRequires>
-        {% block hostRequires %}
         <or>
           <labcontroller op="=" value="example1.com"/>
           <labcontroller op="=" value="example2.com"/>
@@ -13,18 +11,14 @@
         {% for case in match_case_set(SRC_PATH_SET) if case.hostRequires %}
           {% include case.hostRequires %}
         {% endfor %}
-        {% endblock hostRequires %}
       </hostRequires>
       <repos/>
       <partitions>
-        {% block partitions %}
         {% for case in match_case_set(SRC_PATH_SET) if case.partitions %}
           {% include case.partitions %}
         {% endfor %}
-        {% endblock partitions %}
       </partitions>
       <ks_appends/>
-      {% block task %}
       <task name="/distribution/install" role="STANDALONE">
         <params/>
       </task>
@@ -60,8 +54,6 @@
       {% for case in match_case_set(SRC_PATH_SET) if case.tasks %}
         {% include case.tasks %}
       {% endfor %}
-      {% endblock task %}
     </recipe>
-    {% endblock recipeSet %}
   </recipeSet>
 </job>
