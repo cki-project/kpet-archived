@@ -130,7 +130,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                 for src_path in src_path_set:
                     if pattern['pattern'].match(src_path):
                         case = self.get_case(pattern['case_name'])
-                        if case:
+                        if case and case not in case_list:
                             case_list.append(case)
         else:
             case_list = self.cases.copy()
