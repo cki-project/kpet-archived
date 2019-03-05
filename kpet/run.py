@@ -19,6 +19,31 @@ from lxml import etree
 from kpet import data
 
 
+class Suite:    # pylint: disable=too-few-public-methods
+    """A test suite run"""
+
+    def __init__(self, suite, cases):
+        """
+        Initialize a test suite run.
+
+        Args:
+            suite:          The suite to run.
+            cases:          List of the suite's cases to run.
+        """
+        assert isinstance(suite, data.Suite)
+        assert isinstance(cases, list)
+        for case in cases:
+            assert case in suite.cases
+
+        self.description = suite.description
+        self.tasks = suite.tasks
+        self.ignore_panic = suite.ignore_panic
+        self.hostRequires = suite.hostRequires  # pylint: disable=invalid-name
+        self.partitions = suite.partitions
+        self.kickstart = suite.kickstart
+        self.cases = cases
+
+
 class Base:     # pylint: disable=too-few-public-methods
     """A specific execution of tests in a database"""
 
@@ -36,7 +61,9 @@ class Base:     # pylint: disable=too-few-public-methods
         assert isinstance(database, data.Base)
         self.database = database
         self.src_path_set = src_path_set
-        self.suites = self.database.match_suite_list(src_path_set)
+        self.suites = [Suite(suite, suite.match_case_list(src_path_set))
+                       for suite
+                       in self.database.match_suite_list(src_path_set)]
 
     # pylint: disable=too-many-arguments
     def generate(self, description, tree_name, arch_name,
