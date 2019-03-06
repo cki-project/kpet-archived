@@ -104,7 +104,7 @@ class ArgumentParserTest(unittest.TestCase):
         """
         Check run generate command executes successfully
         """
-        dbdir = os.path.join(os.path.dirname(__file__), 'assets')
+        dbdir = os.path.join(os.path.dirname(__file__), 'assets/db/general')
         args = ['--db', dbdir, 'run', 'generate', '-t', 'rhel7', '-k',
                 'url']
         with mock.patch('sys.stdout') as mock_stdout:

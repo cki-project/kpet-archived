@@ -25,7 +25,8 @@ class CmdRunTest(unittest.TestCase):
     """Test cases for run command module."""
 
     def setUp(self):
-        self.dbdir = os.path.join(os.path.dirname(__file__), 'assets')
+        self.dbdir = os.path.join(os.path.dirname(__file__),
+                                  'assets/db/general')
 
     def test_generate(self):
         """

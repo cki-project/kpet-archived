@@ -43,7 +43,8 @@ class DataTest(unittest.TestCase):
         Check that Object raiser Invalid exception if the schema doesn't match.
         """
         self.tmpdir = '/tmp/assets'
-        path2assets = os.path.join(os.path.dirname(__file__), 'assets')
+        path2assets = os.path.join(os.path.dirname(__file__),
+                                   'assets/db/general')
         shutil.copytree(path2assets, self.tmpdir)
 
         suite = os.path.join(self.tmpdir, 'suites/default/index.yaml')

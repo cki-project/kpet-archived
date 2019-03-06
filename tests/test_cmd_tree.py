@@ -25,7 +25,7 @@ class CmdTreeTest(unittest.TestCase):
         Check the proper exception is raised when action is not found, and if
         an exception is raised when the database directory is invalid.
         """
-        dbdir = os.path.join(os.path.dirname(__file__), 'assets')
+        dbdir = os.path.join(os.path.dirname(__file__), 'assets/db/general')
         mock_args = mock.Mock()
         mock_args.db = dbdir
         self.assertRaises(misc.ActionNotFound, cmd_tree.main, mock_args)
