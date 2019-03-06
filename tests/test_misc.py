@@ -25,7 +25,8 @@ class MiscTest(unittest.TestCase):
     """Test cases for misc."""
     def setUp(self):
         """Set common attributes used later on the test cases"""
-        self.root_dir = os.path.join(os.path.dirname(__file__), 'assets')
+        self.root_dir = os.path.join(os.path.dirname(__file__),
+                                     'assets/db/general')
         self.template_rel_path = 'templates/rhel7.xml'
 
     def test_patch2localfile(self):
