@@ -397,6 +397,9 @@ class Struct(Dict):
                     schema.validate(value)
                 except Invalid:
                     raise Invalid("Member \"{}\" is invalid", name)
+        for key in data.keys():
+            if key not in self.required and key not in self.optional:
+                raise Invalid("Unexpected member \"{}\" encountered", key)
 
     def recognize(self):
         recognized_required = {}

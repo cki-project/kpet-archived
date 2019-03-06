@@ -5,8 +5,3 @@ patterns:
 cases:
     -   name: default/ltplite
         tasks: suites/default/ltplite.xml
-maintainers:
-    -   'Rachel Sibley <rasibley@redhat.com>'
-    -   'Fendy Tjahjadi <ftjahjad@redhat.com>'
-    -   'Vector Li <huanli@redhat.com>'
-version: "1.0"
