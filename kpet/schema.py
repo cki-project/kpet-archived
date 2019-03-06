@@ -232,7 +232,7 @@ class RelativeFilePath(String):
     """
     def resolve(self, data):
         self.validate(data)
-        return os.path.realpath(data)
+        return os.path.abspath(data)
 
 
 class YAMLFile(String):
@@ -250,7 +250,7 @@ class YAMLFile(String):
 
     def resolve(self, data):
         self.validate(data)
-        file_path = os.path.realpath(data)
+        file_path = os.path.abspath(data)
 
         # Load the data
         with open(file_path, "r") as resolved_data_file:
@@ -271,7 +271,7 @@ class ScopedYAMLFile(YAMLFile):
     """
     def resolve(self, data):
         self.validate(data)
-        file_path = os.path.realpath(data)
+        file_path = os.path.abspath(data)
         dir_path = os.path.dirname(file_path)
 
         # Load the data
