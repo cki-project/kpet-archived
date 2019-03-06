@@ -1,0 +1,4 @@
+trees:
+    tree: tree.xml
+suites:
+    - missing.yaml

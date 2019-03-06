@@ -1,0 +1,11 @@
+<job>
+  {% for host in HOSTS %}
+    HOST
+    {% for suite in host.suites %}
+      {{ suite.description }}
+      {% for case in suite.cases %}
+        {{ case.name }}
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+</job>

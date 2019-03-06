@@ -1,0 +1,8 @@
+description: suite1
+cases:
+    - name: case1
+patterns:
+    - pattern: a
+      case_name: case1
+    - pattern: d
+      case_name: case1

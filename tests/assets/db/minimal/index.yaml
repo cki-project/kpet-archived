@@ -1,0 +1,3 @@
+# Minimal, but fully-functional database
+trees:
+    tree: tree.xml

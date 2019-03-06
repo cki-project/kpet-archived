@@ -1,0 +1,6 @@
+trees:
+    tree: tree.xml
+host_type_regex: .*
+suites:
+    - suite1.yaml
+    - suite2.yaml
