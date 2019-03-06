@@ -1,0 +1,8 @@
+trees:
+    tree: tree.xml
+host_types:
+    a: {}
+    b: {}
+suites:
+    - suite1.yaml
+    - suite2.yaml

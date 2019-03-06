@@ -1,0 +1,7 @@
+description: suite2
+cases:
+    - name: case2
+      host_type_regex: not_normal
+patterns:
+    - pattern: d
+      case_name: case2
