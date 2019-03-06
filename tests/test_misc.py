@@ -21,7 +21,7 @@ import mock
 from kpet import misc
 
 
-class UtilsTest(unittest.TestCase):
+class MiscTest(unittest.TestCase):
     """Test cases for misc."""
     def setUp(self):
         """Set common attributes used later on the test cases"""
