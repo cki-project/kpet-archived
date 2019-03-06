@@ -17,7 +17,7 @@ import os
 from kpet.schema import Invalid, Struct, StrictStruct, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
-# pylint: disable=raising-format-tuple
+# pylint: disable=raising-format-tuple,access-member-before-definition
 
 
 class Object:   # pylint: disable=too-few-public-methods
@@ -224,10 +224,10 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             ScopedYAMLFile(
                 Struct(
                     required=dict(
-                        suites=List(YAMLFile(Class(Suite))),
-                        trees=Dict(String()),
                     ),
                     optional=dict(
+                        suites=List(YAMLFile(Class(Suite))),
+                        trees=Dict(String()),
                         specific=Boolean(),
                         host_types=Dict(Class(HostType)),
                         host_type_regex=Regex()
@@ -238,6 +238,10 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         )
 
         self.dir_path = dir_path
+        if self.trees is None:
+            self.trees = {}
+        if self.suites is None:
+            self.suites = []
 
     def match_suite_list(self, src_path_set):
         """
