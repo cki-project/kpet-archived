@@ -20,17 +20,14 @@ from kpet import targeted
 
 class TargetedTest(unittest.TestCase):
     """Test cases for targeted."""
-    def setUp(self):
-        """Set common attributes used later on the test cases"""
-        self.db_dir = os.path.join(os.path.dirname(__file__), 'assets')
-
     def test_get_src_files(self):
         """
         Check filenames are extracted from the patches and also if it
         raises the UnrecognizedPatchFormat execption when the patch is not a
         git diff output.
         """
-        patches_dir = os.path.join(self.db_dir, 'patches')
+        patches_dir = os.path.join(os.path.dirname(__file__),
+                                   'assets/patches')
         patches = []
         for patch in sorted(os.listdir(patches_dir)):
             patches.append(os.path.join(patches_dir, patch))
