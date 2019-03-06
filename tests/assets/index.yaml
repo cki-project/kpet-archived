@@ -1,5 +1,3 @@
-schema:
-    version: 1
 trees:
     rhel7: trees/rhel7.xml
     rhel8: trees/rhel8.xml
