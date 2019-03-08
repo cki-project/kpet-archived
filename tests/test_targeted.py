@@ -27,7 +27,7 @@ class TargetedTest(unittest.TestCase):
         git diff output.
         """
         patches_dir = os.path.join(os.path.dirname(__file__),
-                                   'assets/patches')
+                                   'assets/patches/format_assortment')
         patches = []
         for patch in sorted(os.listdir(patches_dir)):
             patches.append(os.path.join(patches_dir, patch))
