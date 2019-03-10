@@ -86,24 +86,10 @@ class Base:     # pylint: disable=too-few-public-methods
                                 cases to run.
         """
         assert isinstance(database, data.Base)
-
-        # If no host types were defined
-        if database.host_types is None:
-            # Assign all suites and cases to a default host
-            return [
-                Host(
-                    data.DEFAULT_HOST_TYPE,
-                    [
-                        Suite(
-                            suite,
-                            suite.match_case_list(database.specific,
-                                                  src_path_set)
-                        )
-                        for suite in
-                        database.match_suite_list(src_path_set)
-                    ]
-                )
-            ]
+        host_types = \
+            database.host_types \
+            if database.host_types is not None \
+            else {"": data.DEFAULT_HOST_TYPE}
 
         # Build a pool of suites and cases
         pool_suites = [
@@ -115,7 +101,7 @@ class Base:     # pylint: disable=too-few-public-methods
 
         # Distribute suites and their cases to hosts
         hosts = list()
-        for host_type_name, host_type in database.host_types.items():
+        for host_type_name, host_type in host_types.items():
             # Create a suite run list
             suites = list()
             for pool_suite in pool_suites.copy():
@@ -127,7 +113,8 @@ class Base:     # pylint: disable=too-few-public-methods
                         case.host_type_regex or \
                         suite.host_type_regex or \
                         database.host_type_regex
-                    if host_type_regex and \
+                    if database.host_types is None or \
+                       host_type_regex and \
                        host_type_regex.match(host_type_name):
                         cases.append(case)
                         pool_cases.remove(case)
