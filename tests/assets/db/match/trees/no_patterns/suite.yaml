@@ -1,7 +1,5 @@
 description: suite1
-match:
-    specific_sources: true
 cases:
     - name: case1
       match:
-          sources: a
+          trees: []

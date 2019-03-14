@@ -272,14 +272,16 @@ class IntegrationTests(unittest.TestCase):
                                 status=1,
                                 stderr_matching=r'.*missing.yaml.*')
 
+    # TODO Remove once test assets are migrated to generic matching
     def test_missing_case_run_generate(self):
         """Test run generation with a pattern pointing to a missing case"""
         # NOTE This is not correct, but it's what we do for now
         # TODO Abort kpet if a case is missing, likely on schema validation
-        self.assertKpetProduces(kpet_run_generate,
-                                "invalid/semantics/missing_case",
-                                get_patch_path("misc/files_abc.diff"),
-                                stdout_matching=r'.*<job>\s*</job>.*')
+        self.assertKpetProduces(
+            kpet_run_generate,
+            "invalid/semantics/missing_case",
+            get_patch_path("misc/files_abc.diff"),
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
 
     def test_invalid_top_yaml_tree_list(self):
         """Test tree listing with invalid YAML in the top database file"""
@@ -332,11 +334,11 @@ class IntegrationTests(unittest.TestCase):
         self.assertKpetProduces(
             kpet_run_generate, "match/sources/one_case/no_patterns",
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
-        # Doesn't match patches
+        # Matches patches
         self.assertKpetProduces(
             kpet_run_generate, "match/sources/one_case/no_patterns",
             get_patch_path("misc/files_abc.diff"),
-            stdout_matching=r'.*<job>\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
 
     def test_match_sources_one_case_one_pattern(self):
         """Test source-matching a case with one pattern"""
@@ -443,30 +445,6 @@ class IntegrationTests(unittest.TestCase):
             get_patch_path("misc/files_ghi.diff"),
             stdout_matching=r'.*<job>\s*</job>.*')
 
-    def test_match_sources_specific_db(self):
-        """Test source-matching with a specific db"""
-        # Nothing matches baseline in a specific db
-        self.assertKpetProduces(
-            kpet_run_generate, "match/sources/specific/db",
-            stdout_matching=r'.*<job>\s*</job>.*')
-        # Only appropriate case matches with a patch
-        self.assertKpetProduces(
-            kpet_run_generate, "match/sources/specific/db",
-            get_patch_path("misc/files_abc.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
-        # All cases can match if provided appropriate patches
-        self.assertKpetProduces(
-            kpet_run_generate, "match/sources/specific/db",
-            get_patch_path("misc/files_abc.diff"),
-            get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
-                            r'suite2\s*case2\s*</job>.*')
-        # None match other patches
-        self.assertKpetProduces(
-            kpet_run_generate, "match/sources/specific/db",
-            get_patch_path("misc/files_ghi.diff"),
-            stdout_matching=r'.*<job>\s*</job>.*')
-
     def test_match_sources_specific_suite(self):
         """Test source-matching with a specific suite"""
         # Only non-specific suite matches baseline
@@ -523,6 +501,98 @@ class IntegrationTests(unittest.TestCase):
         self.assertKpetProduces(
             kpet_run_generate, "match/sources/specific/case",
             get_patch_path("misc/files_ghi.diff"),
+            stdout_matching=r'.*<job>\s*</job>.*')
+
+    def test_match_arches_no_patterns(self):
+        """Test architecture-matching a case with no patterns"""
+        # Doesn't match a non-empty (default "arch") architecture
+        self.assertKpetProduces(
+            kpet_run_generate, "match/arches/no_patterns",
+            stdout_matching=r'.*<job>\s*</job>.*')
+        # Doesn't match empty architecture
+        self.assertKpetProduces(
+            kpet_run_generate, "match/arches/no_patterns", "-a", "",
+            stdout_matching=r'.*<job>\s*</job>.*')
+
+    def test_match_arches_one_pattern(self):
+        """Test architecture-matching a case with one pattern"""
+        # Matches default ("arch") architecture
+        self.assertKpetProduces(
+            kpet_run_generate, "match/arches/one_pattern",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+        # Doesn't match empty architecture
+        self.assertKpetProduces(
+            kpet_run_generate, "match/arches/one_pattern", "-a", "",
+            stdout_matching=r'.*<job>\s*</job>.*')
+        # Doesn't match another architecture
+        self.assertKpetProduces(
+            kpet_run_generate, "match/arches/one_pattern", "-a", "not_arch",
+            stdout_matching=r'.*<job>\s*</job>.*')
+
+    def test_match_arches_two_patterns(self):
+        """Test architecture-matching a case with two patterns"""
+        # Matches default ("arch") architecture
+        self.assertKpetProduces(
+            kpet_run_generate, "match/arches/two_patterns",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+        # Matches non-default (but listed) architecture
+        self.assertKpetProduces(
+            kpet_run_generate, "match/arches/two_patterns",
+            "-a", "other_arch",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+        # Doesn't match empty architecture
+        self.assertKpetProduces(
+            kpet_run_generate, "match/arches/two_patterns", "-a", "",
+            stdout_matching=r'.*<job>\s*</job>.*')
+        # Doesn't match another architecture
+        self.assertKpetProduces(
+            kpet_run_generate, "match/arches/two_patterns", "-a", "not_arch",
+            stdout_matching=r'.*<job>\s*</job>.*')
+
+    def test_match_trees_no_patterns(self):
+        """Test tree-matching a case with no patterns"""
+        # Doesn't match a non-empty (default "tree") tree
+        self.assertKpetProduces(
+            kpet_run_generate, "match/trees/no_patterns",
+            stdout_matching=r'.*<job>\s*</job>.*')
+        # Doesn't match empty tree
+        self.assertKpetProduces(
+            kpet_run_generate, "match/trees/no_patterns", "-t", "",
+            stdout_matching=r'.*<job>\s*</job>.*')
+
+    def test_match_trees_one_pattern(self):
+        """Test tree-matching a case with one pattern"""
+        # Matches default ("tree") tree
+        self.assertKpetProduces(
+            kpet_run_generate, "match/trees/one_pattern",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+        # Doesn't match empty tree
+        self.assertKpetProduces(
+            kpet_run_generate, "match/trees/one_pattern", "-t", "",
+            stdout_matching=r'.*<job>\s*</job>.*')
+        # Doesn't match another tree
+        self.assertKpetProduces(
+            kpet_run_generate, "match/trees/one_pattern", "-t", "not_tree",
+            stdout_matching=r'.*<job>\s*</job>.*')
+
+    def test_match_trees_two_patterns(self):
+        """Test tree-matching a case with two patterns"""
+        # Matches default ("tree") tree
+        self.assertKpetProduces(
+            kpet_run_generate, "match/trees/two_patterns",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+        # Matches non-default (but listed) tree
+        self.assertKpetProduces(
+            kpet_run_generate, "match/trees/two_patterns",
+            "-t", "other_tree",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+        # Doesn't match empty tree
+        self.assertKpetProduces(
+            kpet_run_generate, "match/trees/two_patterns", "-t", "",
+            stdout_matching=r'.*<job>\s*</job>.*')
+        # Doesn't match another tree
+        self.assertKpetProduces(
+            kpet_run_generate, "match/trees/two_patterns", "-t", "not_tree",
             stdout_matching=r'.*<job>\s*</job>.*')
 
     def test_multihost_no_types_no_regex_no_suites(self):

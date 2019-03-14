@@ -1,6 +1,0 @@
-trees:
-    tree: tree.xml
-suites:
-    - suite1.yaml
-    - suite2.yaml
-specific: true

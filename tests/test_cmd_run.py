@@ -33,9 +33,9 @@ class CmdRunTest(unittest.TestCase):
         Check the success case.
         """
         database = data.Base(self.dbdir)
-        baserun = run.Base(database, set())
-        content = baserun.generate(description='Foo', tree_name='rhel7',
-                                   arch_name='baz', kernel_location='bar',
+        target = data.Target(arches='baz', trees='rhel7', sources=set())
+        baserun = run.Base(database, target)
+        content = baserun.generate(description='Foo', kernel_location='bar',
                                    lint=True)
         with open(os.path.join(self.dbdir, 'rhel7_rendered.xml')) as fhandle:
             content_expected = fhandle.read()

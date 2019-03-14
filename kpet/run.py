@@ -74,30 +74,32 @@ class Base:     # pylint: disable=too-few-public-methods
     """A specific execution of tests in a database"""
 
     @staticmethod
-    def __get_hosts(database, src_path_set):
+    def __get_hosts(database, target):
         """
         Get a list of hosts to run.
 
         Args:
-            database:           The database to get test data from.
-            src_path_set:       A set of paths to source files the executed
-                                tests should cover, empty set for all files.
-                                Affects the selection of test suites and test
-                                cases to run.
+            database:   The database to get test data from.
+            target:     The target (a data.Target) to match/run tests against.
         """
         assert isinstance(database, data.Base)
+        assert isinstance(target, data.Target)
+
         host_types = \
             database.host_types \
             if database.host_types is not None \
             else {"": data.DEFAULT_HOST_TYPE}
 
         # Build a pool of suites and cases
-        pool_suites = [
-            (suite,
-             suite.match_case_list(database.specific, src_path_set))
-            for suite
-            in database.match_suite_list(src_path_set)
-        ]
+        pool_suites = []
+        for suite in database.suites:
+            if suite.matches(target):
+                pool_cases = []
+                for case in suite.cases:
+                    if case.matches(target):
+                        pool_cases.append(case)
+                if pool_cases:
+                    pool_suites.append((suite, pool_cases))
 
         # Distribute suites and their cases to hosts
         hosts = list()
@@ -130,42 +132,44 @@ class Base:     # pylint: disable=too-few-public-methods
 
         return hosts
 
-    def __init__(self, database, src_path_set):
+    def __init__(self, database, target):
         """
         Initialize a test run.
 
         Args:
-            database:           The database to get test data from.
-            src_path_set:       A set of paths to source files the executed
-                                tests should cover, empty set for all files.
-                                Affects the selection of test suites and test
-                                cases to run.
+            database:   The database to get test data from.
+            target:     The target (a data.Target) to match/run tests against.
+                        The target's tree must be present in the database.
         """
         assert isinstance(database, data.Base)
+        assert isinstance(target, data.Target)
+        assert target.trees <= set(database.trees.keys())
+        # TODO Check architecture presence in database once it's added there
         self.database = database
-        self.src_path_set = src_path_set
-        self.hosts = self.__get_hosts(database, src_path_set)
+        self.target = target
+        self.hosts = self.__get_hosts(database, target)
 
     # pylint: disable=too-many-arguments
-    def generate(self, description, tree_name, arch_name,
-                 kernel_location, lint):
+    def generate(self, description, kernel_location, lint):
         """
         Generate Beaker XML which would execute tests in the database.
+        The target supplied at creation must have exactly one tree and exactly
+        one architecture for this to succeed.
 
         Args:
             description:        The run description string.
-            tree_name:          Name of the kernel tree to run against.
-            arch_name:          The name of the architecture to run on.
             kernel_location:    Kernel location string (a tarball or RPM URL).
             lint:               Lint and reformat the XML output, if True.
         Returns:
             The beaker XML string.
         """
         assert isinstance(description, str)
-        assert isinstance(tree_name, str)
-        assert tree_name in self.database.trees
-        assert isinstance(arch_name, str)
         assert isinstance(kernel_location, str)
+        assert len(self.target.trees) == 1
+        assert len(self.target.arches) == 1
+
+        tree_name = list(self.target.trees)[0]
+        arch_name = list(self.target.arches)[0]
 
         params = dict(
             DESCRIPTION=description,

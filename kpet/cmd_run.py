@@ -44,10 +44,11 @@ def main(args):
         if args.tree not in database.trees:
             raise Exception("Tree \"{}\" not found".format(args.tree))
         src_files = get_src_files(args.mboxes, args.pw_cookie)
-        baserun = run.Base(database, src_files)
+        target = data.Target(trees=args.tree,
+                             arches=args.arch,
+                             sources=src_files)
+        baserun = run.Base(database, target)
         content = baserun.generate(description=args.description,
-                                   tree_name=args.tree,
-                                   arch_name=args.arch,
                                    kernel_location=args.kernel,
                                    lint=not args.no_lint)
         if not args.output:
@@ -57,10 +58,14 @@ def main(args):
                 file_handler.write(content)
     elif args.action == 'print-test-cases':
         src_files = get_src_files(args.patches, args.pw_cookie)
-        case_name_list = sorted([case.name
-                                 for case
-                                 in database.match_case_list(src_files)])
-        for case_name in case_name_list:
+        target = data.Target(sources=src_files)
+        baserun = run.Base(database, target)
+        case_name_list = []
+        for host in baserun.hosts:
+            for suite in host.suites:
+                for case in suite.cases:
+                    case_name_list.append(case.name)
+        for case_name in sorted(case_name_list):
             print(case_name)
     else:
         misc.raise_action_not_found(args.action, args.command)
