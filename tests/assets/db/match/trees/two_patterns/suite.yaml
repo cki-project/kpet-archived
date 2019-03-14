@@ -1,0 +1,7 @@
+description: suite1
+cases:
+    - name: case1
+      match:
+          trees:
+              - tree
+              - other_tree

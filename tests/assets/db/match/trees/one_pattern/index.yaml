@@ -1,0 +1,6 @@
+trees:
+    "": .xml
+    tree: tree.xml
+    not_tree: not_tree.xml
+suites:
+    - suite.yaml

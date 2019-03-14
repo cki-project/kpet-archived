@@ -14,7 +14,7 @@
 """KPET data"""
 
 import os
-from kpet.schema import Invalid, Struct, StrictStruct, Reduction, \
+from kpet.schema import Invalid, Struct, StrictStruct, Reduction, Succession, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
 # pylint: disable=raising-format-tuple,access-member-before-definition
@@ -197,114 +197,103 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                 optional=dict(
                     host_type_regex=Regex(),
                     ignore_panic=Boolean(),
-                    specific=Boolean(),
                     hostRequires=String(),
                     partitions=String(),
                     kickstart=String(),
                     tasks=String(),
+                    match=Class(PositivePattern),
+                    dont_match=Class(NegativePattern),
                 )
             ),
             data
         )
+        if self.match is None:
+            self.match = PositivePattern({})
+        if self.dont_match is None:
+            self.dont_match = NegativePattern({})
+
+    def matches(self, target):
+        """
+        Check if the case matches a target.
+
+        Args:
+            target: The target to match against.
+
+        Returns:
+            True if the case matches the target, False otherwise.
+        """
+        return self.match.matches(target) and self.dont_match.matches(target)
 
 
 class Suite(Object):    # pylint: disable=too-few-public-methods
     """Test suite"""
     def __init__(self, data):
+        def convert(old_data):
+            """Convert old data to new data."""
+            new_data = old_data.copy()
+            del new_data['patterns']
+            for pattern in old_data['patterns']:
+                for case in new_data['cases']:
+                    if case['name'] == pattern['case_name']:
+                        if 'match' not in case:
+                            case['match'] = dict(sources=[])
+                        case['match']['sources'].append(pattern['pattern'])
+            return new_data
+
         super().__init__(
-            Struct(
-                required=dict(
-                    description=String(),
-                    patterns=List(StrictStruct(pattern=Regex(),
-                                               case_name=String())),
-                    cases=List(Class(Case))
+            Succession(
+                Struct(
+                    required=dict(
+                        description=String(),
+                        patterns=List(StrictStruct(pattern=Regex(),
+                                                   case_name=String())),
+                        cases=List(Class(Case))
+                    ),
+                    optional=dict(
+                        host_type_regex=Regex(),
+                        tasks=String(),
+                        ignore_panic=Boolean(),
+                        hostRequires=String(),
+                        partitions=String(),
+                        kickstart=String(),
+                    )
                 ),
-                optional=dict(
-                    host_type_regex=Regex(),
-                    tasks=String(),
-                    ignore_panic=Boolean(),
-                    specific=Boolean(),
-                    hostRequires=String(),
-                    partitions=String(),
-                    kickstart=String()
-                )
+                convert,
+                Struct(
+                    required=dict(
+                        description=String(),
+                        cases=List(Class(Case))
+                    ),
+                    optional=dict(
+                        host_type_regex=Regex(),
+                        tasks=String(),
+                        ignore_panic=Boolean(),
+                        hostRequires=String(),
+                        partitions=String(),
+                        kickstart=String(),
+                        match=Class(PositivePattern),
+                        dont_match=Class(NegativePattern),
+                    )
+                ),
             ),
             data
         )
+        if self.match is None:
+            self.match = PositivePattern({})
+        if self.dont_match is None:
+            self.dont_match = NegativePattern({})
 
-    def get_case(self, name):
+    def matches(self, target):
         """
-        Get a test case by name.
+        Check if the suite matches a target.
 
         Args:
-            name:   Name of the test case to get.
+            target: The target to match against.
 
         Returns:
-            The matching test case, or None if not found.
+            True if the suite matches the target, False otherwise.
         """
-        for case in self.cases:
-            if case.name == name:
-                return case
-        return None
-
-    def match_case_list(self, specific, src_path_set):
-        """
-        Return a list of test cases responsible for testing any files in a
-        set.
-
-        Args:
-            specific:       The default for the "specific" flag, or None, if
-                            not set. The "specific" flag is either True, if
-                            a test case shouldn't be matching an empty set of
-                            source files, or False if it should. If neither
-                            this, nor suite's, nor case's "specific" flag is
-                            specified, it is assumed to be False.
-            src_path_set:   A set of source file paths to match cases against,
-                            or an empty set for all source files.
-
-        Returns:
-            A list of test cases responsible for testing at least some of the
-            specified files.
-        """
-        case_list = list()
-        if src_path_set:
-            for pattern in self.patterns:
-                for src_path in src_path_set:
-                    if pattern['pattern'].match(src_path):
-                        case = self.get_case(pattern['case_name'])
-                        if case and case not in case_list:
-                            case_list.append(case)
-        else:
-            for case in self.cases:
-                if case.specific is not None:
-                    case_specific = case.specific
-                elif self.specific is not None:
-                    case_specific = self.specific
-                else:
-                    case_specific = specific
-                if not case_specific:
-                    case_list.append(case)
-        return case_list
-
-    def matches(self, specific, src_path_set):
-        """
-        Check if the suite is responsible for testing any files in a set.
-
-        Args:
-            specific:       The default for the "specific" flag, or None, if
-                            not set. The "specific" flag is either True, if
-                            a test case shouldn't be matching an empty set of
-                            source files, or False if it should. If neither
-                            this, nor suite's, nor case's "specific" flag is
-                            specified, it is assumed to be False.
-            src_path_set:   A set of source file paths to check against,
-                            or an empty set for all files.
-
-        Returns:
-            True if the suite is responsible for testing at least some of
-            the specified files.
-        """
-        return bool(self.match_case_list(specific, src_path_set))
+        return self.match.matches(target) and self.dont_match.matches(target)
 
 
 class HostType(Object):     # pylint: disable=too-few-public-methods
@@ -361,7 +350,6 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                     optional=dict(
                         suites=List(YAMLFile(Class(Suite))),
                         trees=Dict(String()),
-                        specific=Boolean(),
                         host_types=Dict(Class(HostType)),
                         host_type_regex=Regex()
                     )
@@ -375,37 +363,3 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             self.trees = {}
         if self.suites is None:
             self.suites = []
-
-    def match_suite_list(self, src_path_set):
-        """
-        Return a list of test suites responsible for testing any files in a
-        set.
-
-        Args:
-            src_path_set:   A set of source file paths to match suites
-                            against, or an empty set for all files.
-
-        Returns:
-            A list of test suites responsible for testing at least some of the
-            specified files.
-        """
-        return [suite for suite in self.suites
-                if suite.matches(self.specific, src_path_set)]
-
-    def match_case_list(self, src_path_set):
-        """
-        Return a list of test cases responsible for testing any files in a
-        set.
-
-        Args:
-            src_path_set:   A set of source file paths to match cases against,
-                            or an empty set for all source files.
-
-        Returns:
-            A list of test cases responsible for testing at least some of the
-            specified files.
-        """
-        case_list = list()
-        for suite in self.suites:
-            case_list += suite.match_case_list(self.specific, src_path_set)
-        return case_list
