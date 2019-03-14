@@ -14,7 +14,7 @@
 """KPET data"""
 
 import os
-from kpet.schema import Invalid, Struct, StrictStruct, \
+from kpet.schema import Invalid, Struct, StrictStruct, Reduction, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
 # pylint: disable=raising-format-tuple,access-member-before-definition
@@ -51,6 +51,139 @@ class Object:   # pylint: disable=too-few-public-methods
             setattr(self, member_name, data[member_name])
         for member_name in schema.optional.keys():
             setattr(self, member_name, data.get(member_name, None))
+
+
+class Target:  # pylint: disable=too-few-public-methods
+    """Execution target that suite/case patterns match against"""
+    def __init__(self, trees=None, arches=None, sources=None):
+        """
+        Initialize a target.
+
+        Args:
+            trees:      The name of the kernel tree we're executing against,
+                        or a set thereof. An empty set means all the trees.
+                        None (the default) is equivalent to an empty set.
+            arches:     The name of the architecture we're executing on or a
+                        set thereof. An empty set means all the architectures.
+                        None (the default) is equivalent to an empty set.
+            sources:    The path to the source file we're covering, or a set
+                        thereof. An empty set means all the files.
+                        None (the default) is equivalent to an empty set.
+        """
+        def normalize(arg):
+            if arg is None:
+                return set()
+            if isinstance(arg, set):
+                return arg
+            return {arg}
+
+        self.trees = normalize(trees)
+        self.arches = normalize(arches)
+        self.sources = normalize(sources)
+
+
+class Pattern(Object):
+    """An execution target pattern"""
+    def __init__(self, positive, data):
+        """
+        Initialize an execution pattern.
+
+        Args:
+            positive:   True if the pattern is positive, False if negative.
+            data:       Pattern data.
+        """
+        # Accept a list of regexes or a single regex, converted to a
+        # single-regex list.
+        pattern = Reduction(Regex(), lambda x: [x], List(Regex()))
+        super().__init__(
+            Struct(
+                optional=dict(
+                    trees=pattern,
+                    arches=pattern,
+                    sources=pattern,
+                    specific_sources=Boolean(),
+                )
+            ),
+            data
+        )
+        self.positive = positive
+
+    def matches_specific_flag(self, target, name):
+        """
+        Check if the pattern matches a target for a specific_* flag parameter.
+
+        Args:
+            target: The target (an instance of Target) to match.
+            name:   The suffix of a specific_* parameter to match.
+
+        Returns:
+            True if the pattern matches for the parameter, False otherwise.
+        """
+        assert isinstance(target, Target)
+        assert isinstance(name, str)
+        specific = getattr(self, "specific_" + name, None)
+        value_set = getattr(target, name)
+
+        # If there's nothing to match
+        if specific is None:
+            return self.positive
+        # Match if wildcard presence matches expectations
+        return (value_set != set()) == specific
+
+    def matches_regex_list(self, target, name):
+        """
+        Check if the pattern matches a target for a regex list parameter.
+
+        Args:
+            target: The target (an instance of Target) to match.
+            name:   The name of the parameter to match.
+
+        Returns:
+            True if the pattern matches for the parameter, False otherwise.
+        """
+        assert isinstance(target, Target)
+        assert isinstance(name, str)
+        regex_list = getattr(self, name, None)
+        value_set = getattr(target, name)
+
+        # If there's nothing to match
+        if regex_list is None or value_set == set():
+            return self.positive
+        # Match if there are any regex/value matches
+        for regex in regex_list:
+            for value in value_set:
+                if regex.fullmatch(value):
+                    return True
+        return False
+
+    def matches(self, target):
+        """
+        Check if the pattern matches a target.
+
+        Args:
+            target: The target (an instance of Target) to match.
+
+        Returns:
+            True if the pattern matches the target, False otherwise.
+        """
+        assert isinstance(target, Target)
+        for name in target.__dict__.keys():
+            if self.matches_specific_flag(target, name) != self.positive or \
+               self.matches_regex_list(target, name) != self.positive:
+                return False
+        return True
+
+
+class PositivePattern(Pattern):
+    """A positive pattern for execution targets"""
+    def __init__(self, data):
+        super().__init__(True, data)
+
+
+class NegativePattern(Pattern):
+    """A negative pattern for execution targets"""
+    def __init__(self, data):
+        super().__init__(False, data)
 
 
 class Case(Object):     # pylint: disable=too-few-public-methods

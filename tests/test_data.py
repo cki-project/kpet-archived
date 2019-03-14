@@ -58,3 +58,207 @@ class DataTest(unittest.TestCase):
 
         with self.assertRaises(data.Invalid):
             data.Base(self.tmpdir)
+
+
+class DataPatternTest(unittest.TestCase):
+    """Pattern tests"""
+
+    # pylint: disable=invalid-name
+    # (matching unittest conventions)
+
+    def assertPositiveMatch(self, pattern_data, **target_kwargs):
+        """
+        Assert a positive pattern matches.
+
+        Args:
+            pattern_data:   The data to create the pattern from.
+            target_kwargs:  Keyword arguments to create the target from.
+        """
+        self.assertTrue(data.PositivePattern(pattern_data).
+                        matches(data.Target(**target_kwargs)))
+
+    def assertPositiveMismatch(self, pattern_data, **target_kwargs):
+        """
+        Assert a positive pattern mismatches.
+
+        Args:
+            pattern_data:   The data to create the pattern from.
+            target_kwargs:  Keyword arguments to create the target from.
+        """
+        self.assertFalse(data.PositivePattern(pattern_data).
+                         matches(data.Target(**target_kwargs)))
+
+    def assertNegativeMatch(self, pattern_data, **target_kwargs):
+        """
+        Assert a negative pattern matches.
+
+        Args:
+            pattern_data:   The data to create the pattern from.
+            target_kwargs:  Keyword arguments to create the target from.
+        """
+        self.assertTrue(data.NegativePattern(pattern_data).
+                        matches(data.Target(**target_kwargs)))
+
+    def assertNegativeMismatch(self, pattern_data, **target_kwargs):
+        """
+        Assert a negative pattern mismatches.
+
+        Args:
+            pattern_data:   The data to create the pattern from.
+            target_kwargs:  Keyword arguments to create the target from.
+        """
+        self.assertFalse(data.NegativePattern(pattern_data).
+                         matches(data.Target(**target_kwargs)))
+
+    def test_empty(self):
+        """Check empty patterns match anything"""
+        self.assertPositiveMatch({})
+        self.assertNegativeMatch({})
+
+        self.assertPositiveMatch({}, sources=set())
+        self.assertPositiveMatch({}, sources={"a"})
+        self.assertNegativeMatch({}, sources=set())
+        self.assertNegativeMatch({}, sources={"a"})
+
+        self.assertPositiveMatch({}, trees=set())
+        self.assertPositiveMatch({}, trees={"a"})
+        self.assertNegativeMatch({}, trees=set())
+        self.assertNegativeMatch({}, trees={"a"})
+
+        self.assertPositiveMatch({}, arches=set())
+        self.assertPositiveMatch({}, arches={"a"})
+        self.assertNegativeMatch({}, arches=set())
+        self.assertNegativeMatch({}, arches={"a"})
+
+        self.assertPositiveMatch({}, sources=set(), trees=set())
+        self.assertPositiveMatch({}, sources=set(), trees={"a"})
+        self.assertPositiveMatch({}, sources={"a"}, trees=set())
+        self.assertPositiveMatch({}, sources={"a"}, trees={"a"})
+        self.assertNegativeMatch({}, sources=set(), trees=set())
+        self.assertNegativeMatch({}, sources=set(), trees={"a"})
+        self.assertNegativeMatch({}, sources={"a"}, trees=set())
+        self.assertNegativeMatch({}, sources={"a"}, trees={"a"})
+
+    def test_positive_specific_sources(self):
+        """Check positive patterns with specific_sources match correctly"""
+        self.assertPositiveMismatch(dict(specific_sources=True),
+                                    sources=set())
+        self.assertPositiveMismatch(dict(specific_sources=True, sources="a"),
+                                    sources=set())
+
+        self.assertPositiveMismatch(dict(specific_sources=False),
+                                    sources={"a"})
+        self.assertPositiveMismatch(dict(specific_sources=False, sources="a"),
+                                    sources={"a"})
+        self.assertPositiveMismatch(dict(specific_sources=False, sources="b"),
+                                    sources={"a"})
+
+        self.assertPositiveMatch(dict(specific_sources=False),
+                                 sources=set())
+        self.assertPositiveMatch(dict(specific_sources=False, sources="a"),
+                                 sources=set())
+
+        self.assertPositiveMatch(dict(specific_sources=True),
+                                 sources={"a"})
+        self.assertPositiveMatch(dict(specific_sources=True, sources="a"),
+                                 sources={"a"})
+        self.assertPositiveMismatch(dict(specific_sources=True, sources="b"),
+                                    sources={"a"})
+
+    def test_negative_specific_sources(self):
+        """Check negative patterns with specific_sources match correctly"""
+        self.assertNegativeMismatch(dict(specific_sources=False),
+                                    sources=set())
+        self.assertNegativeMismatch(dict(specific_sources=False, sources="a"),
+                                    sources=set())
+
+        self.assertNegativeMismatch(dict(specific_sources=True),
+                                    sources={"a"})
+        self.assertNegativeMismatch(dict(specific_sources=True, sources="a"),
+                                    sources={"a"})
+        self.assertNegativeMismatch(dict(specific_sources=True, sources="b"),
+                                    sources={"a"})
+
+        self.assertNegativeMatch(dict(specific_sources=True),
+                                 sources=set())
+        self.assertNegativeMatch(dict(specific_sources=True, sources="a"),
+                                 sources=set())
+
+        self.assertNegativeMatch(dict(specific_sources=False),
+                                 sources={"a"})
+        self.assertNegativeMismatch(dict(specific_sources=False, sources="a"),
+                                    sources={"a"})
+        self.assertNegativeMatch(dict(specific_sources=False, sources="b"),
+                                 sources={"a"})
+
+    def test_positive_two_params(self):
+        """Check two-parameter positive patterns match correctly"""
+        self.assertPositiveMatch(dict(sources="a", trees="A"),
+                                 sources=set(), trees=set())
+        self.assertPositiveMatch(dict(sources="a", trees="A"),
+                                 sources=set(), trees={"A"})
+        self.assertPositiveMatch(dict(sources="a", trees="A"),
+                                 sources={"a"}, trees=set())
+        self.assertPositiveMatch(dict(sources="a", trees="A"),
+                                 sources={"a"}, trees={"A"})
+
+        self.assertPositiveMismatch(dict(sources="a", trees="A"),
+                                    sources={"a"}, trees={"B"})
+        self.assertPositiveMismatch(dict(sources="a", trees="A"),
+                                    sources={"b"}, trees={"A"})
+        self.assertPositiveMismatch(dict(sources="a", trees="A"),
+                                    sources={"b"}, trees={"B"})
+
+    def test_negative_two_params(self):
+        """Check two-parameter negative patterns match correctly"""
+        self.assertNegativeMatch(dict(sources="a", trees="A"),
+                                 sources=set(), trees=set())
+        self.assertNegativeMismatch(dict(sources="a", trees="A"),
+                                    sources=set(), trees={"A"})
+        self.assertNegativeMismatch(dict(sources="a", trees="A"),
+                                    sources={"a"}, trees=set())
+        self.assertNegativeMismatch(dict(sources="a", trees="A"),
+                                    sources={"a"}, trees={"A"})
+
+        self.assertNegativeMismatch(dict(sources="a", trees="A"),
+                                    sources={"a"}, trees={"B"})
+        self.assertNegativeMismatch(dict(sources="a", trees="A"),
+                                    sources={"b"}, trees={"A"})
+        self.assertNegativeMatch(dict(sources="a", trees="A"),
+                                 sources={"b"}, trees={"B"})
+
+    def test_positive_multi_value(self):
+        """Check positive patterns match multiple values correctly"""
+        self.assertPositiveMatch(dict(sources="a"), sources={"a", "a"})
+        self.assertPositiveMatch(dict(sources="a"), sources={"a", "b"})
+        self.assertPositiveMismatch(dict(sources="a"), sources={"b", "b"})
+        self.assertPositiveMismatch(dict(sources="b"), sources={"a", "a"})
+        self.assertPositiveMatch(dict(sources="b"), sources={"a", "b"})
+        self.assertPositiveMatch(dict(sources="b"), sources={"b", "b"})
+
+    def test_negative_multi_value(self):
+        """Check negative patterns match multiple values correctly"""
+        self.assertNegativeMismatch(dict(sources="a"), sources={"a", "a"})
+        self.assertNegativeMismatch(dict(sources="a"), sources={"a", "b"})
+        self.assertNegativeMatch(dict(sources="a"), sources={"b", "b"})
+        self.assertNegativeMatch(dict(sources="b"), sources={"a", "a"})
+        self.assertNegativeMismatch(dict(sources="b"), sources={"a", "b"})
+        self.assertNegativeMismatch(dict(sources="b"), sources={"b", "b"})
+
+    def test_positive_multi_regex(self):
+        """Check positive multi-regex patterns match correctly"""
+        self.assertPositiveMatch(dict(sources=["a", "a"]), sources={"a"})
+        self.assertPositiveMatch(dict(sources=["a", "b"]), sources={"a"})
+        self.assertPositiveMismatch(dict(sources=["b", "b"]), sources={"a"})
+        self.assertPositiveMismatch(dict(sources=["a", "a"]), sources={"b"})
+        self.assertPositiveMatch(dict(sources=["a", "b"]), sources={"b"})
+        self.assertPositiveMatch(dict(sources=["b", "b"]), sources={"b"})
+
+    def test_negative_multi_regex(self):
+        """Check negative multi-regex patterns match correctly"""
+        self.assertNegativeMismatch(dict(sources=["a", "a"]), sources={"a"})
+        self.assertNegativeMismatch(dict(sources=["a", "b"]), sources={"a"})
+        self.assertNegativeMatch(dict(sources=["b", "b"]), sources={"a"})
+        self.assertNegativeMatch(dict(sources=["a", "a"]), sources={"b"})
+        self.assertNegativeMismatch(dict(sources=["a", "b"]), sources={"b"})
+        self.assertNegativeMismatch(dict(sources=["b", "b"]), sources={"b"})
