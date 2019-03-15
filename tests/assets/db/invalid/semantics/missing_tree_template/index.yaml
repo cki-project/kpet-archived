@@ -1,2 +1,4 @@
+arches:
+    - arch
 trees:
     missing_template: missing_template.xml

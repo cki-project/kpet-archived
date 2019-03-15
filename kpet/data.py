@@ -350,6 +350,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                     optional=dict(
                         suites=List(YAMLFile(Class(Suite))),
                         trees=Dict(String()),
+                        arches=List(String()),
                         host_types=Dict(Class(HostType)),
                         host_type_regex=Regex()
                     )
@@ -361,5 +362,8 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         self.dir_path = dir_path
         if self.trees is None:
             self.trees = {}
+        if self.arches is None:
+            # TODO Switch to an empty list once database has these added
+            self.arches = "x86_64 ppc64 ppc64le aarch64 s390x".split(" ")
         if self.suites is None:
             self.suites = []
