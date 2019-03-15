@@ -1,0 +1,5 @@
+description: suite1
+cases:
+    - name: case1
+      match:
+          location_types: []

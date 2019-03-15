@@ -107,7 +107,7 @@ class ArgumentParserTest(unittest.TestCase):
         """
         dbdir = os.path.join(os.path.dirname(__file__), 'assets/db/general')
         args = ['--db', dbdir, 'run', 'generate', '-t', 'rhel7', '-k',
-                'url']
+                'kernel.tar.gz']
         with mock.patch('sys.stdout') as mock_stdout:
             kpet.main(args)
         self.assertIn('<job>', mock_stdout.write.call_args_list[0][0][0])

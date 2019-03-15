@@ -15,7 +15,7 @@
 import sys
 import tempfile
 import shutil
-from kpet import misc, targeted, data, run, cmd_misc
+from kpet import misc, targeted, data, run, cmd_misc, loc
 
 
 def build(cmds_parser, common_parser):
@@ -63,14 +63,14 @@ def build(cmds_parser, common_parser):
     generate_parser.add_argument(
         '--type',
         default='auto',
-        choices=['auto', 'tarball-url', 'rpm-url', 'tarball-path', 'rpm-path'],
-        help='Type of the kernel reference'
+        choices=['auto'] + sorted(loc.TYPE_SET),
+        help='Type of the kernel location. Default "auto".'
     )
     generate_parser.add_argument(
         '-k',
         '--kernel',
         required=True,
-        help='Compiled kernel'
+        help='Kernel location'
     )
     generate_parser.add_argument(
         '-c',
@@ -124,6 +124,7 @@ def get_src_files(patches, pw_cookie=None):
         shutil.rmtree(tmpdir)
 
 
+# pylint: disable=too-many-branches
 def main(args):
     """Main function for the `run` command"""
     if not data.Base.is_dir_valid(args.db):
@@ -134,10 +135,24 @@ def main(args):
             raise Exception("Architecture \"{}\" not found".format(args.arch))
         if args.tree not in database.trees:
             raise Exception("Tree \"{}\" not found".format(args.tree))
+        if args.type == "auto":
+            loc_type = loc.type_detect(args.kernel)
+            if loc_type is None:
+                raise \
+                    Exception(
+                        "Cannot determine the type of kernel location \"{}\", "
+                        "expecting a path to/URL of a .tar.gz/.rpm file."
+                        "Use --type <TYPE> to force a specific type.".
+                        format(args.kernel))
+        else:
+            loc_type = args.type
+        assert loc.type_is_valid(loc_type)
+
         src_files = get_src_files(args.mboxes, args.pw_cookie)
         target = data.Target(trees=args.tree,
                              arches=args.arch,
-                             sources=src_files)
+                             sources=src_files,
+                             location_types=loc_type)
         baserun = run.Base(database, target)
         content = baserun.generate(description=args.description,
                                    kernel_location=args.kernel,

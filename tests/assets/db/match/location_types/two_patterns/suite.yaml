@@ -1,0 +1,12 @@
+description: suite1
+cases:
+    - name: tarball
+      match:
+          location_types:
+              - tarball-path
+              - tarball-url
+    - name: rpm
+      match:
+          location_types:
+              - rpm-path
+              - rpm-url
