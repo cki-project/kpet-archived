@@ -6,9 +6,15 @@ cases:
     - name: rpm-path
       match:
           location_types: rpm-path
+    - name: repo-path
+      match:
+          location_types: repo-path
     - name: tarball-url
       match:
           location_types: tarball-url
     - name: rpm-url
       match:
           location_types: rpm-url
+    - name: repo-url
+      match:
+          location_types: repo-url
