@@ -18,7 +18,8 @@ from kpet import misc
 
 
 # The set of possible location types
-TYPE_SET = {"tarball-url", "rpm-url", "tarball-path", "rpm-path"}
+TYPE_SET = {"tarball-url", "rpm-url", "repo-url",
+            "tarball-path", "rpm-path", "repo-path"}
 
 
 def type_detect(loc):
@@ -39,7 +40,7 @@ def type_detect(loc):
     elif re.match(r'.*\.rpm$', loc):
         type_parts.append("rpm")
     else:
-        return None
+        type_parts.append("repo")
 
     if misc.is_url(loc):
         type_parts.append("url")

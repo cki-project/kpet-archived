@@ -633,6 +633,16 @@ class IntegrationTests(unittest.TestCase):
             kpet_run_generate, "match/location_types/one_pattern",
             "-k", "http://example.com/kernel.rpm",
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*rpm-url\s*</job>.*')
+        # Only one case matches a repo path
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/one_pattern",
+            "-k", "repo",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*repo-path\s*</job>.*')
+        # Only one case matches a repo URL
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/one_pattern",
+            "-k", "http://example.com/repo",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*repo-url\s*</job>.*')
 
     def test_match_location_types_two_patterns(self):
         """Test location-type matching cases with two patterns"""
@@ -656,6 +666,16 @@ class IntegrationTests(unittest.TestCase):
             kpet_run_generate, "match/location_types/two_patterns",
             "-k", "http://example.com/kernel.rpm",
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*rpm\s*</job>.*')
+        # Repo case matches a repo path
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/two_patterns",
+            "-k", "repo",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*repo\s*</job>.*')
+        # Repo case matches a repo URL
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/two_patterns",
+            "-k", "http://example.com/repo",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*repo\s*</job>.*')
 
     def test_multihost_no_types_no_regex_no_suites(self):
         """Test multihost support without types/regex/suites"""

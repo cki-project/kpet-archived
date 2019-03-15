@@ -140,8 +140,9 @@ def main(args):
             if loc_type is None:
                 raise \
                     Exception(
-                        "Cannot determine the type of kernel location \"{}\", "
-                        "expecting a path to/URL of a .tar.gz/.rpm file."
+                        "Cannot determine the type of kernel location \"{}\". "
+                        "Expecting a path to/URL of a .tar.gz/.rpm file or "
+                        "a YUM/DNF repo. "
                         "Use --type <TYPE> to force a specific type.".
                         format(args.kernel))
         else:

@@ -10,3 +10,8 @@ cases:
           location_types:
               - rpm-path
               - rpm-url
+    - name: repo
+      match:
+          location_types:
+              - repo-path
+              - repo-url
