@@ -15,7 +15,96 @@
 import sys
 import tempfile
 import shutil
-from kpet import misc, targeted, data, run
+from kpet import misc, targeted, data, run, cmd_misc
+
+
+def build(cmds_parser, common_parser):
+    """Build the argument parser for the run command"""
+    _, action_subparser = cmd_misc.build(
+        cmds_parser,
+        common_parser,
+        'run',
+        help='Test suite run, default action "generate"',
+    )
+    generate_parser = action_subparser.add_parser(
+        "generate",
+        help='Generate the information required for a test run',
+        parents=[common_parser],
+    )
+    generate_parser.add_argument(
+        '-d',
+        '--description',
+        default='',
+        help='An arbitrary text describing the run'
+    )
+    generate_parser.add_argument(
+        '-o',
+        '--output',
+        default=None,
+        help='Path where will be saved the xml, default is stdout'
+    )
+    generate_parser.add_argument(
+        '--pw-cookie',
+        default=None,
+        help='Patchwork session cookie in case a login is required'
+    )
+    generate_parser.add_argument(
+        '-t',
+        '--tree',
+        required=True,
+        help='kernel "tree" name, chosen from "tree list" output, or "MAIL"'
+    )
+    generate_parser.add_argument(
+        '-a',
+        '--arch',
+        default='x86_64',
+        help='An architecture chosen from "arch list" output'
+    )
+    generate_parser.add_argument(
+        '--type',
+        default='auto',
+        choices=['auto', 'tarball-url', 'rpm-url', 'tarball-path', 'rpm-path'],
+        help='Type of the kernel reference'
+    )
+    generate_parser.add_argument(
+        '-k',
+        '--kernel',
+        required=True,
+        help='Compiled kernel'
+    )
+    generate_parser.add_argument(
+        '-c',
+        '--cover-letter',
+        default='no cover letter',
+        help='Patch series cover letter mbox URL/path'
+    )
+    generate_parser.add_argument(
+        '--no-lint',
+        action='store_true',
+        help='Do not lint and reformat output XML'
+    )
+    generate_parser.add_argument(
+        'mboxes',
+        nargs='*',
+        default=[],
+        help='List of mbox URLs/paths comprising the patch series'
+    )
+    print_test_cases_parser = action_subparser.add_parser(
+        "print-test-cases",
+        help="Print test cases applicable to the patches",
+        parents=[common_parser],
+    )
+    print_test_cases_parser.add_argument(
+        'patches',
+        nargs='*',
+        default=[],
+        help='List of patches URLs/paths'
+    )
+    print_test_cases_parser.add_argument(
+        '--pw-cookie',
+        default=None,
+        help='Patchwork session cookie in case a login is required'
+    )
 
 
 def get_src_files(patches, pw_cookie=None):
