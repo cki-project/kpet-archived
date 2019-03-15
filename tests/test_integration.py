@@ -326,202 +326,202 @@ class IntegrationTests(unittest.TestCase):
             kpet_run_generate, "empty/case_with_a_pattern",
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
 
-    def test_src_match_one_case_no_patterns(self):
+    def test_match_sources_one_case_no_patterns(self):
         """Test source-matching a case with no patterns"""
         # Matches baseline
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/one_case/no_patterns",
+            kpet_run_generate, "match/sources/one_case/no_patterns",
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
         # Doesn't match patches
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/one_case/no_patterns",
+            kpet_run_generate, "match/sources/one_case/no_patterns",
             get_patch_path("misc/files_abc.diff"),
             stdout_matching=r'.*<job>\s*</job>.*')
 
-    def test_src_match_one_case_one_pattern(self):
+    def test_match_sources_one_case_one_pattern(self):
         """Test source-matching a case with one pattern"""
         # Matches baseline
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/one_case/one_pattern",
+            kpet_run_generate, "match/sources/one_case/one_pattern",
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
         # Matches patches it should
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/one_case/one_pattern",
+            kpet_run_generate, "match/sources/one_case/one_pattern",
             get_patch_path("misc/files_abc.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
         # Doesn't match patches it shouldn't
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/one_case/one_pattern",
+            kpet_run_generate, "match/sources/one_case/one_pattern",
             get_patch_path("misc/files_def.diff"),
             stdout_matching=r'.*<job>\s*</job>.*')
 
-    def test_src_match_one_case_two_patterns(self):
+    def test_match_sources_one_case_two_patterns(self):
         """Test source-matching a case with two patterns"""
         # Matches baseline
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/one_case/two_patterns",
+            kpet_run_generate, "match/sources/one_case/two_patterns",
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
         # Matches first patch
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/one_case/two_patterns",
+            kpet_run_generate, "match/sources/one_case/two_patterns",
             get_patch_path("misc/files_abc.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
         # Matches second patch
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/one_case/two_patterns",
+            kpet_run_generate, "match/sources/one_case/two_patterns",
             get_patch_path("misc/files_def.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
         # Matches both patches only once
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/one_case/two_patterns",
+            kpet_run_generate, "match/sources/one_case/two_patterns",
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
         # Doesn't match patches it shouldn't
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/one_case/two_patterns",
+            kpet_run_generate, "match/sources/one_case/two_patterns",
             get_patch_path("misc/files_ghi.diff"),
             stdout_matching=r'.*<job>\s*</job>.*')
 
-    def test_src_match_two_cases(self):
+    def test_match_sources_two_cases(self):
         """Test source-matching two cases"""
         # Both match baseline
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/two_cases",
+            kpet_run_generate, "match/sources/two_cases",
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*'
                             r'case1\s*case2\s*</job>.*')
         # First matches its patch
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/two_cases",
+            kpet_run_generate, "match/sources/two_cases",
             get_patch_path("misc/files_abc.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
         # Second matches its patch
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/two_cases",
+            kpet_run_generate, "match/sources/two_cases",
             get_patch_path("misc/files_def.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case2\s*</job>.*')
         # Both match their patches
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/two_cases",
+            kpet_run_generate, "match/sources/two_cases",
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*'
                             r'case1\s*case2\s*</job>.*')
         # None match other patches
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/two_cases",
+            kpet_run_generate, "match/sources/two_cases",
             get_patch_path("misc/files_ghi.diff"),
             stdout_matching=r'.*<job>\s*</job>.*')
 
-    def test_src_match_two_suites(self):
+    def test_match_sources_two_suites(self):
         """Test source-matching two suites"""
         # Both match baseline
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/two_suites",
+            kpet_run_generate, "match/sources/two_suites",
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
                             r'suite2\s*case2\s*</job>.*')
         # First matches its patch
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/two_suites",
+            kpet_run_generate, "match/sources/two_suites",
             get_patch_path("misc/files_abc.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
         # Second matches its patch
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/two_suites",
+            kpet_run_generate, "match/sources/two_suites",
             get_patch_path("misc/files_def.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
         # Both match their patches
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/two_suites",
+            kpet_run_generate, "match/sources/two_suites",
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
                             r'suite2\s*case2\s*</job>.*')
         # None match other patches
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/two_suites",
+            kpet_run_generate, "match/sources/two_suites",
             get_patch_path("misc/files_ghi.diff"),
             stdout_matching=r'.*<job>\s*</job>.*')
 
-    def test_src_match_specific_db(self):
+    def test_match_sources_specific_db(self):
         """Test source-matching with a specific db"""
         # Nothing matches baseline in a specific db
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/db",
+            kpet_run_generate, "match/sources/specific/db",
             stdout_matching=r'.*<job>\s*</job>.*')
         # Only appropriate case matches with a patch
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/db",
+            kpet_run_generate, "match/sources/specific/db",
             get_patch_path("misc/files_abc.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
         # All cases can match if provided appropriate patches
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/db",
+            kpet_run_generate, "match/sources/specific/db",
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
                             r'suite2\s*case2\s*</job>.*')
         # None match other patches
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/db",
+            kpet_run_generate, "match/sources/specific/db",
             get_patch_path("misc/files_ghi.diff"),
             stdout_matching=r'.*<job>\s*</job>.*')
 
-    def test_src_match_specific_suite(self):
+    def test_match_sources_specific_suite(self):
         """Test source-matching with a specific suite"""
         # Only non-specific suite matches baseline
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/suite",
+            kpet_run_generate, "match/sources/specific/suite",
             stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
         # First matches its patch
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/suite",
+            kpet_run_generate, "match/sources/specific/suite",
             get_patch_path("misc/files_abc.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
         # Second matches its patch
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/suite",
+            kpet_run_generate, "match/sources/specific/suite",
             get_patch_path("misc/files_def.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
         # All suites can match if provided appropriate patches
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/suite",
+            kpet_run_generate, "match/sources/specific/suite",
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
                             r'suite2\s*case2\s*</job>.*')
         # None match other patches
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/suite",
+            kpet_run_generate, "match/sources/specific/suite",
             get_patch_path("misc/files_ghi.diff"),
             stdout_matching=r'.*<job>\s*</job>.*')
 
-    def test_src_match_specific_case(self):
+    def test_match_sources_specific_case(self):
         """Test source-matching with a specific case"""
         # Only non-specific case matches baseline
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/case",
+            kpet_run_generate, "match/sources/specific/case",
             stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
         # First matches its patch
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/case",
+            kpet_run_generate, "match/sources/specific/case",
             get_patch_path("misc/files_abc.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
         # Second matches its patch
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/case",
+            kpet_run_generate, "match/sources/specific/case",
             get_patch_path("misc/files_def.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
         # All cases can match if provided appropriate patches
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/case",
+            kpet_run_generate, "match/sources/specific/case",
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
                             r'suite2\s*case2\s*</job>.*')
         # None match other patches
         self.assertKpetProduces(
-            kpet_run_generate, "src_match/specific/case",
+            kpet_run_generate, "match/sources/specific/case",
             get_patch_path("misc/files_ghi.diff"),
             stdout_matching=r'.*<job>\s*</job>.*')
 
