@@ -228,8 +228,8 @@ class Base:     # pylint: disable=too-few-public-methods
         text = template.render(params)
 
         if lint:
-            parser = etree.XMLParser(remove_blank_text=True, encoding="utf-8")
-            tree = etree.XML(text, parser)
+            parser = etree.XMLParser(remove_blank_text=True)
+            tree = etree.XML(text.encode("utf-8"), parser)
             text = etree.tostring(tree, encoding="utf-8",
                                   xml_declaration=True,
                                   pretty_print=True).decode("utf-8")
