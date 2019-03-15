@@ -41,6 +41,8 @@ def main(args):
         raise Exception("\"{}\" is not a database directory".format(args.db))
     database = data.Base(args.db)
     if args.action == 'generate':
+        if args.arch not in database.arches:
+            raise Exception("Architecture \"{}\" not found".format(args.arch))
         if args.tree not in database.trees:
             raise Exception("Tree \"{}\" not found".format(args.tree))
         src_files = get_src_files(args.mboxes, args.pw_cookie)

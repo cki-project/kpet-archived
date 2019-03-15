@@ -248,9 +248,10 @@ class IntegrationTests(unittest.TestCase):
 
     def test_empty_run_generate(self):
         """Test run generation with empty database"""
-        self.assertKpetProduces(kpet_run_generate, "empty/db",
-                                status=1,
-                                stderr_matching=r'.*Tree "tree" not found.*')
+        self.assertKpetProduces(
+            kpet_run_generate, "empty/db",
+            status=1,
+            stderr_matching=r'.*Architecture "arch" not found.*')
 
     def test_minimal_run_generate(self):
         """Test run generation with empty database"""

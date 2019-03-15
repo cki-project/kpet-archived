@@ -1,3 +1,6 @@
+arches:
+    - ""
+    - arch
 trees:
     tree: tree.xml
 suites:

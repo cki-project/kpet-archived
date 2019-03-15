@@ -1,3 +1,5 @@
+arches:
+    - arch
 trees:
     "": .xml
     tree: tree.xml

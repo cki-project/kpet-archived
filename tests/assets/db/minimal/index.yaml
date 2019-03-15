@@ -1,3 +1,5 @@
 # Minimal, but fully-functional database
+arches:
+    - arch
 trees:
     tree: tree.xml
