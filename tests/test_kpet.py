@@ -17,6 +17,7 @@ import unittest
 import argparse
 import mock
 import kpet
+from kpet import cmd_tree, cmd_arch, cmd_run
 
 
 class ArgumentParserTest(unittest.TestCase):
@@ -26,7 +27,7 @@ class ArgumentParserTest(unittest.TestCase):
         parser = argparse.ArgumentParser()
         common_parser = argparse.ArgumentParser(add_help=False)
         cmd_parser = parser.add_subparsers(dest="command")
-        kpet.build_tree_command(cmd_parser, common_parser)
+        cmd_tree.build(cmd_parser, common_parser)
         args = parser.parse_args(['tree', 'list'])
         self.assertEqual('tree', args.command)
         self.assertEqual('list', args.action)
@@ -36,7 +37,7 @@ class ArgumentParserTest(unittest.TestCase):
         parser = argparse.ArgumentParser()
         common_parser = argparse.ArgumentParser(add_help=False)
         cmd_parser = parser.add_subparsers(dest="command")
-        kpet.build_arch_command(cmd_parser, common_parser)
+        cmd_arch.build(cmd_parser, common_parser)
         args = parser.parse_args(['arch', 'list'])
         self.assertEqual('arch', args.command)
         self.assertEqual('list', args.action)
@@ -46,7 +47,7 @@ class ArgumentParserTest(unittest.TestCase):
         parser = argparse.ArgumentParser()
         common_parser = argparse.ArgumentParser(add_help=False)
         cmd_parser = parser.add_subparsers(dest="command")
-        kpet.build_run_command(cmd_parser, common_parser)
+        cmd_run.build(cmd_parser, common_parser)
         with mock.patch('sys.stderr', mock.Mock()):
             # Hide stderr output
             self.assertRaises(SystemExit,

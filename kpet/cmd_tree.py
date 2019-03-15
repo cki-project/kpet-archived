@@ -12,7 +12,22 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """The "tree" command"""
-from kpet import misc, data
+from kpet import misc, data, cmd_misc
+
+
+def build(cmds_parser, common_parser):
+    """Build the argument parser for the tree command"""
+    _, action_subparser = cmd_misc.build(
+        cmds_parser,
+        common_parser,
+        "tree",
+        help='Kernel tree, default action "list".',
+    )
+    action_subparser.add_parser(
+        "list",
+        help='List available kernel trees.',
+        parents=[common_parser],
+    )
 
 
 def main(args):
