@@ -97,8 +97,8 @@ def kpet_with_db(db_name, *args):
 def kpet_run_generate(db_name, *args):
     """
     Execute "kpet run generate" with a database specified by name, tree
-    "tree", architecture "arch", and kernel "kernel", and optional extra
-    arguments.
+    "tree", architecture "arch", and kernel "kernel.tar.gz", and optional
+    extra arguments.
 
     Args:
         db_name:    Database name (a subdir in the database asset directory).
@@ -109,7 +109,7 @@ def kpet_run_generate(db_name, *args):
     """
     return kpet_with_db(db_name,
                         "run", "generate", "-t", "tree",
-                        "-k", "kernel", "-a", "arch", *args)
+                        "-k", "kernel.tar.gz", "-a", "arch", *args)
 
 
 # pylint: disable=too-many-public-methods
@@ -595,6 +595,67 @@ class IntegrationTests(unittest.TestCase):
         self.assertKpetProduces(
             kpet_run_generate, "match/trees/two_patterns", "-t", "not_tree",
             stdout_matching=r'.*<job>\s*</job>.*')
+
+    def test_match_location_types_no_patterns(self):
+        """Test location-type matching a case with no patterns"""
+        # Doesn't match a tarball path
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/no_patterns",
+            "-k", "kernel.tar.gz",
+            stdout_matching=r'.*<job>\s*</job>.*')
+        # Doesn't match an RPM URL
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/no_patterns",
+            "-k", "http://example.com/kernel.rpm",
+            stdout_matching=r'.*<job>\s*</job>.*')
+
+    def test_match_location_types_one_pattern(self):
+        """Test location-type matching cases with one pattern"""
+        # Only one case matches a tarball path
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/one_pattern",
+            "-k", "kernel.tar.gz",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*'
+                            r'tarball-path\s*</job>.*')
+        # Only one case matches a tarball URL
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/one_pattern",
+            "-k", "http://example.com/kernel.tar.gz",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*'
+                            r'tarball-url\s*</job>.*')
+        # Only one case matches an RPM path
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/one_pattern",
+            "-k", "kernel.rpm",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*rpm-path\s*</job>.*')
+        # Only one case matches an RPM URL
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/one_pattern",
+            "-k", "http://example.com/kernel.rpm",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*rpm-url\s*</job>.*')
+
+    def test_match_location_types_two_patterns(self):
+        """Test location-type matching cases with two patterns"""
+        # Tarball case matches a tarball path
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/two_patterns",
+            "-k", "kernel.tar.gz",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*tarball\s*</job>.*')
+        # Tarball case matches a tarball URL
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/two_patterns",
+            "-k", "http://example.com/kernel.tar.gz",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*tarball\s*</job>.*')
+        # RPM case matches an RPM path
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/two_patterns",
+            "-k", "kernel.rpm",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*rpm\s*</job>.*')
+        # RPM case matches an RPM URL
+        self.assertKpetProduces(
+            kpet_run_generate, "match/location_types/two_patterns",
+            "-k", "http://example.com/kernel.rpm",
+            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*rpm\s*</job>.*')
 
     def test_multihost_no_types_no_regex_no_suites(self):
         """Test multihost support without types/regex/suites"""

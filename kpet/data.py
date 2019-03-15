@@ -55,20 +55,27 @@ class Object:   # pylint: disable=too-few-public-methods
 
 class Target:  # pylint: disable=too-few-public-methods
     """Execution target that suite/case patterns match against"""
-    def __init__(self, trees=None, arches=None, sources=None):
+    def __init__(self, trees=None, arches=None, sources=None,
+                 location_types=None):
         """
         Initialize a target.
 
         Args:
-            trees:      The name of the kernel tree we're executing against,
-                        or a set thereof. An empty set means all the trees.
-                        None (the default) is equivalent to an empty set.
-            arches:     The name of the architecture we're executing on or a
-                        set thereof. An empty set means all the architectures.
-                        None (the default) is equivalent to an empty set.
-            sources:    The path to the source file we're covering, or a set
-                        thereof. An empty set means all the files.
-                        None (the default) is equivalent to an empty set.
+            trees:          The name of the kernel tree we're executing
+                            against, or a set thereof. An empty set means all
+                            the trees.
+                            None (the default) is equivalent to an empty set.
+            arches:         The name of the architecture we're executing on or
+                            a set thereof. An empty set means all the
+                            architectures.
+                            None (the default) is equivalent to an empty set.
+            sources:        The path to the source file we're covering, or a
+                            set thereof. An empty set means all the files.
+                            None (the default) is equivalent to an empty set.
+            location_types: The type of the location of the kernel we're
+                            testing (a member of loc.TYPE_SET), or a set
+                            thereof. An empty set means all the types.
+                            None (the default) is equivalent to an empty set.
         """
         def normalize(arg):
             if arg is None:
@@ -80,6 +87,7 @@ class Target:  # pylint: disable=too-few-public-methods
         self.trees = normalize(trees)
         self.arches = normalize(arches)
         self.sources = normalize(sources)
+        self.location_types = normalize(location_types)
 
 
 class Pattern(Object):
@@ -102,6 +110,7 @@ class Pattern(Object):
                     arches=pattern,
                     sources=pattern,
                     specific_sources=Boolean(),
+                    location_types=pattern,
                 )
             ),
             data
