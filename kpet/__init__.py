@@ -16,7 +16,7 @@ import argparse
 import os
 import sys
 import logging
-from kpet import cmd_run, cmd_tree
+from kpet import cmd_run, cmd_tree, cmd_arch
 
 
 # (argparse uses help as parameter) pylint: disable=redefined-builtin
@@ -195,5 +195,6 @@ def main(args=None):
         'help': [parser.print_help],
         'run': [cmd_run.main, args],
         'tree': [cmd_tree.main, args],
+        'arch': [cmd_arch.main, args],
     }
     exec_command(args, commands)
