@@ -22,12 +22,16 @@ class ActionNotFound(Exception):
     """Raised when an action is not found"""
 
 
+def is_url(string):
+    """Check if a string can be interpreted as a URL"""
+    return bool(urlparse(string).scheme)
+
+
 def patch2localfile(patches, workdir, session_cookie=None):
     """Convert all patches in local files"""
     result = []
     for patch in patches:
-        # check if it's an url
-        if urlparse(patch).scheme:
+        if is_url(patch):
             # Create a Patchwork session cookie if specified
             cookie_jar = None
             if session_cookie:
