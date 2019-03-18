@@ -195,6 +195,48 @@ class Succession(Choice):
         return last_valid_schema.resolve(data)
 
 
+class Reduction(Choice):
+    """
+    A schema describing a general schema and a choice of specific schemas for
+    the same data, along with the means to convert the data from each of the
+    specific schemas to the general one (converter functions). It essentially
+    reduces a choice of schemas to one schema, hence the name. Validates
+    against one of the schemas, recognizes as, and resolves to the last schema
+    in the list (the general schema).
+
+    Each uninterrupted sequence of supplied converter functions must accept
+    data validated by the preceding (specific) schema and return data
+    validated by the last schema in the list (the general schema).
+    """
+    def resolve(self, data):
+        self.validate(data)
+        # First valid schema
+        first_valid_schema = None
+        # We find the first matching schema, then run any following converters
+        # until the next schema.
+        for schema_or_converter in self.schemas_and_converters:
+            # If it's a schema
+            if isinstance(schema_or_converter, Node):
+                # If we found our schema (and converted data) already
+                if first_valid_schema:
+                    break
+                else:
+                    # Try to validate the data
+                    try:
+                        schema_or_converter.validate(data)
+                        first_valid_schema = schema_or_converter
+                    except Invalid:
+                        pass
+            # Else it's a conversion function, and if we found valid schema
+            elif first_valid_schema:
+                # Convert the data for the next converter/last schema
+                data = schema_or_converter(data)
+        # We should've matched a schema, guaranteed by validation
+        assert first_valid_schema is not None
+        # Resolve the data with the last schema
+        return self.schemas_and_converters[-1].resolve(data)
+
+
 class String(Node):
     """String schema"""
     def __init__(self):
