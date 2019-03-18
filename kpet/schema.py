@@ -129,6 +129,8 @@ class Succession(Node):
                     the original data argument and return the converted data.
         """
         assert args
+        for arg in args:
+            assert isinstance(arg, Node) or callable(arg)
         assert isinstance(args[0], Node)
         assert isinstance(args[-1], Node)
         super().__init__(object)
