@@ -111,7 +111,7 @@ class Node:
         return data
 
 
-class Ancestry(Node):
+class Succession(Node):
     """
     A schema describing a succession of accepted schema versions and means to
     inherit the legacy data. Validates against one of the schema versions.
@@ -119,7 +119,7 @@ class Ancestry(Node):
     """
     def __init__(self, *args):
         """
-        Initialize an ancestry schema.
+        Initialize a succession schema.
 
         Args:
             args:   A list of schemas and functions which could be used to
@@ -137,7 +137,7 @@ class Ancestry(Node):
     def validate(self, data):
         super().validate(data)
         last_exc = None
-        # For each schema/converter in the ancestry
+        # For each schema/converter in the succession
         for schema_or_converter in self.schemas_and_converters:
             # If it's a schema
             if isinstance(schema_or_converter, Node):
@@ -158,7 +158,7 @@ class Ancestry(Node):
         last_exc = None
         # We find the first matching schema, then proceed converting and
         # validating until we get to the last schema.
-        # For each schema/converter in the ancestry
+        # For each schema/converter in the succession
         for schema_or_converter in self.schemas_and_converters:
             # If it's a schema
             if isinstance(schema_or_converter, Node):
