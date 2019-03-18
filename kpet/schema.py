@@ -132,24 +132,24 @@ class Ancestry(Node):
         assert isinstance(args[0], Node)
         assert isinstance(args[-1], Node)
         super().__init__(object)
-        self.ancestry = args
+        self.schemas_and_converters = args
 
     def validate(self, data):
         super().validate(data)
         last_exc = None
         # For each schema/converter in the ancestry
-        for item in self.ancestry:
+        for schema_or_converter in self.schemas_and_converters:
             # If it's a schema
-            if isinstance(item, Node):
+            if isinstance(schema_or_converter, Node):
                 try:
-                    item.validate(data)
+                    schema_or_converter.validate(data)
                     return
                 except Invalid as exc:
                     last_exc = exc
         raise last_exc
 
     def recognize(self):
-        return self.ancestry[-1].recognize()
+        return self.schemas_and_converters[-1].recognize()
 
     def resolve(self, data):
         # Last valid schema
@@ -159,13 +159,13 @@ class Ancestry(Node):
         # We find the first matching schema, then proceed converting and
         # validating until we get to the last schema.
         # For each schema/converter in the ancestry
-        for item in self.ancestry:
+        for schema_or_converter in self.schemas_and_converters:
             # If it's a schema
-            if isinstance(item, Node):
+            if isinstance(schema_or_converter, Node):
                 try:
                     # Validate the data
-                    item.validate(data)
-                    last_valid_schema = item
+                    schema_or_converter.validate(data)
+                    last_valid_schema = schema_or_converter
                 except Invalid as exc:
                     # If we already got a valid schema
                     if last_valid_schema:
@@ -174,7 +174,7 @@ class Ancestry(Node):
             # Else it's a conversion function, and if we found valid schema
             elif last_valid_schema:
                 # Convert the data for the next schema/converter
-                data = item(data)
+                data = schema_or_converter(data)
         # If no schema matched
         if not last_valid_schema:
             raise last_exc
