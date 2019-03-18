@@ -145,11 +145,11 @@ class IntegrationTests(unittest.TestCase):
             errors.append("Expected exit status {}, got {}".
                           format(status, result_status))
         if not re.fullmatch(stdout_matching, result_stdout, re.DOTALL):
-            errors.append("Stdout doesn't match regex {}:\n{}".
+            errors.append("Stdout doesn't match regex \"{}\":\n{}".
                           format(stdout_matching,
                                  textwrap.indent(result_stdout, "    ")))
         if not re.fullmatch(stderr_matching, result_stderr, re.DOTALL):
-            errors.append("Stderr doesn't match regex {}:\n{}".
+            errors.append("Stderr doesn't match regex \"{}\":\n{}".
                           format(stderr_matching,
                                  textwrap.indent(result_stderr, "    ")))
         if errors:
