@@ -111,22 +111,23 @@ class Node:
         return data
 
 
-class Succession(Node):
+class Choice(Node):
     """
-    A schema describing a succession of accepted schema versions and means to
-    inherit the legacy data. Validates against one of the schema versions.
-    Resolves to the data matching the last schema.
+    An abstract schema describing an ordered list of schemas, optionally
+    intermixed with data conversion functions of undefined purpose. Validates
+    against one of the schemas, recognizes as the last schema in the list.
+    Cannot resolve data.
     """
     def __init__(self, *args):
         """
-        Initialize a succession schema.
+        Initialize a choice schema.
 
         Args:
-            args:   A list of schemas and functions which could be used to
-                    convert the data, in the order of succession. Can be mixed
-                    in any order, except the first and the last items must be
-                    schemas. Cannot be empty. Converter functions must accept
-                    the original data argument and return the converted data.
+            args:   A list of schemas and data conversion functions.
+                    Can be mixed in any order, except the first and the last
+                    items must be schemas. Cannot be empty. Converter
+                    functions must accept a data argument and return the
+                    converted data.
         """
         assert args
         for arg in args:
@@ -139,7 +140,7 @@ class Succession(Node):
     def validate(self, data):
         super().validate(data)
         err_list = []
-        # For each schema/converter in the succession
+        # For each schema/converter
         for schema_or_converter in self.schemas_and_converters:
             # If it's a schema
             if isinstance(schema_or_converter, Node):
@@ -153,6 +154,20 @@ class Succession(Node):
     def recognize(self):
         return self.schemas_and_converters[-1].recognize()
 
+    def resolve(self, data):
+        raise NotImplementedError()
+
+
+class Succession(Choice):
+    """
+    A schema describing a succession of accepted schema versions and the means
+    to inherit the legacy data - converter functions. Validates against one of
+    the schemas, recognizes as, and resolves to the last schema in the list.
+
+    Each uninterrupted sequence of supplied converter functions must accept
+    data validated by the preceding schema and return data validated by the
+    following schema.
+    """
     def resolve(self, data):
         self.validate(data)
         # Last valid schema
