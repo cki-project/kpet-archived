@@ -138,7 +138,7 @@ class Succession(Node):
 
     def validate(self, data):
         super().validate(data)
-        last_exc = None
+        err_list = []
         # For each schema/converter in the succession
         for schema_or_converter in self.schemas_and_converters:
             # If it's a schema
@@ -147,8 +147,8 @@ class Succession(Node):
                     schema_or_converter.validate(data)
                     return
                 except Invalid as exc:
-                    last_exc = exc
-        raise last_exc
+                    err_list.append(str(exc))
+        raise Invalid("{}", "\nand\n".join(err_list))
 
     def recognize(self):
         return self.schemas_and_converters[-1].recognize()
