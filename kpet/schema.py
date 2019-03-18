@@ -309,7 +309,7 @@ class YAMLFile(String):
 
         # Load the data
         with open(file_path, "r") as resolved_data_file:
-            resolved_data = yaml.load(resolved_data_file)
+            resolved_data = yaml.safe_load(resolved_data_file)
 
         # Resolve loaded data
         try:
@@ -331,7 +331,7 @@ class ScopedYAMLFile(YAMLFile):
 
         # Load the data
         with open(file_path, "r") as resolved_data_file:
-            resolved_data = yaml.load(resolved_data_file)
+            resolved_data = yaml.safe_load(resolved_data_file)
 
         # Validate and resolve loaded data
         orig_dir_path = os.getcwd()
