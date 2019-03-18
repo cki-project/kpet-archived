@@ -154,10 +154,9 @@ class Succession(Node):
         return self.schemas_and_converters[-1].recognize()
 
     def resolve(self, data):
+        self.validate(data)
         # Last valid schema
         last_valid_schema = None
-        # Last validation failure
-        last_exc = None
         # We find the first matching schema, then proceed converting and
         # validating until we get to the last schema.
         # For each schema/converter in the succession
@@ -168,18 +167,15 @@ class Succession(Node):
                     # Validate the data
                     schema_or_converter.validate(data)
                     last_valid_schema = schema_or_converter
-                except Invalid as exc:
-                    # If we already got a valid schema
-                    if last_valid_schema:
-                        raise exc
-                    last_exc = exc
+                except Invalid:
+                    # Cannot fail validation after a matching schema is found
+                    assert last_valid_schema is None
             # Else it's a conversion function, and if we found valid schema
             elif last_valid_schema:
                 # Convert the data for the next schema/converter
                 data = schema_or_converter(data)
-        # If no schema matched
-        if not last_valid_schema:
-            raise last_exc
+        # We should arrive at the last schema
+        assert last_valid_schema is self.schemas_and_converters[-1]
         # Resolve the data with the last schema
         return last_valid_schema.resolve(data)
 
