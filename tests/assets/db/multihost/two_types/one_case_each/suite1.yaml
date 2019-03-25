@@ -2,6 +2,6 @@ description: suite1
 cases:
     - name: case1
       host_type_regex: a
-patterns:
-    - pattern: a
-      case_name: case1
+      match:
+        sources:
+          - a

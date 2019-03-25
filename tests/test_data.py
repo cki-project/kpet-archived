@@ -51,7 +51,7 @@ class DataTest(unittest.TestCase):
 
         with open(suite, 'r') as fhandle:
             mydata = fhandle.read()
-            mydata = mydata.replace('pattern: .*', 'pattern: .*[')
+            mydata += '        match: .*'
 
             with open(suite, 'a+') as fhandle2:
                 fhandle2.write(mydata)
