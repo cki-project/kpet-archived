@@ -2,6 +2,6 @@ description: suite2
 host_type_regex: not_normal
 cases:
     - name: case2
-patterns:
-    - pattern: d
-      case_name: case2
+      match:
+        sources:
+          - d

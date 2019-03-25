@@ -1,17 +1,17 @@
 description: 'layout of xfs tests for KPET'
-patterns:
-    -   pattern: ^fs/ext4/.*
-        case_name: fs/ext4
-    -   pattern: ^fs/jbd2/.*
-        case_name: fs/ext4
-    -   pattern: ^fs/xfs/.*
-        case_name: fs/xfs
-    -   pattern: ^fs/[^/]*[ch]
-        case_name: fs/xfs
 cases:
     -   hostRequires: suites/fs/hostrequires.xml
         name: fs/ext4
         tasks: suites/fs/xfstests-ext4-4k.xml
+        match:
+          sources:
+            - ^fs/ext4/.*
+            - ^fs/jbd2/.*
+
     -   name: fs/xfs
         partitions: suites/fs/partitions.xml
         tasks: suites/fs/xfstests-xfs-4k-finobt.xml
+        match:
+          sources:
+            - ^fs/xfs/.*
+            - ^fs/[^/]*[ch]

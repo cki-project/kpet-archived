@@ -1,6 +1,6 @@
 description: suite2
 cases:
     - name: case2
-patterns:
-    - pattern: d
-      case_name: case2
+      match:
+        sources:
+          - d
