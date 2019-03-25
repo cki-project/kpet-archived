@@ -14,7 +14,7 @@
 """KPET data"""
 
 import os
-from kpet.schema import Invalid, Struct, StrictStruct, Reduction, Succession, \
+from kpet.schema import Invalid, Struct, Reduction, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
 # pylint: disable=raising-format-tuple,access-member-before-definition
@@ -237,53 +237,23 @@ class Case(Object):     # pylint: disable=too-few-public-methods
 class Suite(Object):    # pylint: disable=too-few-public-methods
     """Test suite"""
     def __init__(self, data):
-        def convert(old_data):
-            """Convert old data to new data."""
-            new_data = old_data.copy()
-            del new_data['patterns']
-            for pattern in old_data['patterns']:
-                for case in new_data['cases']:
-                    if case['name'] == pattern['case_name']:
-                        if 'match' not in case:
-                            case['match'] = dict(sources=[])
-                        case['match']['sources'].append(pattern['pattern'])
-            return new_data
 
         super().__init__(
-            Succession(
-                Struct(
-                    required=dict(
-                        description=String(),
-                        patterns=List(StrictStruct(pattern=Regex(),
-                                                   case_name=String())),
-                        cases=List(Class(Case))
-                    ),
-                    optional=dict(
-                        host_type_regex=Regex(),
-                        tasks=String(),
-                        ignore_panic=Boolean(),
-                        hostRequires=String(),
-                        partitions=String(),
-                        kickstart=String(),
-                    )
+            Struct(
+                required=dict(
+                    description=String(),
+                    cases=List(Class(Case))
                 ),
-                convert,
-                Struct(
-                    required=dict(
-                        description=String(),
-                        cases=List(Class(Case))
-                    ),
-                    optional=dict(
-                        host_type_regex=Regex(),
-                        tasks=String(),
-                        ignore_panic=Boolean(),
-                        hostRequires=String(),
-                        partitions=String(),
-                        kickstart=String(),
-                        match=Class(PositivePattern),
-                        dont_match=Class(NegativePattern),
-                    )
-                ),
+                optional=dict(
+                    host_type_regex=Regex(),
+                    tasks=String(),
+                    ignore_panic=Boolean(),
+                    hostRequires=String(),
+                    partitions=String(),
+                    kickstart=String(),
+                    match=Class(PositivePattern),
+                    dont_match=Class(NegativePattern),
+                )
             ),
             data
         )
