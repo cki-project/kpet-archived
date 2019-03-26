@@ -93,7 +93,7 @@ class CmdRunTest(unittest.TestCase):
 
         cmd_run.main(mock_args)
 
-        expected = ["default/ltplite", "fs/ext4", "fs/xfs"]
+        expected = ["/kernel/distribution/ltp/lite", "fs/ext4", "fs/xfs"]
 
         self.assertEqual(mock_stdout.getvalue().splitlines(), expected)
 
@@ -118,7 +118,7 @@ class CmdRunTest(unittest.TestCase):
 
         self.assertEqual(
             mock_stdout.write.call_args_list[0],
-            mock.call('default/ltplite'),
+            mock.call('/kernel/distribution/ltp/lite'),
         )
         self.assertEqual(
             mock_stdout.write.call_args_list[2],

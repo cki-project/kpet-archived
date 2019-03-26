@@ -1,4 +1,6 @@
 description: 'layout of ltplite for KPET'
+maintainers:
+  - maint1
+url_suffix: distribution/ltp/lite
 cases:
-    -   name: default/ltplite
-        tasks: suites/default/ltplite.xml
+    -   name: /kernel/distribution/ltp/lite

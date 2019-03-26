@@ -1,4 +1,6 @@
 description: suite1
+maintainers:
+  - maint1
 match:
     specific_sources: true
 cases:

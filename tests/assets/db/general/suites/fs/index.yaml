@@ -1,4 +1,7 @@
 description: 'layout of xfs tests for KPET'
+url_suffix: /filesystems/xfs/xfstests
+maintainers:
+  - maint1
 cases:
     -   hostRequires: suites/fs/hostrequires.xml
         name: fs/ext4
