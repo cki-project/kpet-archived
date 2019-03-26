@@ -273,17 +273,6 @@ class IntegrationTests(unittest.TestCase):
                                 status=1,
                                 stderr_matching=r'.*missing.yaml.*')
 
-    # TODO Remove once test assets are migrated to generic matching
-    def test_missing_case_run_generate(self):
-        """Test run generation with a pattern pointing to a missing case"""
-        # NOTE This is not correct, but it's what we do for now
-        # TODO Abort kpet if a case is missing, likely on schema validation
-        self.assertKpetProduces(
-            kpet_run_generate,
-            "invalid/semantics/missing_case",
-            get_patch_path("misc/files_abc.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
-
     def test_invalid_top_yaml_tree_list(self):
         """Test tree listing with invalid YAML in the top database file"""
         self.assertKpetProduces(kpet_with_db, "invalid/yaml/top",
