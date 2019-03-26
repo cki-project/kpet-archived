@@ -55,10 +55,10 @@
           </params>
         </task>
         <task name="/test/misc/machineinfo">
-          <fetch url="https://github.com/CKI-project/tests-beaker/archive/staging.zip#test/misc/machineinfo"/>
+          <fetch url="https://github.com/CKI-project/tests-beaker/archive/master.zip#test/misc/machineinfo"/>
         </task>
         <task name="/distribution/kpkginstall" role="STANDALONE">
-          <fetch url="https://github.com/CKI-project/tests-beaker/archive/staging.zip#distribution/kpkginstall"/>
+          <fetch url="https://github.com/CKI-project/tests-beaker/archive/master.zip#distribution/kpkginstall"/>
           <params>
             <param name="KPKG_URL" value="{{ KURL }}"/>
           </params>
