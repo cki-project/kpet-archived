@@ -369,6 +369,24 @@ class List(Node):
         return [self.element_schema.resolve(value) for value in data]
 
 
+class NonEmptyList(List):
+    """
+    List schema like List. Valid only if not empty.
+    """
+    def validate(self, data):
+        super().validate(data)
+
+        if not data:
+            raise Invalid("This list must not be empty!")
+
+    def recognize(self):
+        return List(self.element_schema.recognize())
+
+    def resolve(self, data):
+        self.validate(data)
+        return [self.element_schema.resolve(value) for value in data]
+
+
 class Dict(Node):
     """
     Dictionary schema, with string keys and every value matching a single

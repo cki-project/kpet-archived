@@ -56,6 +56,21 @@
       </task>
       <task name="/kernel/distribution/ltp/lite" role="STANDALONE">
         <fetch url="https://github.com/CKI-project/tests-beaker/archive/master.zip#distribution/ltp/lite"/>
+        <params>
+          <param name="_MAINTAINERS" value="maint1"/>
+        </params>
+      </task>
+      <task name="fs/ext4" role="STANDALONE">
+        <fetch url="https://github.com/CKI-project/tests-beaker/archive/master.zip#/filesystems/xfs/xfstests"/>
+        <params>
+          <param name="_MAINTAINERS" value="maint1"/>
+        </params>
+      </task>
+      <task name="fs/xfs" role="STANDALONE">
+        <fetch url="https://github.com/CKI-project/tests-beaker/archive/master.zip#/filesystems/xfs/xfstests"/>
+        <params>
+          <param name="_MAINTAINERS" value="maint1"/>
+        </params>
       </task>
     </recipe>
   </recipeSet>

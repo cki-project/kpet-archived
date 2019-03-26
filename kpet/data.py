@@ -14,7 +14,7 @@
 """KPET data"""
 
 import os
-from kpet.schema import Invalid, Struct, Reduction, \
+from kpet.schema import Invalid, Struct, Reduction, NonEmptyList, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
 
 # pylint: disable=raising-format-tuple,access-member-before-definition
@@ -212,6 +212,9 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                     tasks=String(),
                     match=Class(PositivePattern),
                     dont_match=Class(NegativePattern),
+                    waived=Boolean(),
+                    role=String(),
+                    task_params=Dict(String()),
                 )
             ),
             data
@@ -220,6 +223,10 @@ class Case(Object):     # pylint: disable=too-few-public-methods
             self.match = PositivePattern({})
         if self.dont_match is None:
             self.dont_match = NegativePattern({})
+        if self.task_params is None:
+            self.task_params = {}
+        if self.role is None:
+            self.role = 'STANDALONE'
 
     def matches(self, target):
         """
@@ -253,6 +260,8 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     kickstart=String(),
                     match=Class(PositivePattern),
                     dont_match=Class(NegativePattern),
+                    url_suffix=String(),
+                    maintainers=NonEmptyList(String())
                 )
             ),
             data

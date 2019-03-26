@@ -51,9 +51,11 @@ class DataTest(unittest.TestCase):
 
         with open(suite, 'r') as fhandle:
             mydata = fhandle.read()
-            mydata += '        match: .*'
+            mydata = mydata.replace('maintainers:', 'maintainers: []')
+            mydata = mydata.replace('- maint1', '')
 
-            with open(suite, 'a+') as fhandle2:
+            # overwrite the file, without required 'maintainers: field'
+            with open(suite, 'w') as fhandle2:
                 fhandle2.write(mydata)
 
         with self.assertRaises(data.Invalid):

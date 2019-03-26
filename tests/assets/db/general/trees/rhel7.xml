@@ -1,3 +1,29 @@
+{% set TESTS_BEAKER_ZIP_URL = getenv('TESTS_BEAKER_ZIP_URL') or "https://github.com/CKI-project/tests-beaker/archive/master.zip" %}
+
+
+{% macro host_add_tasks(host) -%}
+  {% for suite in host.suites %}
+    {% for case in suite.cases %}
+        <task name="{{ case['name'] }}" role="{{ case['role'] }}">
+          {% if suite['url_suffix'] is not none %}
+              <fetch url="{{ TESTS_BEAKER_ZIP_URL }}#{{ suite['url_suffix'] }}"/>
+          {% endif %}
+            <params>
+              {% if case['waived'] is not none %}
+                <param name="_WAIVED" value="{{ case['waived'] }}"/>
+              {% endif %}
+              {% set maint = suite['maintainers']|join(", ")|e %}
+              <param name="_MAINTAINERS" value="{{ maint }}"/>
+
+              {% for param in case['task_params'] %}
+              <param name="{{ param }}" value="{{ case['task_params'][param] }}"/>
+              {% endfor %}
+            </params>
+        </task>
+    {% endfor %}
+  {% endfor %}
+{% endmacro %}
+
 {% macro host_include_templates(host, template_field) -%}
 	{% if host[template_field] %}
 		{% include host[template_field] %}
@@ -63,7 +89,7 @@
             <param name="KPKG_URL" value="{{ KURL }}"/>
           </params>
         </task>
-        {{- host_include_templates(host, 'tasks') -}}
+        {{- host_add_tasks(host) -}}
       </recipe>
     {% endfor %}
   </recipeSet>
