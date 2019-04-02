@@ -24,7 +24,7 @@
   {% endfor %}
 {% endmacro %}
 
-{% macro host_include_templates(host, template_field) -%}
+{% macro host_include_templates(host, role, template_field) -%}
 	{% if host[template_field] %}
 		{% include host[template_field] %}
 	{% endif %}
@@ -50,11 +50,11 @@
             <labcontroller op="=" value="example2.com"/>
             <labcontroller op="=" value="example3.com"/>
           </or>
-          {{- host_include_templates(host, 'hostRequires') -}}
+          {{- host_include_templates(host, role, 'hostRequires') -}}
         </hostRequires>
         <repos/>
         <partitions>
-          {{- host_include_templates(host, 'partitions') -}}
+          {{- host_include_templates(host, role, 'partitions') -}}
         </partitions>
         <ks_appends/>
         <task name="/distribution/install" role="STANDALONE">
