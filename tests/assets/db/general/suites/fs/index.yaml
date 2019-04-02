@@ -5,7 +5,6 @@ maintainers:
 cases:
     -   hostRequires: suites/fs/hostrequires.xml
         name: fs/ext4
-        tasks: suites/fs/xfstests-ext4-4k.xml
         match:
           sources:
             - ^fs/ext4/.*
@@ -13,7 +12,6 @@ cases:
 
     -   name: fs/xfs
         partitions: suites/fs/partitions.xml
-        tasks: suites/fs/xfstests-xfs-4k-finobt.xml
         match:
           sources:
             - ^fs/xfs/.*
