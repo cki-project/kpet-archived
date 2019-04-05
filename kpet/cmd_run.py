@@ -168,10 +168,11 @@ def main(args):
         target = data.Target(sources=src_files)
         baserun = run.Base(database, target)
         case_name_list = []
-        for host in baserun.hosts:
-            for suite in host.suites:
-                for case in suite.cases:
-                    case_name_list.append(case.name)
+        for recipeset in baserun.recipesets_of_hosts:
+            for host in recipeset:
+                for suite in host.suites:
+                    for case in suite.cases:
+                        case_name_list.append(case.name)
         for case_name in sorted(case_name_list):
             print(case_name)
     else:

@@ -1,6 +1,12 @@
 trees:
     rhel7: trees/rhel7.xml
     rhel8: trees/rhel8.xml
+host_type_regex: ^normal
+host_types:
+    normal: {}
+recipesets:
+    rcs1:
+      - normal
 suites:
     - suites/default/index.yaml
     - suites/fs/index.yaml

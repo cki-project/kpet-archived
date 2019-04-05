@@ -1,3 +1,9 @@
+host_type_regex: ^normal
+
+recipesets:
+    rcs1:
+      - other
+
 arches:
     - arch
 trees:

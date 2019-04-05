@@ -51,11 +51,12 @@ class Host:     # pylint: disable=too-few-public-methods
     """A host running test suites"""
 
     # pylint: disable=redefined-builtin
-    def __init__(self, type, suites):
+    def __init__(self, name, type, suites):
         """
         Initialize a host run.
 
         Args:
+            name:       Name of the host.
             type:       Type of the host.
             suites:     List of suite runs to execute.
         """
@@ -72,9 +73,38 @@ class Host:     # pylint: disable=too-few-public-methods
         self.tasks = type.tasks
         self.suites = suites
 
+        self.name = name
+
 
 class Base:     # pylint: disable=too-few-public-methods
     """A specific execution of tests in a database"""
+
+    @staticmethod
+    def __get_recipesets(database, target):
+        """ Return a list of recipesets that contains a list of hosts."""
+
+        assert isinstance(database, data.Base)
+        assert isinstance(target, data.Target)
+
+        # get hosts and their testcases
+        hosts = Base.__get_hosts(database, target)
+
+        # load recipesets assignments from yaml
+        db_recipesets = database.recipesets
+
+        # Distribute hosts to their respective recipesets
+        recipesets_of_hosts = list()
+        for host_recipeset_names in db_recipesets.values():
+            recipeset = list()
+            for host_recipeset_name in host_recipeset_names:
+                for host in hosts:
+                    if host.name == host_recipeset_name:
+                        recipeset.append(host)
+
+            if recipeset:
+                recipesets_of_hosts.append(recipeset)
+
+        return recipesets_of_hosts
 
     @staticmethod
     def __get_hosts(database, target):
@@ -131,7 +161,7 @@ class Base:     # pylint: disable=too-few-public-methods
                     pool_suites.remove(pool_suite)
             # Add host to list, if it has suites to run
             if suites:
-                hosts.append(Host(host_type, suites))
+                hosts.append(Host(host_type_name, host_type, suites))
 
         return hosts
 
@@ -150,7 +180,7 @@ class Base:     # pylint: disable=too-few-public-methods
         # TODO Check architecture presence in database once it's added there
         self.database = database
         self.target = target
-        self.hosts = self.__get_hosts(database, target)
+        self.recipesets_of_hosts = self.__get_recipesets(database, target)
 
     # pylint: disable=too-many-arguments
     def generate(self, description, kernel_location, lint):
@@ -179,7 +209,7 @@ class Base:     # pylint: disable=too-few-public-methods
             KURL=kernel_location,
             ARCH=arch_name,
             TREE=tree_name,
-            HOSTS=self.hosts,
+            RECIPESETS=self.recipesets_of_hosts,
             getenv=os.getenv,
         )
 

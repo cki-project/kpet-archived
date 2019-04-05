@@ -341,7 +341,8 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                         trees=Dict(String()),
                         arches=List(String()),
                         host_types=Dict(Class(HostType)),
-                        host_type_regex=Regex()
+                        host_type_regex=Regex(),
+                        recipesets=Dict(List(String()))
                     )
                 )
             ),
