@@ -5,9 +5,13 @@
   {% for suite in host.suites %}
     {% for case in suite.cases %}
         <task name="{{ case['name'] }}" role="{{ case['role'] }}">
-          {% if suite['url_suffix'] is not none %}
-              <fetch url="{{ TESTS_BEAKER_ZIP_URL }}#{{ suite['url_suffix'] }}"/>
-          {% endif %}
+            {% if case['url_suffix'] is not none %}
+                <fetch url="{{ TESTS_BEAKER_ZIP_URL }}#{{ case['url_suffix'] }}"/>
+            {% else %}
+                {% if suite['url_suffix'] is not none %}
+                    <fetch url="{{ TESTS_BEAKER_ZIP_URL }}#{{ suite['url_suffix'] }}"/>
+                {% endif %}
+            {% endif %}
             <params>
               {% if case['waived'] is not none %}
                 <param name="_WAIVED" value="{{ case['waived'] }}"/>

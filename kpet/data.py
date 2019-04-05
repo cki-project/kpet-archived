@@ -214,6 +214,7 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                     dont_match=Class(NegativePattern),
                     waived=Boolean(),
                     role=String(),
+                    url_suffix=String(),
                     task_params=Dict(String()),
                 )
             ),
