@@ -1,1 +1,15 @@
+host_type_regex: ^normal
+host_types:
+    normal: {}
+    panicky:
+        ignore_panic: true
+    multihost_1: {}
+recipesets:
+    rcs1:
+      - normal
+      - panicky
+    rcs2:
+      - multihost_1
+      - multihost_2
+
 tree: {

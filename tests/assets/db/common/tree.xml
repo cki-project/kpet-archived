@@ -1,10 +1,12 @@
 <job>
-  {% for host in HOSTS %}
-    HOST
-    {% for suite in host.suites %}
-      {{ suite.description }}
-      {% for case in suite.cases %}
-        {{ case.name }}
+  {% for recipeset in RECIPESETS %}
+    {% for HOST in recipeset %}
+      HOST
+      {% for suite in HOST.suites %}
+        {{ suite.description }}
+        {% for case in suite.cases %}
+          {{ case.name }}
+        {% endfor %}
       {% endfor %}
     {% endfor %}
   {% endfor %}
