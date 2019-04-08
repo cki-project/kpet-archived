@@ -177,7 +177,8 @@ class Base:     # pylint: disable=too-few-public-methods
         assert isinstance(database, data.Base)
         assert isinstance(target, data.Target)
         assert target.trees <= set(database.trees.keys())
-        # TODO Check architecture presence in database once it's added there
+        assert target.arches <= set(database.arches)
+
         self.database = database
         self.target = target
         self.recipesets_of_hosts = self.__get_recipesets(database, target)
