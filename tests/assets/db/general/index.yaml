@@ -7,6 +7,8 @@ host_types:
 recipesets:
     rcs1:
       - normal
+arches:
+    - x86_64
 suites:
     - suites/default/index.yaml
     - suites/fs/index.yaml

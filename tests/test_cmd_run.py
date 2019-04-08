@@ -33,7 +33,7 @@ class CmdRunTest(unittest.TestCase):
         Check the success case.
         """
         database = data.Base(self.dbdir)
-        target = data.Target(arches='baz', trees='rhel7', sources=set())
+        target = data.Target(arches='x86_64', trees='rhel7', sources=set())
         baserun = run.Base(database, target)
         content = baserun.generate(description='Foo', kernel_location='bar',
                                    lint=True)
@@ -104,12 +104,30 @@ class CmdRunTest(unittest.TestCase):
         mock_args.action = 'generate'
         mock_args.tree = 'rhel0'
         mock_args.kernel = 'kernel'
-        mock_args.arch = 'arch'
+        mock_args.arch = 'x86_64'
         mock_args.db = self.dbdir
         mock_args.output = None
         mock_args.pw_cookie = None
         mock_args.description = 'description'
         mock_args.mboxes = []
+
+        with self.assertRaises(Exception):
+            cmd_run.main(mock_args)
+
+    def test_invalid_arch(self):
+        """Check invalid arch raises an exception."""
+
+        mock_args = mock.Mock()
+        mock_args.action = 'generate'
+        mock_args.tree = 'rhel7'
+        mock_args.kernel = 'kernel'
+        mock_args.arch = 'foo'
+        mock_args.db = self.dbdir
+        mock_args.output = None
+        mock_args.pw_cookie = None
+        mock_args.description = 'description'
+        mock_args.mboxes = []
+        mock_args.patches = []
 
         with self.assertRaises(Exception):
             cmd_run.main(mock_args)

@@ -353,7 +353,6 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         if self.trees is None:
             self.trees = {}
         if self.arches is None:
-            # TODO Switch to an empty list once database has these added
-            self.arches = "x86_64 ppc64 ppc64le aarch64 s390x".split(" ")
+            self.arches = []
         if self.suites is None:
             self.suites = []
