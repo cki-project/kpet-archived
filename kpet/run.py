@@ -47,7 +47,8 @@ class Suite:
         self.url_suffix = suite.url_suffix
 
 
-class Host:     # pylint: disable=too-few-public-methods
+class Host:
+    # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """A host running test suites"""
 
     # pylint: disable=redefined-builtin
@@ -74,6 +75,7 @@ class Host:     # pylint: disable=too-few-public-methods
         self.suites = suites
 
         self.name = name
+        self.hostname = type.hostname
 
 
 class Base:     # pylint: disable=too-few-public-methods
