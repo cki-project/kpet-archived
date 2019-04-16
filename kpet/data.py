@@ -296,6 +296,7 @@ class HostType(Object):     # pylint: disable=too-few-public-methods
             Struct(optional=dict(
                 ignore_panic=Boolean(),
                 hostRequires=String(),
+                hostname=String(),
                 partitions=String(),
                 kickstart=String(),
                 tasks=String(),
