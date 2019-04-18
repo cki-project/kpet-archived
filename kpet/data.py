@@ -15,7 +15,7 @@
 
 import os
 from kpet.schema import Invalid, Struct, Reduction, NonEmptyList, \
-    List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean
+    List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, Int
 
 # pylint: disable=raising-format-tuple,access-member-before-definition
 
@@ -216,6 +216,7 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                     role=String(),
                     url_suffix=String(),
                     task_params=Dict(String()),
+                    max_duration_minutes=Int(),
                 )
             ),
             data
