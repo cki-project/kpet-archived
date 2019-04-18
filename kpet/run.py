@@ -40,7 +40,6 @@ class Suite:
         self.tasks = suite.tasks
         self.ignore_panic = suite.ignore_panic
         self.hostRequires = suite.hostRequires  # pylint: disable=invalid-name
-        self.hostname = suite.hostname
         self.partitions = suite.partitions
         self.kickstart = suite.kickstart
         self.cases = cases
@@ -51,7 +50,7 @@ class Suite:
 class Host:     # pylint: disable=too-few-public-methods
     """A host running test suites"""
 
-    # pylint: disable=redefined-builtin,too-many-instance-attributes
+    # pylint: disable=redefined-builtin
     def __init__(self, name, type, suites):
         """
         Initialize a host run.
@@ -75,7 +74,6 @@ class Host:     # pylint: disable=too-few-public-methods
         self.suites = suites
 
         self.name = name
-        self.hostname = type.hostname
 
 
 class Base:     # pylint: disable=too-few-public-methods
