@@ -14,6 +14,8 @@
 """Targeted testing - matching patches to applicable test cases"""
 import re
 
+import chardet
+
 
 class UnrecognizedPatchFormat(Exception):
     """Raised when can't extract any source file from a patch"""
@@ -56,6 +58,7 @@ def get_src_files(patch_path_list):
         UnrecognizedPatchFormat: a patch format was invalid.
         UnrecognizedPatchPathFormat: a path in a diff header was invalid.
     """
+    # pylint: disable=too-many-locals
     pattern = re.compile(r'^---$|'
                          r'^--- (\S+)(\s.*)?$\n'
                          r'^\+\+\+ (\S+)(\s.*)?$|'
@@ -65,7 +68,11 @@ def get_src_files(patch_path_list):
     file_set = set()
     for patch_path in patch_path_list:
         with open(patch_path, 'rb') as patch_file:
-            patch_content = patch_file.read().decode('utf-8')
+            patch_content = patch_file.read()
+            # Determine which encoding is used in the patch and decode
+            # to a regular string.
+            encoding = chardet.detect(patch_content).get('encoding') or 'utf-8'
+            patch_content = patch_content.decode(encoding)
             patch_file_set = set()
             for match in re.finditer(pattern, patch_content):
                 if match.group(0) == "---":
