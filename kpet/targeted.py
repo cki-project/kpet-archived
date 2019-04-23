@@ -64,8 +64,8 @@ def get_src_files(patch_path_list):
                          re.MULTILINE)
     file_set = set()
     for patch_path in patch_path_list:
-        with open(patch_path) as patch_file:
-            patch_content = patch_file.read()
+        with open(patch_path, 'rb') as patch_file:
+            patch_content = patch_file.read().decode('utf-8')
             patch_file_set = set()
             for match in re.finditer(pattern, patch_content):
                 if match.group(0) == "---":
