@@ -14,8 +14,6 @@
 """Targeted testing - matching patches to applicable test cases"""
 import re
 
-import chardet
-
 
 class UnrecognizedPatchFormat(Exception):
     """Raised when can't extract any source file from a patch"""
@@ -67,12 +65,12 @@ def get_src_files(patch_path_list):
                          re.MULTILINE)
     file_set = set()
     for patch_path in patch_path_list:
-        with open(patch_path, 'rb') as patch_file:
+        # Some upstream patches are encoded as cp1252, iso-8859-1, or utf-8.
+        # This is the recommended method from:
+        #   http://python-notes.curiousefficiency.org/
+        with open(patch_path, encoding="ascii",
+                  errors="surrogateescape") as patch_file:
             patch_content = patch_file.read()
-            # Determine which encoding is used in the patch and decode
-            # to a regular string.
-            encoding = chardet.detect(patch_content).get('encoding') or 'utf-8'
-            patch_content = patch_content.decode(encoding)
             patch_file_set = set()
             for match in re.finditer(pattern, patch_content):
                 if match.group(0) == "---":
