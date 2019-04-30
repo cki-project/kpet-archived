@@ -4,3 +4,4 @@ maintainers:
 url_suffix: distribution/ltp/lite
 cases:
     -   name: /kernel/distribution/ltp/lite
+        max_duration_seconds: 600

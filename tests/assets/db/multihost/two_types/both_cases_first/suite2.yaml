@@ -3,6 +3,7 @@ maintainers:
   - maint1
 cases:
     - name: case2
+      max_duration_seconds: 600
       host_type_regex: a
       match:
         sources:

@@ -202,6 +202,7 @@ class Case(Object):     # pylint: disable=too-few-public-methods
             Struct(
                 required=dict(
                     name=String(),
+                    max_duration_seconds=Int(),
                 ),
                 optional=dict(
                     host_type_regex=Regex(),
@@ -216,7 +217,6 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                     role=String(),
                     url_suffix=String(),
                     task_params=Dict(String()),
-                    max_duration_seconds=Int(),
                 )
             ),
             data

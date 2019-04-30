@@ -3,16 +3,19 @@ maintainers:
   - maint1
 cases:
     - name: tarball
+      max_duration_seconds: 600
       match:
           location_types:
               - tarball-path
               - tarball-url
     - name: rpm
+      max_duration_seconds: 600
       match:
           location_types:
               - rpm-path
               - rpm-url
     - name: repo
+      max_duration_seconds: 600
       match:
           location_types:
               - repo-path

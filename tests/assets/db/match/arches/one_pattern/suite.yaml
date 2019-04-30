@@ -3,5 +3,6 @@ maintainers:
   - maint1
 cases:
     - name: case1
+      max_duration_seconds: 600
       match:
           arches: arch
