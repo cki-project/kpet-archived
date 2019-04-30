@@ -5,6 +5,7 @@ maintainers:
 cases:
     -   hostRequires: suites/fs/hostrequires.xml
         name: fs/ext4
+        max_duration_seconds: 600
         match:
           sources:
             - ^fs/ext4/.*
@@ -12,6 +13,7 @@ cases:
 
     -   name: fs/xfs
         partitions: suites/fs/partitions.xml
+        max_duration_seconds: 600
         match:
           sources:
             - ^fs/xfs/.*

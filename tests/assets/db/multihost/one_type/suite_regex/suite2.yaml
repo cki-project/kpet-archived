@@ -4,6 +4,7 @@ maintainers:
 host_type_regex: not_normal
 cases:
     - name: case2
+      max_duration_seconds: 600
       match:
         sources:
           - d
