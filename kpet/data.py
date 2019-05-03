@@ -209,7 +209,6 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                     hostRequires=String(),
                     partitions=String(),
                     kickstart=String(),
-                    tasks=String(),
                     match=Class(PositivePattern),
                     dont_match=Class(NegativePattern),
                     waived=Boolean(),
@@ -254,7 +253,6 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                 ),
                 optional=dict(
                     host_type_regex=Regex(),
-                    tasks=String(),
                     hostRequires=String(),
                     partitions=String(),
                     kickstart=String(),
