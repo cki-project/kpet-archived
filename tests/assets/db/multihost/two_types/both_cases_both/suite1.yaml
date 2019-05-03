@@ -4,7 +4,7 @@ maintainers:
 cases:
     - name: case1
       max_duration_seconds: 600
-      host_type_regex: ""
+      host_type_regex: ".*"
       match:
         sources:
           - a
