@@ -150,7 +150,7 @@ class Base:     # pylint: disable=too-few-public-methods
                         database.host_type_regex
                     if database.host_types is None or \
                        host_type_regex and \
-                       host_type_regex.match(host_type_name):
+                       host_type_regex.fullmatch(host_type_name):
                         cases.append(case)
                         pool_cases.remove(case)
                 # Add the suite run to the list, if it has cases to run
