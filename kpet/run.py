@@ -38,7 +38,6 @@ class Suite:
 
         self.description = suite.description
         self.tasks = suite.tasks
-        self.ignore_panic = suite.ignore_panic
         self.hostRequires = suite.hostRequires  # pylint: disable=invalid-name
         self.partitions = suite.partitions
         self.kickstart = suite.kickstart
