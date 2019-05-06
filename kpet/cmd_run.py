@@ -52,13 +52,15 @@ def build(cmds_parser, common_parser):
         '-t',
         '--tree',
         required=True,
-        help='kernel "tree" name, chosen from "tree list" output, or "MAIL"'
+        help='Name of the specified kernel\'s tree. Required. ' +
+        'See "kpet tree list" for recognized trees.'
     )
     generate_parser.add_argument(
         '-a',
         '--arch',
         default='x86_64',
-        help='An architecture chosen from "arch list" output'
+        help='Architecture of the specified kernel. Required. ' +
+        'See "kpet arch list" for supported architectures.'
     )
     generate_parser.add_argument(
         '--type',
@@ -70,7 +72,7 @@ def build(cmds_parser, common_parser):
         '-k',
         '--kernel',
         required=True,
-        help='Kernel location'
+        help='Kernel location. Must be accessible by Beaker. Required.'
     )
     generate_parser.add_argument(
         '-c',
