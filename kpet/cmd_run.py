@@ -75,12 +75,6 @@ def build(cmds_parser, common_parser):
         help='Kernel location. Must be accessible by Beaker. Required.'
     )
     generate_parser.add_argument(
-        '-c',
-        '--cover-letter',
-        default='no cover letter',
-        help='Patch series cover letter mbox URL/path'
-    )
-    generate_parser.add_argument(
         '--no-lint',
         action='store_true',
         help='Do not lint and reformat output XML'
