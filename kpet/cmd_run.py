@@ -12,6 +12,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """The "run" command"""
+import re
 import sys
 import tempfile
 import shutil
@@ -61,6 +62,13 @@ def build(cmds_parser, common_parser):
         default='x86_64',
         help='Architecture of the specified kernel. Required. ' +
         'See "kpet arch list" for supported architectures.'
+    )
+    generate_parser.add_argument(
+        '-s',
+        '--sets',
+        metavar='REGEX',
+        help='A regular expression matching the sets of tests ' +
+        'to restrict the run to. See "kpet set list" for available sets.'
     )
     generate_parser.add_argument(
         '--type',
@@ -131,6 +139,13 @@ def main(args):
             raise Exception("Architecture \"{}\" not found".format(args.arch))
         if args.tree not in database.trees:
             raise Exception("Tree \"{}\" not found".format(args.tree))
+        if args.sets is None:
+            sets = set()
+        else:
+            sets = set(x for x in database.sets if re.fullmatch(args.sets, x))
+            if not sets:
+                raise Exception("No test sets matched specified regular " +
+                                "expression: {}".format(args.sets))
         if args.type == "auto":
             loc_type = loc.type_detect(args.kernel)
             if loc_type is None:
@@ -148,6 +163,7 @@ def main(args):
         src_files = get_src_files(args.mboxes, args.pw_cookie)
         target = data.Target(trees=args.tree,
                              arches=args.arch,
+                             sets=sets,
                              sources=src_files,
                              location_types=loc_type)
         baserun = run.Base(database, target)

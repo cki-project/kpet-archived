@@ -53,9 +53,9 @@ class Object:   # pylint: disable=too-few-public-methods
             setattr(self, member_name, data.get(member_name, None))
 
 
-class Target:  # pylint: disable=too-few-public-methods
+class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
     """Execution target that suite/case patterns match against"""
-    def __init__(self, trees=None, arches=None, sources=None,
+    def __init__(self, trees=None, arches=None, sets=None, sources=None,
                  location_types=None):
         """
         Initialize a target.
@@ -69,6 +69,10 @@ class Target:  # pylint: disable=too-few-public-methods
                             a set thereof. An empty set means all the
                             architectures.
                             None (the default) is equivalent to an empty set.
+            sets:           The name of the set of tests to restrict the run
+                            to, or a set thereof. An empty set means all the
+                            test set names, i.e. no restriction. None (the
+                            default) is equivalent to an empty set.
             sources:        The path to the source file we're covering, or a
                             set thereof. An empty set means all the files.
                             None (the default) is equivalent to an empty set.
@@ -86,6 +90,7 @@ class Target:  # pylint: disable=too-few-public-methods
 
         self.trees = normalize(trees)
         self.arches = normalize(arches)
+        self.sets = normalize(sets)
         self.sources = normalize(sources)
         self.location_types = normalize(location_types)
 
@@ -108,6 +113,7 @@ class Pattern(Object):
                 optional=dict(
                     trees=pattern,
                     arches=pattern,
+                    sets=pattern,
                     sources=pattern,
                     specific_sources=Boolean(),
                     location_types=pattern,
@@ -338,6 +344,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                         suites=List(YAMLFile(Class(Suite))),
                         trees=Dict(String()),
                         arches=List(String()),
+                        sets=Dict(String()),
                         host_types=Dict(Class(HostType)),
                         host_type_regex=Regex(),
                         recipesets=Dict(List(String()))
@@ -352,5 +359,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             self.trees = {}
         if self.arches is None:
             self.arches = []
+        if self.sets is None:
+            self.sets = {}
         if self.suites is None:
             self.suites = []
