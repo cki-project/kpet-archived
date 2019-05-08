@@ -12,7 +12,6 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Miscellaneous routines"""
-import http.cookiejar as cookiejar
 from urllib.parse import urlparse
 import tempfile
 import requests
@@ -27,23 +26,23 @@ def is_url(string):
     return bool(urlparse(string).scheme)
 
 
-def patch2localfile(patches, workdir, session_cookie=None):
-    """Convert all patches in local files"""
+def patch2localfile(patches, workdir, cookies=None):
+    """
+    Convert all patches to local files.
+
+    Args:
+        patches:    A list of patch paths or URLs.
+        workdir:    Directory to place downloaded patches in.
+        cookies:    A jar of cookies to send when downloading patches.
+                    Optional.
+
+    Returns:
+        A list of patch paths.
+    """
     result = []
     for patch in patches:
         if is_url(patch):
-            # Create a Patchwork session cookie if specified
-            cookie_jar = None
-            if session_cookie:
-                domain = patch.rsplit('patch', 1)[0].strip('/').split('/')[-1]
-                cookie = cookiejar.Cookie(0, 'sessionid', session_cookie, None,
-                                          False, domain, False, False, '/',
-                                          False, False, None, False, None,
-                                          None, {})
-                cookie_jar = cookiejar.CookieJar()
-                cookie_jar.set_cookie(cookie)
-
-            response = requests.get(patch, cookies=cookie_jar)
+            response = requests.get(patch, cookies=cookies)
             response.raise_for_status()
             tmpfile = tempfile.mktemp(dir=workdir)
             with open(tmpfile, 'wb') as file_handler:
