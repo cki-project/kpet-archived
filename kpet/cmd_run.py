@@ -134,6 +134,10 @@ def main(args):
     if not data.Base.is_dir_valid(args.db):
         raise Exception("\"{}\" is not a database directory".format(args.db))
     database = data.Base(args.db)
+
+    if args.action in ('generate', 'print-test-cases'):
+        src_files = get_src_files(args.mboxes, args.pw_cookie)
+
     if args.action == 'generate':
         if args.arch not in database.arches:
             raise Exception("Architecture \"{}\" not found".format(args.arch))
@@ -160,7 +164,6 @@ def main(args):
             loc_type = args.type
         assert loc.type_is_valid(loc_type)
 
-        src_files = get_src_files(args.mboxes, args.pw_cookie)
         target = data.Target(trees=args.tree,
                              arches=args.arch,
                              sets=sets,
@@ -176,7 +179,6 @@ def main(args):
             with open(args.output, 'w') as file_handler:
                 file_handler.write(content)
     elif args.action == 'print-test-cases':
-        src_files = get_src_files(args.mboxes, args.pw_cookie)
         target = data.Target(sources=src_files)
         baserun = run.Base(database, target)
         case_name_list = []
