@@ -99,10 +99,10 @@ def build(cmds_parser, common_parser):
         parents=[common_parser],
     )
     print_test_cases_parser.add_argument(
-        'patches',
+        'mboxes',
         nargs='*',
         default=[],
-        help='List of patches URLs/paths'
+        help='List of mbox URLs/paths comprising the patch series'
     )
     print_test_cases_parser.add_argument(
         '--pw-cookie',
@@ -176,7 +176,7 @@ def main(args):
             with open(args.output, 'w') as file_handler:
                 file_handler.write(content)
     elif args.action == 'print-test-cases':
-        src_files = get_src_files(args.patches, args.pw_cookie)
+        src_files = get_src_files(args.mboxes, args.pw_cookie)
         target = data.Target(sources=src_files)
         baserun = run.Base(database, target)
         case_name_list = []
