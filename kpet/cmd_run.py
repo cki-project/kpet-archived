@@ -12,6 +12,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """The "run" command"""
+import http.cookiejar as cookiejar
 import re
 import sys
 import tempfile
@@ -111,24 +112,25 @@ def build(cmds_parser, common_parser):
     )
 
 
-def get_src_files(patches, pw_cookie=None):
+def get_src_files(patches, cookies=None):
     """
     Get the set of files modified by a list of patches.
 
     Args:
         patches:   List of patches, they can be local files or remote urls
-        pw_cookie: Session cookie to Patchwork instance if login is required,
-                   None otherwise
+        cookies:   A jar of cookies to send when downloading patches.
+                   Optional.
     """
     tmpdir = tempfile.mkdtemp(suffix='kpet')
     try:
-        patches = misc.patch2localfile(patches, tmpdir, pw_cookie)
+        patches = misc.patch2localfile(patches, tmpdir, cookies)
         return targeted.get_src_files(patches)
     finally:
         shutil.rmtree(tmpdir)
 
 
-# pylint: disable=too-many-branches
+# TODO: Refactor into sub-functions
+# pylint: disable=too-many-branches, too-many-locals
 def main(args):
     """Main function for the `run` command"""
     if not data.Base.is_dir_valid(args.db):
@@ -136,7 +138,19 @@ def main(args):
     database = data.Base(args.db)
 
     if args.action in ('generate', 'print-test-cases'):
-        src_files = get_src_files(args.mboxes, args.pw_cookie)
+        cookies = None
+        if args.pw_cookie:
+            for mbox in args.mboxes:
+                if not misc.is_url(mbox):
+                    continue
+                domain = mbox.rsplit('patch', 1)[0].strip('/').split('/')[-1]
+                cookie = cookiejar.Cookie(0, 'sessionid', args.pw_cookie,
+                                          None, False, domain, False, False,
+                                          '/', False, False, None, False,
+                                          None, None, {})
+                cookies = cookiejar.CookieJar()
+                cookies.set_cookie(cookie)
+        src_files = get_src_files(args.mboxes, cookies)
 
     if args.action == 'generate':
         if args.arch not in database.arches:
