@@ -54,6 +54,7 @@ class CmdRunTest(unittest.TestCase):
         mock_args.db = self.dbdir
         mock_args.no_lint = None
         mock_args.output = None
+        mock_args.cookies = None
         mock_args.pw_cookie = None
         mock_args.description = 'description'
         mock_args.mboxes = []
@@ -69,6 +70,7 @@ class CmdRunTest(unittest.TestCase):
         mock_args.arch = 'arch'
         mock_args.db = '/tmp/igotgoosebutnoshoes'
         mock_args.output = None
+        mock_args.cookies = None
         mock_args.pw_cookie = None
         mock_args.description = 'description'
         mock_args.mboxes = []
@@ -86,6 +88,7 @@ class CmdRunTest(unittest.TestCase):
         mock_args.arch = 'arch'
         mock_args.db = self.dbdir
         mock_args.output = None
+        mock_args.cookies = None
         mock_args.pw_cookie = None
         mock_args.description = 'description'
         mock_args.mboxes = []
@@ -107,6 +110,7 @@ class CmdRunTest(unittest.TestCase):
         mock_args.arch = 'x86_64'
         mock_args.db = self.dbdir
         mock_args.output = None
+        mock_args.cookies = None
         mock_args.pw_cookie = None
         mock_args.description = 'description'
         mock_args.mboxes = []
@@ -124,6 +128,7 @@ class CmdRunTest(unittest.TestCase):
         mock_args.arch = 'foo'
         mock_args.db = self.dbdir
         mock_args.output = None
+        mock_args.cookies = None
         mock_args.pw_cookie = None
         mock_args.description = 'description'
         mock_args.mboxes = []

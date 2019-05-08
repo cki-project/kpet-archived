@@ -51,6 +51,12 @@ def build(cmds_parser, common_parser):
         help='Patchwork session cookie in case a login is required'
     )
     generate_parser.add_argument(
+        '--cookies',
+        metavar='FILE',
+        default=None,
+        help='Cookies to send when downloading patches, Netscape-format file.'
+    )
+    generate_parser.add_argument(
         '-t',
         '--tree',
         required=True,
@@ -110,6 +116,12 @@ def build(cmds_parser, common_parser):
         default=None,
         help='Patchwork session cookie in case a login is required'
     )
+    print_test_cases_parser.add_argument(
+        '--cookies',
+        metavar='FILE',
+        default=None,
+        help='Cookies to send when downloading patches, Netscape-format file.'
+    )
 
 
 def get_src_files(patches, cookies=None):
@@ -138,7 +150,9 @@ def main(args):
     database = data.Base(args.db)
 
     if args.action in ('generate', 'print-test-cases'):
-        cookies = None
+        cookies = cookiejar.MozillaCookieJar()
+        if args.cookies:
+            cookies.load(args.cookies)
         if args.pw_cookie:
             for mbox in args.mboxes:
                 if not misc.is_url(mbox):
@@ -148,7 +162,6 @@ def main(args):
                                           None, False, domain, False, False,
                                           '/', False, False, None, False,
                                           None, None, {})
-                cookies = cookiejar.CookieJar()
                 cookies.set_cookie(cookie)
         src_files = get_src_files(args.mboxes, cookies)
 
