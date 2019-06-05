@@ -17,8 +17,7 @@ import shutil
 import tempfile
 import unittest
 
-from kpet import data
-from kpet import schema
+from kpet import data, schema
 
 
 class SchemaTest(unittest.TestCase):
