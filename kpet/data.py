@@ -56,8 +56,8 @@ class Object:   # pylint: disable=too-few-public-methods
 
 class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
     """Execution target that suite/case patterns match against"""
-    def __init__(self, trees=None, arches=None, sets=None, sources=None,
-                 location_types=None):
+    def __init__(self, trees=None, arches=None, components=None, sets=None,
+                 sources=None, location_types=None):
         """
         Initialize a target.
 
@@ -70,6 +70,10 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
                             a set thereof. An empty set means all the
                             architectures.
                             None (the default) is equivalent to an empty set.
+            components:     The name of an extra component included into the
+                            tested kernel build, or a set thereof. An empty
+                            set means no extra components. None (the default)
+                            is equivalent to an empty set.
             sets:           The name of the set of tests to restrict the run
                             to, or a set thereof. An empty set means all the
                             test set names, i.e. no restriction. None (the
@@ -91,8 +95,10 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
 
         self.trees = normalize(trees)
         self.arches = normalize(arches)
+        self.components = normalize(components)
         self.sets = normalize(sets)
         self.sources = normalize(sources)
+        # TODO: Remove once kpet-db switches to components
         self.location_types = normalize(location_types)
 
 
@@ -100,7 +106,9 @@ class Pattern(Object):  # pylint: disable=too-few-public-methods
     """Execution target pattern"""
 
     # Target field qualifiers
-    qualifiers = {"trees", "arches", "sets", "sources", "location_types"}
+    qualifiers = {"trees", "arches", "components", "sets", "sources",
+                  # TODO: Remove once kpet-db switches to components
+                  "location_types"}
 
     """An execution target pattern"""
     def __init__(self, data):
@@ -368,6 +376,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                         suites=List(YAMLFile(Class(Suite))),
                         trees=Dict(String()),
                         arches=List(String()),
+                        components=Dict(String()),
                         sets=Dict(String()),
                         host_types=Dict(Class(HostType)),
                         host_type_regex=Regex(),
@@ -383,6 +392,8 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             self.trees = {}
         if self.arches is None:
             self.arches = []
+        if self.components is None:
+            self.components = {}
         if self.sets is None:
             self.sets = {}
         if self.suites is None:

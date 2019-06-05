@@ -53,6 +53,14 @@ def build_target(parser):
         'See "kpet arch list" for supported architectures.'
     )
     parser.add_argument(
+        '-c',
+        '--components',
+        metavar='REGEX',
+        help='A regular expression matching extra components included ' +
+        'into the kernel build. ' +
+        'See "kpet component list" for recognized components.'
+    )
+    parser.add_argument(
         '-s',
         '--sets',
         metavar='REGEX',
@@ -139,6 +147,7 @@ def get_src_files(patches, cookies=None):
         shutil.rmtree(tmpdir)
 
 
+# pylint: disable=too-many-branches
 def main_create_baserun(args, database):
     """
     Generate test execution data for specified test database and command-line
@@ -169,6 +178,14 @@ def main_create_baserun(args, database):
         raise Exception("Architecture \"{}\" not found".format(args.arch))
     if args.tree not in database.trees:
         raise Exception("Tree \"{}\" not found".format(args.tree))
+    if args.components is None:
+        components = set()
+    else:
+        components = set(x for x in database.components
+                         if re.fullmatch(args.components, x))
+        if not components:
+            raise Exception("No components matched specified regular " +
+                            "expression: {}".format(args.components))
     if args.sets is None:
         sets = set()
     else:
@@ -192,6 +209,7 @@ def main_create_baserun(args, database):
 
     target = data.Target(trees=args.tree,
                          arches=args.arch,
+                         components=components,
                          sets=sets,
                          sources=src_files,
                          location_types=loc_type)

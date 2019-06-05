@@ -16,7 +16,7 @@ import argparse
 import os
 import sys
 import logging
-from kpet import cmd_run, cmd_tree, cmd_arch, cmd_set
+from kpet import cmd_run, cmd_tree, cmd_arch, cmd_component, cmd_set
 
 
 def exec_command(args, commands):
@@ -53,6 +53,7 @@ def main(args=None):
     cmd_run.build(cmds_parser, common_parser)
     cmd_tree.build(cmds_parser, common_parser)
     cmd_arch.build(cmds_parser, common_parser)
+    cmd_component.build(cmds_parser, common_parser)
     cmd_set.build(cmds_parser, common_parser)
 
     args = parser.parse_args(args)
@@ -61,6 +62,7 @@ def main(args=None):
         'run': [cmd_run.main, args],
         'tree': [cmd_tree.main, args],
         'arch': [cmd_arch.main, args],
+        'component': [cmd_component.main, args],
         'set': [cmd_set.main, args],
     }
     exec_command(args, commands)
