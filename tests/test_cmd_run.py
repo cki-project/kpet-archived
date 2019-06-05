@@ -86,6 +86,7 @@ class CmdRunTest(unittest.TestCase):
         mock_args.tree = 'rhel7'
         mock_args.kernel = 'kernel'
         mock_args.arch = 'x86_64'
+        mock_args.components = None
         mock_args.sets = None
         mock_args.type = 'auto'
         mock_args.db = self.dbdir
