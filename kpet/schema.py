@@ -279,6 +279,12 @@ class Reduction(Attraction):
         return self.schemas_and_converters[-1].resolve(data)
 
 
+class Null(Node):
+    """Null schema"""
+    def __init__(self):
+        super().__init__(type(None))
+
+
 class String(Node):
     """String schema"""
     def __init__(self):
