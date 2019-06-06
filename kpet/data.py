@@ -14,8 +14,9 @@
 """KPET data"""
 
 import os
-from kpet.schema import Invalid, Struct, Reduction, NonEmptyList, \
-    List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, Int
+from kpet.schema import Invalid, Struct, Choice, Reduction, NonEmptyList, \
+    List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, \
+    Int, Null, RE
 
 # pylint: disable=raising-format-tuple,access-member-before-definition
 
@@ -93,6 +94,142 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
         self.sets = normalize(sets)
         self.sources = normalize(sources)
         self.location_types = normalize(location_types)
+
+
+# TODO Rename to just "Pattern" once kpet-db is transitions to this type
+class GenericPattern(Object):  # pylint: disable=too-few-public-methods
+    """Generic target pattern"""
+
+    # Target field qualifiers
+    qualifiers = {"trees", "arches", "sets", "sources", "location_types"}
+
+    """An execution target pattern"""
+    def __init__(self, data):
+        """
+        Initialize an execution pattern.
+
+        Args:
+            data:       Pattern data.
+        """
+        class NonRecursiveChoice(Choice):
+            """Choice schema preventing recursive recognition"""
+            def __init__(self, *args):
+                super().__init__(*args)
+                self.recognizing = False
+
+            def recognize(self):
+                if self.recognizing:
+                    recognized = self
+                else:
+                    self.recognizing = True
+                    recognized = super().recognize()
+                    self.recognizing = False
+                return recognized
+
+        class OpsOrValues(NonRecursiveChoice):
+            """Pattern operations or values"""
+            def __init__(self):
+                super().__init__(
+                    Null(),
+                    Regex(),
+                    List(self),
+                    Struct(optional={k: self for k in {"not", "and", "or"}})
+                )
+
+        ops_or_values_schema = OpsOrValues()
+
+        class OpsOrQualifiers(NonRecursiveChoice):
+            """Pattern operations or qualifiers"""
+            def __init__(self):
+                fields = {}
+                fields.update({k: self for k in {"not", "and", "or"}})
+                fields.update({k: ops_or_values_schema
+                               for k in GenericPattern.qualifiers})
+                super().__init__(
+                    List(self),
+                    Struct(optional=fields)
+                )
+
+        try:
+            self.data = OpsOrQualifiers().resolve(data)
+        except Invalid:
+            raise Invalid("Invalid pattern")
+
+    # Documentation overhead for multiple functions would be too big, and
+    # spread-out logic too hard to grasp.
+    # pylint: disable=too-many-branches
+    def __node_matches(self, target, and_op, node, qualifier):
+        """
+        Check if a pattern node matches a target.
+
+        Args:
+            target:     The target (an instance of Target) to match.
+            and_op:     True if the node items should be "and'ed" together,
+                        False if "or'ed".
+            node:       The pattern node matching against the target.
+                        Either None, a regex, a dictionary or a list.
+            qualifier:  Qualifier (name of the target parameter being
+                        matched), if already encountered, None if not.
+                        Cannot be None if node is a None or a regex.
+
+        Returns:
+            True if the node matched, False otherwise.
+        """
+        assert isinstance(target, Target)
+        assert qualifier is None or qualifier in self.qualifiers
+
+        if isinstance(node, dict):
+            result = and_op
+            for name, sub_node in node.items():
+                assert qualifier is None or name not in self.qualifiers, \
+                       "Qualifier is already specified"
+                sub_result = self.__node_matches(
+                    target, (name != "or"), sub_node,
+                    name if name in self.qualifiers else qualifier)
+                if name == "not":
+                    sub_result = not sub_result
+                if and_op:
+                    result &= sub_result
+                else:
+                    result |= sub_result
+        elif isinstance(node, list):
+            result = and_op
+            for sub_node in node:
+                sub_result = self.__node_matches(
+                    target, True, sub_node, qualifier)
+                if and_op:
+                    result &= sub_result
+                else:
+                    result |= sub_result
+        elif isinstance(node, RE):
+            assert qualifier is not None, "Qualifier not specified"
+            value_set = getattr(target, qualifier)
+            for value in value_set:
+                if node.fullmatch(value):
+                    result = True
+                    break
+            else:
+                result = (value_set == set())
+        elif node is None:
+            assert qualifier is not None, "Qualifier not specified"
+            result = getattr(target, qualifier) == set()
+        else:
+            assert False, "Unknown node type: " + type(node).__name__
+
+        return result
+
+    def matches(self, target):
+        """
+        Check if the pattern matches a target.
+
+        Args:
+            target: The target (an instance of Target) to match.
+
+        Returns:
+            True if the pattern matches the target, False otherwise.
+        """
+        assert isinstance(target, Target)
+        return self.__node_matches(target, True, self.data, None)
 
 
 class Pattern(Object):
@@ -217,6 +354,7 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                     kickstart=String(),
                     match=Class(PositivePattern),
                     dont_match=Class(NegativePattern),
+                    pattern=Class(GenericPattern),
                     waived=Boolean(),
                     role=String(),
                     url_suffix=String(),
@@ -229,6 +367,8 @@ class Case(Object):     # pylint: disable=too-few-public-methods
             self.match = PositivePattern({})
         if self.dont_match is None:
             self.dont_match = NegativePattern({})
+        if self.pattern is None:
+            self.pattern = GenericPattern({})
         if self.task_params is None:
             self.task_params = {}
         if self.role is None:
@@ -244,7 +384,9 @@ class Case(Object):     # pylint: disable=too-few-public-methods
         Returns:
             True if the case matches the target, False otherwise.
         """
-        return self.match.matches(target) and self.dont_match.matches(target)
+        return self.match.matches(target) and \
+            self.dont_match.matches(target) and \
+            self.pattern.matches(target)
 
 
 class Suite(Object):    # pylint: disable=too-few-public-methods
@@ -264,6 +406,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     kickstart=String(),
                     match=Class(PositivePattern),
                     dont_match=Class(NegativePattern),
+                    pattern=Class(GenericPattern),
                     url_suffix=String(),
                     maintainers=NonEmptyList(String())
                 )
@@ -274,6 +417,8 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
             self.match = PositivePattern({})
         if self.dont_match is None:
             self.dont_match = NegativePattern({})
+        if self.pattern is None:
+            self.pattern = GenericPattern({})
 
     def matches(self, target):
         """
@@ -285,7 +430,9 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
         Returns:
             True if the suite matches the target, False otherwise.
         """
-        return self.match.matches(target) and self.dont_match.matches(target)
+        return self.match.matches(target) and \
+            self.dont_match.matches(target) and \
+            self.pattern.matches(target)
 
 
 class HostType(Object):     # pylint: disable=too-few-public-methods

@@ -264,3 +264,214 @@ class DataPatternTest(unittest.TestCase):
         self.assertNegativeMatch(dict(sources=["a", "a"]), sources={"b"})
         self.assertNegativeMismatch(dict(sources=["a", "b"]), sources={"b"})
         self.assertNegativeMismatch(dict(sources=["b", "b"]), sources={"b"})
+
+
+# TODO: Rename to DataPatternTest once switched to generic patterns
+class DataGenericPatternTest(unittest.TestCase):
+    """Generic pattern tests"""
+
+    # pylint: disable=invalid-name
+    # (matching unittest conventions)
+
+    def assertMatch(self, pattern_data, **target_kwargs):
+        """
+        Assert a pattern matches.
+
+        Args:
+            pattern_data:   The data to create the pattern from.
+            target_kwargs:  Keyword arguments to create the target from.
+        """
+        self.assertTrue(data.GenericPattern(pattern_data).
+                        matches(data.Target(**target_kwargs)))
+
+    def assertMismatch(self, pattern_data, **target_kwargs):
+        """
+        Assert a pattern mismatches.
+
+        Args:
+            pattern_data:   The data to create the pattern from.
+            target_kwargs:  Keyword arguments to create the target from.
+        """
+        self.assertFalse(data.GenericPattern(pattern_data).
+                         matches(data.Target(**target_kwargs)))
+
+    def test_empty(self):
+        """Check empty patterns match anything"""
+        self.assertMatch({})
+
+        self.assertMatch({}, sources=set())
+        self.assertMatch({}, sources={"a"})
+
+        self.assertMatch({}, trees=set())
+        self.assertMatch({}, trees={"a"})
+
+        self.assertMatch({}, arches=set())
+        self.assertMatch({}, arches={"a"})
+
+        self.assertMatch({}, sources=set(), trees=set())
+        self.assertMatch({}, sources=set(), trees={"a"})
+        self.assertMatch({}, sources={"a"}, trees=set())
+        self.assertMatch({}, sources={"a"}, trees={"a"})
+
+    def test_specific_sources(self):
+        """Check patterns match specific/all sources correctly"""
+        self.assertMismatch({"not": dict(sources=None)},
+                            sources=set())
+        self.assertMismatch({"not": dict(sources=None), "sources": "a"},
+                            sources=set())
+
+        self.assertMismatch(dict(sources=None), sources={"a"})
+        self.assertMismatch(dict(sources=[None, "a"]), sources={"a"})
+        self.assertMismatch(dict(sources=[None, "b"]), sources={"a"})
+
+        self.assertMatch(dict(sources=None), sources=set())
+        self.assertMatch(dict(sources=[None, "a"]), sources=set())
+
+        self.assertMatch({"not": dict(sources=None)},
+                         sources={"a"})
+        self.assertMatch({"not": dict(sources=None), "sources": "a"},
+                         sources={"a"})
+        self.assertMismatch({"not": dict(sources=None), "sources": "b"},
+                            sources={"a"})
+
+    def test_two_params(self):
+        """Check two-parameter patterns match correctly"""
+        self.assertMatch(dict(sources="a", trees="A"),
+                         sources=set(), trees=set())
+        self.assertMatch(dict(sources="a", trees="A"),
+                         sources=set(), trees={"A"})
+        self.assertMatch(dict(sources="a", trees="A"),
+                         sources={"a"}, trees=set())
+        self.assertMatch(dict(sources="a", trees="A"),
+                         sources={"a"}, trees={"A"})
+
+        self.assertMismatch(dict(sources="a", trees="A"),
+                            sources={"a"}, trees={"B"})
+        self.assertMismatch(dict(sources="a", trees="A"),
+                            sources={"b"}, trees={"A"})
+        self.assertMismatch(dict(sources="a", trees="A"),
+                            sources={"b"}, trees={"B"})
+
+    def test_multi_value(self):
+        """Check patterns match multiple values correctly"""
+        self.assertMatch(dict(sources="a"), sources={"a", "a"})
+        self.assertMatch(dict(sources="a"), sources={"a", "b"})
+        self.assertMismatch(dict(sources="a"), sources={"b", "b"})
+        self.assertMismatch(dict(sources="b"), sources={"a", "a"})
+        self.assertMatch(dict(sources="b"), sources={"a", "b"})
+        self.assertMatch(dict(sources="b"), sources={"b", "b"})
+
+    def test_multi_regex(self):
+        """Check multi-regex patterns match correctly"""
+        self.assertMatch(dict(sources={"or": ["a", "a"]}), sources={"a"})
+        self.assertMatch(dict(sources={"or": ["a", "b"]}), sources={"a"})
+        self.assertMismatch(dict(sources={"or": ["b", "b"]}), sources={"a"})
+        self.assertMismatch(dict(sources={"or": ["a", "a"]}), sources={"b"})
+        self.assertMatch(dict(sources={"or": ["a", "b"]}), sources={"b"})
+        self.assertMatch(dict(sources={"or": ["b", "b"]}), sources={"b"})
+
+    def test_not(self):
+        """Check negation works"""
+        self.assertMismatch({"not": {}})
+        self.assertMatch({"not": {"not": {}}})
+        self.assertMismatch({"not": {"trees": ".*"}}, trees="a")
+        self.assertMatch({"not": {"not": {"trees": ".*"}}}, trees="a")
+
+    def test_or(self):
+        """Check disjunction works"""
+        # Empty dict
+        self.assertMismatch({"or": {}})
+        # Empty list
+        self.assertMismatch({"or": []})
+        # One true in dict
+        self.assertMatch({"or": dict(trees=".*")}, trees="foo")
+        # One true in list
+        self.assertMatch({"or": [dict(trees=".*")]}, trees="foo")
+        # One false in dict
+        self.assertMismatch({"or": dict(trees="bar")}, trees="foo")
+        # One false in list
+        self.assertMismatch({"or": [dict(trees="bar")]}, trees="foo")
+        # True and false in dict
+        self.assertMatch({"or": dict(trees=".*", arches="bleh")},
+                         trees="foo", arches="baz")
+        # True and false in list
+        self.assertMatch({"or": [dict(trees=".*"), dict(arches="bleh")]},
+                         trees="foo", arches="baz")
+        # Two truths in dict
+        self.assertMatch({"or": dict(trees=".*", arches="baz")},
+                         trees="foo", arches="baz")
+        # Two truths in list
+        self.assertMatch({"or": [dict(trees=".*"), dict(arches="baz")]},
+                         trees="foo", arches="baz")
+        # Two falses in dict
+        self.assertMismatch({"or": dict(trees="oof", arches="zab")},
+                            trees="foo", arches="baz")
+        # Two falses in list
+        self.assertMismatch({"or": [dict(trees="oof"), dict(arches="zab")]},
+                            trees="foo", arches="baz")
+
+    def test_and(self):
+        """Check conjunction works"""
+        # Empty dict
+        self.assertMatch({"and": {}})
+        # Empty list
+        self.assertMatch({"and": []})
+        # One true in dict
+        self.assertMatch({"and": dict(trees=".*")}, trees="foo")
+        # One true in list
+        self.assertMatch({"and": [dict(trees=".*")]}, trees="foo")
+        # One false in dict
+        self.assertMismatch({"and": dict(trees="bar")}, trees="foo")
+        # One false in list
+        self.assertMismatch({"and": [dict(trees="bar")]}, trees="foo")
+        # True and false in dict
+        self.assertMismatch({"and": dict(trees=".*", arches="bleh")},
+                            trees="foo", arches="baz")
+        # True and false in list
+        self.assertMismatch({"and": [dict(trees=".*"), dict(arches="bleh")]},
+                            trees="foo", arches="baz")
+        # Two truths in dict
+        self.assertMatch({"and": dict(trees=".*", arches="baz")},
+                         trees="foo", arches="baz")
+        # Two truths in list
+        self.assertMatch({"and": [dict(trees=".*"), dict(arches="baz")]},
+                         trees="foo", arches="baz")
+        # Two falses in dict
+        self.assertMismatch({"and": dict(trees="oof", arches="zab")},
+                            trees="foo", arches="baz")
+        # Two falses in list
+        self.assertMismatch({"and": [dict(trees="oof"), dict(arches="zab")]},
+                            trees="foo", arches="baz")
+
+    def test_default_op(self):
+        """Check default operation (conjunction) works"""
+        # Empty dict
+        self.assertMatch({})
+        # Empty list
+        self.assertMatch([])
+        # One true in dict
+        self.assertMatch(dict(trees=".*"), trees="foo")
+        # One true in list
+        self.assertMatch([dict(trees=".*")], trees="foo")
+        # One false in dict
+        self.assertMismatch(dict(trees="bar"), trees="foo")
+        # One false in list
+        self.assertMismatch([dict(trees="bar")], trees="foo")
+        # True and false in dict
+        self.assertMismatch(dict(trees=".*", arches="bleh"),
+                            trees="foo", arches="baz")
+        # True and false in list
+        self.assertMismatch([dict(trees=".*"), dict(arches="bleh")],
+                            trees="foo", arches="baz")
+        # Two truths in dict
+        self.assertMatch(dict(trees=".*", arches="baz"),
+                         trees="foo", arches="baz")
+        # Two truths in list
+        self.assertMatch([dict(trees=".*"), dict(arches="baz")],
+                         trees="foo", arches="baz")
+        # Two falses in dict
+        self.assertMismatch(dict(trees="oof", arches="zab"),
+                            trees="foo", arches="baz")
+        # Two falses in list
+        self.assertMismatch([dict(trees="oof"), dict(arches="zab")],
+                            trees="foo", arches="baz")
