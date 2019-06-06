@@ -111,6 +111,47 @@ class Node:
         return data
 
 
+class Choice(Node):
+    """
+    A schema matching a choice of other schemas.
+    """
+    def __init__(self, *args):
+        """
+        Initialize a choice schema.
+
+        Args:
+            args:   A list of schemas the data can match.
+        """
+        for arg in args:
+            assert isinstance(arg, Node)
+        super().__init__(object)
+        self.schemas = args
+
+    def validate(self, data):
+        super().validate(data)
+        err_list = []
+        # For each schema
+        for schema in self.schemas:
+            try:
+                schema.validate(data)
+                return
+            except Invalid as exc:
+                err_list.append(str(exc))
+        raise Invalid("{}", "\nand\n".join(err_list))
+
+    def recognize(self):
+        return Choice(*(schema.recognize() for schema in self.schemas))
+
+    def resolve(self, data):
+        self.validate(data)
+        for schema in self.schemas:
+            try:
+                return schema.resolve(data)
+            except Invalid:
+                pass
+        assert False, "Data deemed valid, but no schema resolved"
+
+
 class Attraction(Node):
     """
     An abstract schema describing an ordered list of schemas, optionally
