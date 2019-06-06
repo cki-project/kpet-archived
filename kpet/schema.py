@@ -22,7 +22,7 @@ import yaml
 
 # The type returned by re.compile(). Different between Python 2 and 3
 # TODO Switch to just using re.Pattern once upgraded to Python 3.7 or later
-_RE = type(re.compile(""))
+RE = type(re.compile(""))
 
 
 def _get_re_error_type():
@@ -274,7 +274,7 @@ class Regex(String):
             raise Invalid("Invalid regular expression")
 
     def recognize(self):
-        return Node(_RE)
+        return Node(RE)
 
     def resolve(self, data):
         self.validate(data)
