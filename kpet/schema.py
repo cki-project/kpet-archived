@@ -111,16 +111,17 @@ class Node:
         return data
 
 
-class Choice(Node):
+class Attraction(Node):
     """
     An abstract schema describing an ordered list of schemas, optionally
     intermixed with data conversion functions of undefined purpose. Validates
     against one of the schemas, recognizes as the last schema in the list.
+    Mnemonic: data is attracted to the ultimate schema.
     Cannot resolve data.
     """
     def __init__(self, *args):
         """
-        Initialize a choice schema.
+        Initialize an attraction schema.
 
         Args:
             args:   A list of schemas and data conversion functions.
@@ -158,7 +159,7 @@ class Choice(Node):
         raise NotImplementedError()
 
 
-class Succession(Choice):
+class Succession(Attraction):
     """
     A schema describing a succession of accepted schema versions and the means
     to inherit the legacy data - converter functions. Validates against one of
@@ -195,7 +196,7 @@ class Succession(Choice):
         return last_valid_schema.resolve(data)
 
 
-class Reduction(Choice):
+class Reduction(Attraction):
     """
     A schema describing a general schema and a choice of specific schemas for
     the same data, along with the means to convert the data from each of the
