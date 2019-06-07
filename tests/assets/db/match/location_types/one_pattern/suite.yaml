@@ -4,25 +4,25 @@ maintainers:
 cases:
     - name: tarball-path
       max_duration_seconds: 600
-      match:
+      pattern:
           location_types: tarball-path
     - name: rpm-path
       max_duration_seconds: 600
-      match:
+      pattern:
           location_types: rpm-path
     - name: repo-path
       max_duration_seconds: 600
-      match:
+      pattern:
           location_types: repo-path
     - name: tarball-url
       max_duration_seconds: 600
-      match:
+      pattern:
           location_types: tarball-url
     - name: rpm-url
       max_duration_seconds: 600
-      match:
+      pattern:
           location_types: rpm-url
     - name: repo-url
       max_duration_seconds: 600
-      match:
+      pattern:
           location_types: repo-url

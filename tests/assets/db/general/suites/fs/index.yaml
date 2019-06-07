@@ -6,15 +6,17 @@ cases:
     -   hostRequires: suites/fs/hostrequires.xml
         name: fs/ext4
         max_duration_seconds: 600
-        match:
+        pattern:
           sources:
-            - ^fs/ext4/.*
-            - ^fs/jbd2/.*
+            or:
+              - ^fs/ext4/.*
+              - ^fs/jbd2/.*
 
     -   name: fs/xfs
         partitions: suites/fs/partitions.xml
         max_duration_seconds: 600
-        match:
+        pattern:
           sources:
-            - ^fs/xfs/.*
-            - ^fs/[^/]*[ch]
+            or:
+              - ^fs/xfs/.*
+              - ^fs/[^/]*[ch]
