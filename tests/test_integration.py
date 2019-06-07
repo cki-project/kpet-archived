@@ -18,6 +18,8 @@ import os.path
 import subprocess
 import textwrap
 import unittest
+import shutil
+import tempfile
 
 
 # Initial command-line arguments invoking kpet
@@ -32,6 +34,37 @@ if "coverage" in sys.modules:
 # Add path to in-tree kpet executable, relative for more readable output
 KPET_ARGV += [os.path.relpath(os.path.join(os.path.dirname(__file__),
                                            "../bin/kpet"))]
+
+COMMONTREE_XML = """
+<job>
+  {% for recipeset in RECIPESETS %}
+    {% for HOST in recipeset %}
+      HOST
+      {% for suite in HOST.suites %}
+        {{ suite.description }}
+        {% for case in suite.cases %}
+          {{ case.name }}
+        {% endfor %}
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+</job>
+"""
+
+EMPTYSUITEINDEX_YAML = """
+host_types:
+    normal: {}
+host_type_regex: ^normal
+recipesets:
+    rcs1:
+      - normal
+arches:
+    - arch
+trees:
+    tree: tree.xml
+suites:
+    - suite.yaml
+"""
 
 
 def get_db_path(db_name):
@@ -112,6 +145,15 @@ def kpet_run_generate(db_name, *args):
                         "-k", "kernel.tar.gz", "-a", "arch", *args)
 
 
+def create_asset_files(self, assets):
+    for filename, content in assets.items():
+        tmp_file = open(os.path.join(self.test_dir, filename), 'w')
+        tmp_file.write(content)
+        tmp_file.close()
+
+    return str(self.test_dir)
+
+
 class IntegrationTests(unittest.TestCase):
     """Integration tests"""
 
@@ -154,6 +196,11 @@ class IntegrationTests(unittest.TestCase):
         if errors:
             raise AssertionError("\n".join(errors))
 
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir)
 
     def assertKpetSrcMatchesTwoSuites(self, db_name):
         """
@@ -190,7 +237,6 @@ class IntegrationTests(unittest.TestCase):
             get_patch_path("misc/files_ghi.diff"),
             stdout_matching=r'.*<job>\s*</job>.*')
 
-
     def assertKpetSrcMatchesOneOfTwoSuites(self, db_name):
         """
         Assert kpet source-matches one of two suites properly.
@@ -223,7 +269,6 @@ class IntegrationTests(unittest.TestCase):
             kpet_run_generate, db_name,
             get_patch_path("misc/files_ghi.diff"),
             stdout_matching=r'.*<job>\s*</job>.*')
-
 
     def assertKpetSrcMatchesNoneOfTwoSuites(self, db_name):
         """

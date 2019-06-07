@@ -12,7 +12,8 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Integration multihost tests"""
-from .test_integration import IntegrationTests, kpet_run_generate
+from .test_integration import (IntegrationTests, kpet_run_generate,
+                               COMMONTREE_XML, create_asset_files)
 
 
 class IntegrationMultihostTests(IntegrationTests):
@@ -20,49 +21,464 @@ class IntegrationMultihostTests(IntegrationTests):
 
     def test_multihost_no_types_no_regex_no_suites(self):
         """Test multihost support without types/regex/suites"""
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+                host_types:
+                    normal: {}
+                    panicky:
+                        ignore_panic: true
+                    multihost_1: {}
+                recipesets:
+                    rcs1:
+                      - normal
+                      - panicky
+                    rcs2:
+                      - multihost_1
+                      - multihost_2
+
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self, assets)
+
         self.assertKpetSrcMatchesNoneOfTwoSuites(
-            "multihost/no_types/no_regex/no_suites")
+            assets_path)
 
     def test_multihost_no_types_no_regex_two_suites(self):
         """Test multihost support without types/regex and two suites"""
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+                host_types:
+                    normal: {}
+                    panicky:
+                        ignore_panic: true
+                    multihost_1: {}
+                recipesets:
+                    rcs1:
+                      - normal
+                      - panicky
+                    rcs2:
+                      - multihost_1
+                      - multihost_2
+
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+                suites:
+                    - suite1.yaml
+                    - suite2.yaml
+            """,
+            "suite1.yaml": """
+                description: suite1
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case1
+                      max_duration_seconds: 600
+                      pattern:
+                        sources:
+                          or:
+                            - a
+            """,
+            "suite2.yaml": """
+                description: suite2
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case2
+                      max_duration_seconds: 600
+                      pattern:
+                        sources:
+                          or:
+                            - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self, assets)
+
         self.assertKpetSrcMatchesTwoSuites(
-            "multihost/no_types/no_regex/two_suites")
+            assets_path)
 
     def test_multihost_no_types_wildcard_regex_two_suites(self):
         """
         Test multihost support without types, with a DB-level wildcard regex,
         and two suites.
         """
-        self.assertKpetSrcMatchesTwoSuites("multihost/no_types/db_regex")
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+                host_types:
+                    normal: {}
+                    panicky:
+                        ignore_panic: true
+                    multihost_1: {}
+                recipesets:
+                    rcs1:
+                      - normal
+                      - panicky
+                    rcs2:
+                      - multihost_1
+                      - multihost_2
+
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+                host_type_regex: .*
+                suites:
+                    - suite1.yaml
+                    - suite2.yaml
+            """,
+            "suite1.yaml": """
+                description: suite1
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case1
+                      max_duration_seconds: 600
+                      pattern:
+                        sources:
+                          or:
+                            - a
+            """,
+            "suite2.yaml": """
+                description: suite2
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case2
+                      max_duration_seconds: 600
+                      pattern:
+                        sources:
+                          or:
+                            - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self, assets)
+
+        self.assertKpetSrcMatchesTwoSuites(assets_path)
 
     def test_multihost_one_type_no_regex_no_suites(self):
         """Test multihost support with one type, but no regex/suites"""
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+                host_types:
+                    normal: {}
+                    panicky:
+                        ignore_panic: true
+                    multihost_1: {}
+                recipesets:
+                    rcs1:
+                      - normal
+                      - panicky
+                    rcs2:
+                      - multihost_1
+                      - multihost_2
+
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+                host_types:
+                    normal: {}
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self, assets)
+
         self.assertKpetSrcMatchesNoneOfTwoSuites(
-            "multihost/one_type/no_regex/no_suites")
+            assets_path)
 
     def test_multihost_one_type_no_regex_two_suites(self):
         """Test multihost support with one type, no regex, and two suites"""
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+
+                recipesets:
+                    rcs1:
+                      - other
+
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+                host_types:
+                    normal: {}
+                suites:
+                    - suite1.yaml
+                    - suite2.yaml
+            """,
+            "suite1.yaml": """
+                description: suite1
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case1
+                      max_duration_seconds: 600
+                      pattern:
+                        sources:
+                          or:
+                            - a
+            """,
+            "suite2.yaml": """
+                description: suite2
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case2
+                      max_duration_seconds: 600
+                      pattern:
+                        sources:
+                          or:
+                            - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self, assets)
+
         self.assertKpetSrcMatchesNoneOfTwoSuites(
-            "multihost/one_type/no_regex/two_suites")
+            assets_path)
 
     def test_multihost_one_type_db_regex(self):
         """Test multihost support with one type and DB-level regex"""
-        self.assertKpetSrcMatchesTwoSuites("multihost/one_type/db_regex")
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+                host_types:
+                    normal: {}
+                    panicky:
+                        ignore_panic: true
+                    multihost_1: {}
+                recipesets:
+                    rcs1:
+                      - normal
+                      - panicky
+                    rcs2:
+                      - multihost_1
+                      - multihost_2
+
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+                host_types:
+                    normal: {}
+                host_type_regex: normal
+                suites:
+                    - suite1.yaml
+                    - suite2.yaml
+            """,
+            "suite1.yaml": """
+                description: suite1
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case1
+                      max_duration_seconds: 600
+                      pattern:
+                        sources:
+                          or:
+                            - a
+            """,
+            "suite2.yaml": """
+                description: suite2
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case2
+                      max_duration_seconds: 600
+                      pattern:
+                        sources:
+                          or:
+                            - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self, assets)
+
+        self.assertKpetSrcMatchesTwoSuites(assets_path)
 
     def test_multihost_one_type_suite_regex(self):
         """Test multihost support with one type and suite-level regexes"""
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+                recipesets:
+                    rcs1:
+                      - normal
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+                host_types:
+                    normal: {}
+                    not_normal: {}
+                suites:
+                    - suite1.yaml
+                    - suite2.yaml
+            """,
+            "suite1.yaml": """
+                description: suite1
+                maintainers:
+                  - maint1
+                host_type_regex: normal
+                cases:
+                    - name: case1
+                      max_duration_seconds: 600
+                      pattern:
+                        sources:
+                          or:
+                            - a
+            """,
+            "suite2.yaml": """
+                description: suite2
+                maintainers:
+                  - maint1
+                host_type_regex: not_normal
+                cases:
+                    - name: case2
+                      max_duration_seconds: 600
+                      pattern:
+                        sources:
+                          or:
+                            - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self, assets)
+
         self.assertKpetSrcMatchesOneOfTwoSuites(
-            "multihost/one_type/suite_regex")
+            assets_path)
 
     def test_multihost_one_type_case_regex(self):
         """Test multihost support with one type and case-level regexes"""
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+                recipesets:
+                    rcs1:
+                      - normal
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+                host_types:
+                    normal: {}
+                    not_normal: {}
+                suites:
+                    - suite1.yaml
+                    - suite2.yaml
+            """,
+            "suite1.yaml": """
+                description: suite1
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case1
+                      max_duration_seconds: 600
+                      host_type_regex: normal
+                      pattern:
+                        sources:
+                          or:
+                            - a
+            """,
+            "suite2.yaml": """
+                description: suite2
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case2
+                      max_duration_seconds: 600
+                      host_type_regex: not_normal
+                      pattern:
+                        sources:
+                          or:
+                            - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self, assets)
+
         self.assertKpetSrcMatchesOneOfTwoSuites(
-            "multihost/one_type/case_regex")
+            assets_path)
 
     def test_multihost_two_types_one_case_each(self):
         """Test multihost support with two types matching one case each"""
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+                host_types:
+                    normal: {}
+                    panicky:
+                        ignore_panic: true
+                    multihost_1: {}
+                recipesets:
+                    rcs1:
+                      - a
+                      - b
+
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+                host_types:
+                    a: {}
+                    b: {}
+                suites:
+                    - suite1.yaml
+                    - suite2.yaml
+            """,
+            "suite1.yaml": """
+                description: suite1
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case1
+                      max_duration_seconds: 600
+                      host_type_regex: a
+                      pattern:
+                        sources:
+                          or:
+                            - a
+            """,
+            "suite2.yaml": """
+                description: suite2
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case2
+                      max_duration_seconds: 600
+                      host_type_regex: b
+                      pattern:
+                        sources:
+                          or:
+                            - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self, assets)
+
         self.assertKpetProduces(
-            kpet_run_generate, "multihost/two_types/one_case_each",
+            kpet_run_generate, assets_path,
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
                             r'HOST\s*suite2\s*case2\s*</job>.*')
 
@@ -71,9 +487,59 @@ class IntegrationMultihostTests(IntegrationTests):
         Test multihost support with two types and both cases matching the
         first one.
         """
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+                recipesets:
+                    rcs1:
+                      - a
+                      - b
+
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+                host_types:
+                    a: {}
+                    b: {}
+                suites:
+                    - suite1.yaml
+                    - suite2.yaml
+            """,
+            "suite1.yaml": """
+                description: suite1
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case1
+                      max_duration_seconds: 600
+                      host_type_regex: a
+                      pattern:
+                        sources:
+                          or:
+                            - a
+            """,
+            "suite2.yaml": """
+                description: suite2
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case2
+                      max_duration_seconds: 600
+                      host_type_regex: a
+                      pattern:
+                        sources:
+                          or:
+                            - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self, assets)
+
         # TODO Distinguish host types somehow
         self.assertKpetProduces(
-            kpet_run_generate, "multihost/two_types/both_cases_first",
+            kpet_run_generate, assets_path,
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
                             r'suite2\s*case2\s*</job>.*')
 
@@ -82,9 +548,59 @@ class IntegrationMultihostTests(IntegrationTests):
         Test multihost support with two types and both cases matching the
         second one.
         """
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+                recipesets:
+                    rcs1:
+                      - a
+                      - b
+
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+                host_types:
+                    a: {}
+                    b: {}
+                suites:
+                    - suite1.yaml
+                    - suite2.yaml
+            """,
+            "suite1.yaml": """
+                description: suite1
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case1
+                      max_duration_seconds: 600
+                      host_type_regex: b
+                      pattern:
+                        sources:
+                          or:
+                            - a
+            """,
+            "suite2.yaml": """
+                description: suite2
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case2
+                      max_duration_seconds: 600
+                      host_type_regex: b
+                      pattern:
+                        sources:
+                          or:
+                            - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self, assets)
+
         # TODO Distinguish host types somehow
         self.assertKpetProduces(
-            kpet_run_generate, "multihost/two_types/both_cases_second",
+            kpet_run_generate, assets_path,
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
                             r'suite2\s*case2\s*</job>.*')
 
@@ -93,8 +609,63 @@ class IntegrationMultihostTests(IntegrationTests):
         Test multihost support with two types and both cases matching both
         types.
         """
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+                host_types:
+                    normal: {}
+                    panicky:
+                        ignore_panic: true
+                    multihost_1: {}
+                recipesets:
+                    rcs1:
+                      - a
+                      - b
+
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+                host_types:
+                    a: {}
+                    b: {}
+                suites:
+                    - suite1.yaml
+                    - suite2.yaml
+            """,
+            "suite1.yaml": """
+                description: suite1
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case1
+                      max_duration_seconds: 600
+                      host_type_regex: ".*"
+                      pattern:
+                        sources:
+                          or:
+                            - a
+            """,
+            "suite2.yaml": """
+                description: suite2
+                maintainers:
+                  - maint1
+                cases:
+                    - name: case2
+                      max_duration_seconds: 600
+                      host_type_regex: ".*"
+                      pattern:
+                        sources:
+                          or:
+                            - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self, assets)
+
         # TODO Distinguish host types somehow
         self.assertKpetProduces(
-            kpet_run_generate, "multihost/two_types/both_cases_both",
+            kpet_run_generate, assets_path,
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
                             r'suite2\s*case2\s*</job>.*')
