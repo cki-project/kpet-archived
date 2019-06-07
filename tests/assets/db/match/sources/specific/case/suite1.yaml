@@ -4,6 +4,7 @@ maintainers:
 cases:
     - name: case1
       max_duration_seconds: 600
-      match:
-          specific_sources: true
+      pattern:
+          not:
+              sources: null
           sources: a

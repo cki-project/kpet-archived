@@ -5,6 +5,7 @@ cases:
     - name: case2
       max_duration_seconds: 600
       host_type_regex: b
-      match:
+      pattern:
         sources:
-          - d
+          or:
+              - d
