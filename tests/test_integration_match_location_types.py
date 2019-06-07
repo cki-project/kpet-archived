@@ -12,8 +12,9 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Integration tests expecting a match"""
-from .test_integration import (IntegrationTests, kpet_run_generate,
-                               COMMONTREE_XML, create_asset_files)
+from tests.test_integration import (IntegrationTests, kpet_run_generate,
+                                    COMMONTREE_XML, create_asset_files,
+                                    INDEX_BASE_YAML, SUITE_BASE)
 
 
 class IntegrationMatchLocationTypesTests(IntegrationTests):
@@ -22,25 +23,8 @@ class IntegrationMatchLocationTypesTests(IntegrationTests):
     def test_match_location_types_no_patterns(self):
         """Test location-type matching a case with no patterns"""
         assets = {
-            "index.yaml": """
-                host_type_regex: ^normal
-                host_types:
-                    normal: {}
-                recipesets:
-                    rcs1:
-                      - normal
-                arches:
-                    - arch
-                trees:
-                    tree: tree.xml
-                suites:
-                    - suite.yaml
-            """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "index.yaml": INDEX_BASE_YAML,
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -50,7 +34,7 @@ class IntegrationMatchLocationTypesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Doesn't match a tarball path
         self.assertKpetProduces(
@@ -66,25 +50,8 @@ class IntegrationMatchLocationTypesTests(IntegrationTests):
     def test_match_location_types_one_pattern(self):
         """Test location-type matching cases with one pattern"""
         assets = {
-            "index.yaml": """
-                host_type_regex: ^normal
-                host_types:
-                    normal: {}
-                recipesets:
-                    rcs1:
-                      - normal
-                arches:
-                    - arch
-                trees:
-                    tree: tree.xml
-                suites:
-                    - suite.yaml
-            """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "index.yaml": INDEX_BASE_YAML,
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: tarball-path
                       max_duration_seconds: 600
                       pattern:
@@ -119,7 +86,7 @@ class IntegrationMatchLocationTypesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Only one case matches a tarball path
         self.assertKpetProduces(
@@ -157,25 +124,8 @@ class IntegrationMatchLocationTypesTests(IntegrationTests):
     def test_match_location_types_two_patterns(self):
         """Test location-type matching cases with two patterns"""
         assets = {
-            "index.yaml": """
-                host_type_regex: ^normal
-                host_types:
-                    normal: {}
-                recipesets:
-                    rcs1:
-                      - normal
-                arches:
-                    - arch
-                trees:
-                    tree: tree.xml
-                suites:
-                    - suite.yaml
-            """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "index.yaml": INDEX_BASE_YAML,
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: tarball
                       max_duration_seconds: 600
                       pattern:
@@ -201,7 +151,7 @@ class IntegrationMatchLocationTypesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Tarball case matches a tarball path
         self.assertKpetProduces(

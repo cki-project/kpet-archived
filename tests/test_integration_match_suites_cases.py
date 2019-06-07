@@ -12,9 +12,10 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Integration tests expecting a match"""
-from .test_integration import (IntegrationTests, kpet_run_generate,
-                               get_patch_path, COMMONTREE_XML,
-                               create_asset_files)
+from tests.test_integration import (IntegrationTests, kpet_run_generate,
+                                    get_patch_path, COMMONTREE_XML,
+                                    create_asset_files, INDEX_BASE_YAML,
+                                    SUITE_BASE)
 
 
 class IntegrationMatchSuitesCasesTests(IntegrationTests):
@@ -23,32 +24,15 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
     def test_match_sources_one_case_no_patterns(self):
         """Test source-matching a case with no patterns"""
         assets = {
-            "index.yaml": """
-                host_type_regex: ^normal
-                host_types:
-                    normal: {}
-                recipesets:
-                    rcs1:
-                      - normal
-                arches:
-                    - arch
-                trees:
-                    tree: tree.xml
-                suites:
-                    - suite.yaml
-            """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "index.yaml": INDEX_BASE_YAML,
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
             """,
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Matches baseline
         self.assertKpetProduces(
@@ -63,25 +47,8 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
     def test_match_sources_one_case_one_pattern(self):
         """Test source-matching a case with one pattern"""
         assets = {
-            "index.yaml": """
-                host_type_regex: ^normal
-                host_types:
-                    normal: {}
-                recipesets:
-                    rcs1:
-                      - normal
-                arches:
-                    - arch
-                trees:
-                    tree: tree.xml
-                suites:
-                    - suite.yaml
-            """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "index.yaml": INDEX_BASE_YAML,
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -91,7 +58,7 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Matches baseline
         self.assertKpetProduces(
@@ -111,25 +78,8 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
     def test_match_sources_one_case_two_patterns(self):
         """Test source-matching a case with two patterns"""
         assets = {
-            "index.yaml": """
-                host_type_regex: ^normal
-                host_types:
-                    normal: {}
-                recipesets:
-                    rcs1:
-                      - normal
-                arches:
-                    - arch
-                trees:
-                    tree: tree.xml
-                suites:
-                    - suite.yaml
-            """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "index.yaml": INDEX_BASE_YAML,
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -141,7 +91,7 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Matches baseline
         self.assertKpetProduces(
@@ -172,25 +122,8 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
     def test_match_sources_two_cases(self):
         """Test source-matching two cases"""
         assets = {
-            "index.yaml": """
-                host_type_regex: ^normal
-                host_types:
-                    normal: {}
-                recipesets:
-                    rcs1:
-                      - normal
-                arches:
-                    - arch
-                trees:
-                    tree: tree.xml
-                suites:
-                    - suite.yaml
-            """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "index.yaml": INDEX_BASE_YAML,
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -205,7 +138,7 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Both match baseline
         self.assertKpetProduces(
@@ -253,22 +186,14 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
                     - suite1.yaml
                     - suite2.yaml
             """,
-            "suite1.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite1.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
                         sources:
                           or: a
             """,
-            "suite2.yaml": """
-                description: suite2
-                maintainers:
-                  - maint1
-                cases:
+            "suite2.yaml": SUITE_BASE.format(2) + """
                     - name: case2
                       max_duration_seconds: 600
                       pattern:
@@ -278,7 +203,7 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Both match baseline
         self.assertKpetProduces(
@@ -340,11 +265,7 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
                         sources:
                           or: a
             """,
-            "suite2.yaml": """
-                description: suite2
-                maintainers:
-                  - maint1
-                cases:
+            "suite2.yaml": SUITE_BASE.format(2) + """
                     - name: case2
                       max_duration_seconds: 600
                       pattern:
@@ -354,7 +275,7 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Only non-specific suite matches baseline
         self.assertKpetProduces(
@@ -401,11 +322,7 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
                     - suite1.yaml
                     - suite2.yaml
             """,
-            "suite1.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite1.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -413,11 +330,7 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
                           sources: null
                         sources: a
             """,
-            "suite2.yaml": """
-                description: suite2
-                maintainers:
-                  - maint1
-                cases:
+            "suite2.yaml": SUITE_BASE.format(2) + """
                     - name: case2
                       max_duration_seconds: 600
                       pattern:
@@ -427,7 +340,7 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Only non-specific case matches baseline
         self.assertKpetProduces(
