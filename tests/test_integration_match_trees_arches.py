@@ -12,8 +12,9 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Integration tests expecting a match"""
-from .test_integration import (IntegrationTests, kpet_run_generate,
-                               COMMONTREE_XML, create_asset_files)
+from tests.test_integration import (IntegrationTests, kpet_run_generate,
+                                    COMMONTREE_XML, create_asset_files,
+                                    SUITE_BASE)
 
 
 class IntegrationMatchTreesArchesTests(IntegrationTests):
@@ -37,11 +38,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
                 suites:
                     - suite.yaml
             """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -51,7 +48,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Doesn't match a non-empty (default "arch") architecture
         self.assertKpetProduces(
@@ -81,11 +78,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
                 suites:
                     - suite.yaml
             """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -94,7 +87,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Matches default ("arch") architecture
         self.assertKpetProduces(
@@ -129,11 +122,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
                 suites:
                     - suite.yaml
             """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -145,7 +134,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Matches default ("arch") architecture
         self.assertKpetProduces(
@@ -183,11 +172,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
                 suites:
                     - suite.yaml
             """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -198,7 +183,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
             ".xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Doesn't match a non-empty (default "tree") tree
         self.assertKpetProduces(
@@ -228,11 +213,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
                 suites:
                     - suite.yaml
             """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -243,7 +224,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
             ".xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Matches default ("tree") tree
         self.assertKpetProduces(
@@ -278,11 +259,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
                 suites:
                     - suite.yaml
             """,
-            "suite.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -297,7 +274,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
             "other_tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # Matches default ("tree") tree
         self.assertKpetProduces(

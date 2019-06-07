@@ -12,17 +12,11 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Integration multihost tests"""
-from .test_integration import (IntegrationTests, kpet_run_generate,
-                               COMMONTREE_XML, create_asset_files)
+from tests.test_integration import (IntegrationTests, kpet_run_generate,
+                                    COMMONTREE_XML, create_asset_files,
+                                    SUITE_BASE)
 
-
-class IntegrationMultihostTypesTests(IntegrationTests):
-    """Multihost integration tests with at least one type"""
-
-    def test_multihost_one_type_no_regex_no_suites(self):
-        """Test multihost support with one type, but no regex/suites"""
-        assets = {
-            "index.yaml": """
+INDEX_BASE = """
                 host_type_regex: ^normal
                 host_types:
                     normal: {}
@@ -43,11 +37,20 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                     tree: tree.xml
                 host_types:
                     normal: {}
-            """,
+"""
+
+
+class IntegrationMultihostTypesTests(IntegrationTests):
+    """Multihost integration tests with at least one type"""
+
+    def test_multihost_one_type_no_regex_no_suites(self):
+        """Test multihost support with one type, but no regex/suites"""
+        assets = {
+            "index.yaml": INDEX_BASE,
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         self.assertKpetSrcMatchesNoneOfTwoSuites(
             assets_path)
@@ -72,11 +75,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                     - suite1.yaml
                     - suite2.yaml
             """,
-            "suite1.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite1.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -84,11 +83,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                           or:
                             - a
             """,
-            "suite2.yaml": """
-                description: suite2
-                maintainers:
-                  - maint1
-                cases:
+            "suite2.yaml": SUITE_BASE.format(2) + """
                     - name: case2
                       max_duration_seconds: 600
                       pattern:
@@ -99,7 +94,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         self.assertKpetSrcMatchesNoneOfTwoSuites(
             assets_path)
@@ -107,37 +102,13 @@ class IntegrationMultihostTypesTests(IntegrationTests):
     def test_multihost_one_type_db_regex(self):
         """Test multihost support with one type and DB-level regex"""
         assets = {
-            "index.yaml": """
-                host_type_regex: ^normal
-                host_types:
-                    normal: {}
-                    panicky:
-                        ignore_panic: true
-                    multihost_1: {}
-                recipesets:
-                    rcs1:
-                      - normal
-                      - panicky
-                    rcs2:
-                      - multihost_1
-                      - multihost_2
-
-                arches:
-                    - arch
-                trees:
-                    tree: tree.xml
-                host_types:
-                    normal: {}
+            "index.yaml": INDEX_BASE + """
                 host_type_regex: normal
                 suites:
                     - suite1.yaml
                     - suite2.yaml
             """,
-            "suite1.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite1.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       pattern:
@@ -145,11 +116,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                           or:
                             - a
             """,
-            "suite2.yaml": """
-                description: suite2
-                maintainers:
-                  - maint1
-                cases:
+            "suite2.yaml": SUITE_BASE.format(2) + """
                     - name: case2
                       max_duration_seconds: 600
                       pattern:
@@ -160,7 +127,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         self.assertKpetSrcMatchesTwoSuites(assets_path)
 
@@ -212,7 +179,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         self.assertKpetSrcMatchesOneOfTwoSuites(
             assets_path)
@@ -236,11 +203,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                     - suite1.yaml
                     - suite2.yaml
             """,
-            "suite1.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite1.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       host_type_regex: normal
@@ -249,11 +212,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                           or:
                             - a
             """,
-            "suite2.yaml": """
-                description: suite2
-                maintainers:
-                  - maint1
-                cases:
+            "suite2.yaml": SUITE_BASE.format(2) + """
                     - name: case2
                       max_duration_seconds: 600
                       host_type_regex: not_normal
@@ -265,7 +224,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         self.assertKpetSrcMatchesOneOfTwoSuites(
             assets_path)
@@ -296,11 +255,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                     - suite1.yaml
                     - suite2.yaml
             """,
-            "suite1.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite1.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       host_type_regex: a
@@ -309,11 +264,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                           or:
                             - a
             """,
-            "suite2.yaml": """
-                description: suite2
-                maintainers:
-                  - maint1
-                cases:
+            "suite2.yaml": SUITE_BASE.format(2) + """
                     - name: case2
                       max_duration_seconds: 600
                       host_type_regex: b
@@ -325,7 +276,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
@@ -356,11 +307,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                     - suite1.yaml
                     - suite2.yaml
             """,
-            "suite1.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite1.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       host_type_regex: a
@@ -369,11 +316,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                           or:
                             - a
             """,
-            "suite2.yaml": """
-                description: suite2
-                maintainers:
-                  - maint1
-                cases:
+            "suite2.yaml": SUITE_BASE.format(2) + """
                     - name: case2
                       max_duration_seconds: 600
                       host_type_regex: a
@@ -385,7 +328,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # TODO Distinguish host types somehow
         self.assertKpetProduces(
@@ -417,11 +360,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                     - suite1.yaml
                     - suite2.yaml
             """,
-            "suite1.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite1.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       host_type_regex: b
@@ -430,11 +369,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                           or:
                             - a
             """,
-            "suite2.yaml": """
-                description: suite2
-                maintainers:
-                  - maint1
-                cases:
+            "suite2.yaml": SUITE_BASE.format(2) + """
                     - name: case2
                       max_duration_seconds: 600
                       host_type_regex: b
@@ -446,7 +381,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # TODO Distinguish host types somehow
         self.assertKpetProduces(
@@ -483,11 +418,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                     - suite1.yaml
                     - suite2.yaml
             """,
-            "suite1.yaml": """
-                description: suite1
-                maintainers:
-                  - maint1
-                cases:
+            "suite1.yaml": SUITE_BASE.format(1) + """
                     - name: case1
                       max_duration_seconds: 600
                       host_type_regex: ".*"
@@ -496,11 +427,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                           or:
                             - a
             """,
-            "suite2.yaml": """
-                description: suite2
-                maintainers:
-                  - maint1
-                cases:
+            "suite2.yaml": SUITE_BASE.format(2) + """
                     - name: case2
                       max_duration_seconds: 600
                       host_type_regex: ".*"
@@ -512,7 +439,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             "tree.xml": COMMONTREE_XML,
         }
 
-        assets_path = create_asset_files(self, assets)
+        assets_path = create_asset_files(self.test_dir, assets)
 
         # TODO Distinguish host types somehow
         self.assertKpetProduces(

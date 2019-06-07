@@ -51,19 +51,26 @@ COMMONTREE_XML = """
 </job>
 """
 
-EMPTYSUITEINDEX_YAML = """
-host_types:
-    normal: {}
-host_type_regex: ^normal
-recipesets:
-    rcs1:
-      - normal
-arches:
-    - arch
-trees:
-    tree: tree.xml
-suites:
-    - suite.yaml
+INDEX_BASE_YAML = """
+                host_type_regex: ^normal
+                host_types:
+                    normal: {}
+                recipesets:
+                    rcs1:
+                      - normal
+                arches:
+                    - arch
+                trees:
+                    tree: tree.xml
+                suites:
+                    - suite.yaml
+"""
+
+SUITE_BASE = """
+description: suite{}
+maintainers:
+  - maint1
+cases:
 """
 
 
@@ -145,13 +152,24 @@ def kpet_run_generate(db_name, *args):
                         "-k", "kernel.tar.gz", "-a", "arch", *args)
 
 
-def create_asset_files(self, assets):
+def create_asset_files(path, assets):
+    """
+    Creates asset files in a given folder from given filenames and content
+
+    Args:
+        path:   The path in which to create the files
+        assets: A dictionary where the keys are the filenames and values
+                the content of the file
+
+    Returns:
+        A string of the given path
+    """
     for filename, content in assets.items():
-        tmp_file = open(os.path.join(self.test_dir, filename), 'w')
+        tmp_file = open(os.path.join(path, filename), 'w')
         tmp_file.write(content)
         tmp_file.close()
 
-    return str(self.test_dir)
+    return str(path)
 
 
 class IntegrationTests(unittest.TestCase):
