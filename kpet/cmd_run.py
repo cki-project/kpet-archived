@@ -20,6 +20,65 @@ import shutil
 from kpet import misc, targeted, data, run, cmd_misc, loc
 
 
+def build_target(parser):
+    """
+    Add target-specifying arguments to a "run" sub-command parser.
+
+    Args:
+        parser: The parser to add arguments to.
+    """
+    parser.add_argument(
+        '--pw-cookie',
+        default=None,
+        help='Patchwork session cookie in case a login is required'
+    )
+    parser.add_argument(
+        '--cookies',
+        metavar='FILE',
+        default=None,
+        help='Cookies to send when downloading patches, Netscape-format file.'
+    )
+    parser.add_argument(
+        '-t',
+        '--tree',
+        required=True,
+        help='Name of the specified kernel\'s tree. Required. ' +
+        'See "kpet tree list" for recognized trees.'
+    )
+    parser.add_argument(
+        '-a',
+        '--arch',
+        default='x86_64',
+        help='Architecture of the specified kernel. Required. ' +
+        'See "kpet arch list" for supported architectures.'
+    )
+    parser.add_argument(
+        '-s',
+        '--sets',
+        metavar='REGEX',
+        help='A regular expression matching the sets of tests ' +
+        'to restrict the run to. See "kpet set list" for available sets.'
+    )
+    parser.add_argument(
+        '--type',
+        default='auto',
+        choices=['auto'] + sorted(loc.TYPE_SET),
+        help='Type of the kernel location. Default "auto".'
+    )
+    parser.add_argument(
+        '-k',
+        '--kernel',
+        required=True,
+        help='Kernel location. Must be accessible by Beaker. Required.'
+    )
+    parser.add_argument(
+        'mboxes',
+        nargs='*',
+        default=[],
+        help='List of mbox URLs/paths comprising the patch series'
+    )
+
+
 def build(cmds_parser, common_parser):
     """Build the argument parser for the run command"""
     _, action_subparser = cmd_misc.build(
@@ -46,82 +105,18 @@ def build(cmds_parser, common_parser):
         help='Path where will be saved the xml, default is stdout'
     )
     generate_parser.add_argument(
-        '--pw-cookie',
-        default=None,
-        help='Patchwork session cookie in case a login is required'
-    )
-    generate_parser.add_argument(
-        '--cookies',
-        metavar='FILE',
-        default=None,
-        help='Cookies to send when downloading patches, Netscape-format file.'
-    )
-    generate_parser.add_argument(
-        '-t',
-        '--tree',
-        required=True,
-        help='Name of the specified kernel\'s tree. Required. ' +
-        'See "kpet tree list" for recognized trees.'
-    )
-    generate_parser.add_argument(
-        '-a',
-        '--arch',
-        default='x86_64',
-        help='Architecture of the specified kernel. Required. ' +
-        'See "kpet arch list" for supported architectures.'
-    )
-    generate_parser.add_argument(
-        '-s',
-        '--sets',
-        metavar='REGEX',
-        help='A regular expression matching the sets of tests ' +
-        'to restrict the run to. See "kpet set list" for available sets.'
-    )
-    generate_parser.add_argument(
-        '--type',
-        default='auto',
-        choices=['auto'] + sorted(loc.TYPE_SET),
-        help='Type of the kernel location. Default "auto".'
-    )
-    generate_parser.add_argument(
-        '-k',
-        '--kernel',
-        required=True,
-        help='Kernel location. Must be accessible by Beaker. Required.'
-    )
-    generate_parser.add_argument(
         '--no-lint',
         action='store_true',
         help='Do not lint and reformat output XML'
     )
-    generate_parser.add_argument(
-        'mboxes',
-        nargs='*',
-        default=[],
-        help='List of mbox URLs/paths comprising the patch series'
-    )
+    build_target(generate_parser)
+
     print_test_cases_parser = action_subparser.add_parser(
         "print-test-cases",
         help="Print test cases applicable to the patches",
         parents=[common_parser],
     )
-    print_test_cases_parser.add_argument(
-        'mboxes',
-        nargs='*',
-        default=[],
-        help='List of mbox URLs/paths comprising the patch series'
-    )
-    print_test_cases_parser.add_argument(
-        '--pw-cookie',
-        default=None,
-        help='Patchwork session cookie in case a login is required'
-    )
-    print_test_cases_parser.add_argument(
-        '--cookies',
-        metavar='FILE',
-        default=None,
-        help='Cookies to send when downloading patches, Netscape-format file.'
-    )
+    build_target(print_test_cases_parser)
 
 
 def get_src_files(patches, cookies=None):
@@ -144,16 +139,32 @@ def get_src_files(patches, cookies=None):
         shutil.rmtree(tmpdir)
 
 
-def main_generate(args, database, src_files):
+def main_create_baserun(args, database):
     """
-    Execute `run generate`
+    Generate test execution data for specified test database and command-line
+    arguments.
 
     Args:
         args:       Parsed command-line arguments.
         database:   The database to get test data from.
-        src_files:  A set of source file paths modified by the supplied
-                    patches.
+
+    Returns:
+        Test execution data.
     """
+    cookies = cookiejar.MozillaCookieJar()
+    if args.cookies:
+        cookies.load(args.cookies)
+    if args.pw_cookie:
+        for mbox in args.mboxes:
+            if not misc.is_url(mbox):
+                continue
+            domain = mbox.rsplit('patch', 1)[0].strip('/').split('/')[-1]
+            cookie = cookiejar.Cookie(0, 'sessionid', args.pw_cookie,
+                                      None, False, domain, False, False,
+                                      '/', False, False, None, False,
+                                      None, None, {})
+            cookies.set_cookie(cookie)
+    src_files = get_src_files(args.mboxes, cookies)
     if args.arch not in database.arches:
         raise Exception("Architecture \"{}\" not found".format(args.arch))
     if args.tree not in database.trees:
@@ -184,7 +195,17 @@ def main_generate(args, database, src_files):
                          sets=sets,
                          sources=src_files,
                          location_types=loc_type)
-    baserun = run.Base(database, target)
+    return run.Base(database, target)
+
+
+def main_generate(args, baserun):
+    """
+    Execute `run generate`
+
+    Args:
+        args:       Parsed command-line arguments.
+        baserun:    Test execution data.
+    """
     content = baserun.generate(description=args.description,
                                kernel_location=args.kernel,
                                lint=not args.no_lint)
@@ -196,18 +217,14 @@ def main_generate(args, database, src_files):
 
 
 # pylint: disable=unused-argument
-def main_print_test_cases(args, database, src_files):
+def main_print_test_cases(args, baserun):
     """
     Execute `run print-test-cases`
 
     Args:
         args:       Parsed command-line arguments.
-        database:   The database to get test data from.
-        src_files:  A set of source file paths modified by the supplied
-                    patches.
+        baserun:    Test execution data.
     """
-    target = data.Target(sources=src_files)
-    baserun = run.Base(database, target)
     case_name_list = []
     for recipeset in baserun.recipesets_of_hosts:
         for host in recipeset:
@@ -224,25 +241,9 @@ def main(args):
         raise Exception("\"{}\" is not a database directory".format(args.db))
     database = data.Base(args.db)
 
-    if args.action in ('generate', 'print-test-cases'):
-        cookies = cookiejar.MozillaCookieJar()
-        if args.cookies:
-            cookies.load(args.cookies)
-        if args.pw_cookie:
-            for mbox in args.mboxes:
-                if not misc.is_url(mbox):
-                    continue
-                domain = mbox.rsplit('patch', 1)[0].strip('/').split('/')[-1]
-                cookie = cookiejar.Cookie(0, 'sessionid', args.pw_cookie,
-                                          None, False, domain, False, False,
-                                          '/', False, False, None, False,
-                                          None, None, {})
-                cookies.set_cookie(cookie)
-        src_files = get_src_files(args.mboxes, cookies)
-
     if args.action == 'generate':
-        main_generate(args, database, src_files)
+        main_generate(args, main_create_baserun(args, database))
     elif args.action == 'print-test-cases':
-        main_print_test_cases(args, database, src_files)
+        main_print_test_cases(args, main_create_baserun(args, database))
     else:
         misc.raise_action_not_found(args.action, args.command)

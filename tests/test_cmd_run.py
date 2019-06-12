@@ -85,7 +85,9 @@ class CmdRunTest(unittest.TestCase):
         mock_args.action = 'print-test-cases'
         mock_args.tree = 'rhel7'
         mock_args.kernel = 'kernel'
-        mock_args.arch = 'arch'
+        mock_args.arch = 'x86_64'
+        mock_args.sets = None
+        mock_args.type = 'auto'
         mock_args.db = self.dbdir
         mock_args.output = None
         mock_args.cookies = None
