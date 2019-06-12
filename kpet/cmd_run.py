@@ -132,6 +132,9 @@ def get_src_files(patches, cookies=None):
         patches:   List of patches, they can be local files or remote urls
         cookies:   A jar of cookies to send when downloading patches.
                    Optional.
+
+    Returns:
+        A set of source file paths modified by the patches.
     """
     tmpdir = tempfile.mkdtemp(suffix='kpet')
     try:
@@ -141,8 +144,80 @@ def get_src_files(patches, cookies=None):
         shutil.rmtree(tmpdir)
 
 
-# TODO: Refactor into sub-functions
-# pylint: disable=too-many-branches, too-many-locals
+def main_generate(args, database, src_files):
+    """
+    Execute `run generate`
+
+    Args:
+        args:       Parsed command-line arguments.
+        database:   The database to get test data from.
+        src_files:  A set of source file paths modified by the supplied
+                    patches.
+    """
+    if args.arch not in database.arches:
+        raise Exception("Architecture \"{}\" not found".format(args.arch))
+    if args.tree not in database.trees:
+        raise Exception("Tree \"{}\" not found".format(args.tree))
+    if args.sets is None:
+        sets = set()
+    else:
+        sets = set(x for x in database.sets if re.fullmatch(args.sets, x))
+        if not sets:
+            raise Exception("No test sets matched specified regular " +
+                            "expression: {}".format(args.sets))
+    if args.type == "auto":
+        loc_type = loc.type_detect(args.kernel)
+        if loc_type is None:
+            raise \
+                Exception(
+                    "Cannot determine the type of kernel location \"{}\". "
+                    "Expecting a path to/URL of a .tar.gz/.rpm file or "
+                    "a YUM/DNF repo. "
+                    "Use --type <TYPE> to force a specific type.".
+                    format(args.kernel))
+    else:
+        loc_type = args.type
+    assert loc.type_is_valid(loc_type)
+
+    target = data.Target(trees=args.tree,
+                         arches=args.arch,
+                         sets=sets,
+                         sources=src_files,
+                         location_types=loc_type)
+    baserun = run.Base(database, target)
+    content = baserun.generate(description=args.description,
+                               kernel_location=args.kernel,
+                               lint=not args.no_lint)
+    if not args.output:
+        sys.stdout.write(content)
+    else:
+        with open(args.output, 'w') as file_handler:
+            file_handler.write(content)
+
+
+# pylint: disable=unused-argument
+def main_print_test_cases(args, database, src_files):
+    """
+    Execute `run print-test-cases`
+
+    Args:
+        args:       Parsed command-line arguments.
+        database:   The database to get test data from.
+        src_files:  A set of source file paths modified by the supplied
+                    patches.
+    """
+    target = data.Target(sources=src_files)
+    baserun = run.Base(database, target)
+    case_name_list = []
+    for recipeset in baserun.recipesets_of_hosts:
+        for host in recipeset:
+            for suite in host.suites:
+                for case in suite.cases:
+                    case_name_list.append(case.name)
+    for case_name in sorted(case_name_list):
+        print(case_name)
+
+
 def main(args):
     """Main function for the `run` command"""
     if not data.Base.is_dir_valid(args.db):
@@ -166,55 +241,8 @@ def main(args):
         src_files = get_src_files(args.mboxes, cookies)
 
     if args.action == 'generate':
-        if args.arch not in database.arches:
-            raise Exception("Architecture \"{}\" not found".format(args.arch))
-        if args.tree not in database.trees:
-            raise Exception("Tree \"{}\" not found".format(args.tree))
-        if args.sets is None:
-            sets = set()
-        else:
-            sets = set(x for x in database.sets if re.fullmatch(args.sets, x))
-            if not sets:
-                raise Exception("No test sets matched specified regular " +
-                                "expression: {}".format(args.sets))
-        if args.type == "auto":
-            loc_type = loc.type_detect(args.kernel)
-            if loc_type is None:
-                raise \
-                    Exception(
-                        "Cannot determine the type of kernel location \"{}\". "
-                        "Expecting a path to/URL of a .tar.gz/.rpm file or "
-                        "a YUM/DNF repo. "
-                        "Use --type <TYPE> to force a specific type.".
-                        format(args.kernel))
-        else:
-            loc_type = args.type
-        assert loc.type_is_valid(loc_type)
-
-        target = data.Target(trees=args.tree,
-                             arches=args.arch,
-                             sets=sets,
-                             sources=src_files,
-                             location_types=loc_type)
-        baserun = run.Base(database, target)
-        content = baserun.generate(description=args.description,
-                                   kernel_location=args.kernel,
-                                   lint=not args.no_lint)
-        if not args.output:
-            sys.stdout.write(content)
-        else:
-            with open(args.output, 'w') as file_handler:
-                file_handler.write(content)
+        main_generate(args, database, src_files)
     elif args.action == 'print-test-cases':
-        target = data.Target(sources=src_files)
-        baserun = run.Base(database, target)
-        case_name_list = []
-        for recipeset in baserun.recipesets_of_hosts:
-            for host in recipeset:
-                for suite in host.suites:
-                    for case in suite.cases:
-                        case_name_list.append(case.name)
-        for case_name in sorted(case_name_list):
-            print(case_name)
+        main_print_test_cases(args, database, src_files)
     else:
         misc.raise_action_not_found(args.action, args.command)
