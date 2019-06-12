@@ -36,7 +36,7 @@ def main(args):
         raise Exception("\"{}\" is not a database directory".format(args.db))
     database = data.Base(args.db)
     if args.action == 'list':
-        max_name_length = max(len(k) for k in database.sets)
+        max_name_length = max((len(k) for k in database.sets), default=0)
         for name, description in sorted(database.sets.items(),
                                         key=lambda i: i[0]):
             print(f"{name: <{max_name_length}} {description}")
