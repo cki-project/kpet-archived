@@ -183,9 +183,6 @@ def main_create_baserun(args, database):
     else:
         components = set(x for x in database.components
                          if re.fullmatch(args.components, x))
-        if not components:
-            raise Exception("No components matched specified regular " +
-                            "expression: {}".format(args.components))
     if args.sets is None:
         sets = set()
     else:
