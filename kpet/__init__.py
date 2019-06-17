@@ -17,6 +17,7 @@ import os
 import sys
 import logging
 from kpet import cmd_run, cmd_tree, cmd_arch, cmd_component, cmd_set
+from kpet import misc
 
 
 def exec_command(args, commands):
@@ -65,4 +66,9 @@ def main(args=None):
         'component': [cmd_component.main, args],
         'set': [cmd_set.main, args],
     }
-    exec_command(args, commands)
+    try:
+        exec_command(args, commands)
+    except misc.ActionNotFound:
+        logging.error('No action specified')
+        parser.print_help()
+        parser.print_help(file=sys.stderr)
