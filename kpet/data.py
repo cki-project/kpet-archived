@@ -16,7 +16,7 @@
 import os
 from kpet.schema import Invalid, Struct, Choice, NonEmptyList, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, \
-    Int, Null, RE, Succession
+    Int, Null, RE
 
 # pylint: disable=raising-format-tuple,access-member-before-definition
 
@@ -243,53 +243,23 @@ class Case(Object):     # pylint: disable=too-few-public-methods
     """Test case"""
 
     def __init__(self, data):
-        def convert(old_data):
-            """Convert old data to new data."""
-            new_data = old_data.copy()
-
-            if 'task_params' in old_data.keys():
-                del new_data['task_params']
-                new_data['environment'] = old_data['task_params']
-
-            return new_data
-
         super().__init__(
-            Succession(
-                Struct(
-                    required=dict(
-                        name=String(),
-                        max_duration_seconds=Int(),
-                    ),
-                    optional=dict(
-                        host_type_regex=Regex(),
-                        hostRequires=String(),
-                        partitions=String(),
-                        kickstart=String(),
-                        pattern=Class(Pattern),
-                        waived=Boolean(),
-                        role=String(),
-                        url_suffix=String(),
-                        task_params=Dict(String()),
-                    )
+            Struct(
+                required=dict(
+                    name=String(),
+                    max_duration_seconds=Int(),
                 ),
-                convert,
-                Struct(
-                    required=dict(
-                        name=String(),
-                        max_duration_seconds=Int(),
-                    ),
-                    optional=dict(
-                        host_type_regex=Regex(),
-                        hostRequires=String(),
-                        partitions=String(),
-                        kickstart=String(),
-                        pattern=Class(Pattern),
-                        waived=Boolean(),
-                        role=String(),
-                        url_suffix=String(),
-                        environment=Dict(String()),
-                    )
-                ),
+                optional=dict(
+                    host_type_regex=Regex(),
+                    hostRequires=String(),
+                    partitions=String(),
+                    kickstart=String(),
+                    pattern=Class(Pattern),
+                    waived=Boolean(),
+                    role=String(),
+                    url_suffix=String(),
+                    environment=Dict(String()),
+                )
             ),
             data
         )
