@@ -335,7 +335,6 @@ class HostType(Object):     # pylint: disable=too-few-public-methods
                 hostname=String(),
                 partitions=String(),
                 kickstart=String(),
-                tasks=String(),
             )),
             data
         )
