@@ -44,6 +44,8 @@ def main(args=None):
     common_parser = argparse.ArgumentParser(add_help=False)
     common_parser.add_argument('--verbose', '-v', action='count')
     parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('-d', '--debug', action='store_true',
+                        help='Enable debug (backtrace) output on error')
     parser.add_argument(
         '--db',
         help='Location of database of kernel trees and tests, default "."',
@@ -58,6 +60,10 @@ def main(args=None):
     cmd_set.build(cmds_parser, common_parser)
 
     args = parser.parse_args(args)
+
+    if not args.debug:
+        sys.tracebacklimit = 0
+
     commands = {
         'help': [parser.print_help],
         'run': [cmd_run.main, args],
