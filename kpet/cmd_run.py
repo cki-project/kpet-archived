@@ -173,7 +173,10 @@ def main_create_baserun(args, database):
                                       '/', False, False, None, False,
                                       None, None, {})
             cookies.set_cookie(cookie)
-    src_files = get_src_files(args.mboxes, cookies)
+    if args.mboxes:
+        src_files = get_src_files(args.mboxes, cookies)
+    else:
+        src_files = None
     if args.arch not in database.arches:
         raise Exception("Architecture \"{}\" not found".format(args.arch))
     if args.tree not in database.trees:
@@ -184,7 +187,7 @@ def main_create_baserun(args, database):
         components = set(x for x in database.components
                          if re.fullmatch(args.components, x))
     if args.sets is None:
-        sets = set()
+        sets = None
     else:
         sets = set(x for x in database.sets if re.fullmatch(args.sets, x))
         if not sets:
