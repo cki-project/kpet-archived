@@ -94,33 +94,33 @@ class DataPatternTest(unittest.TestCase):
         """Check empty patterns match anything"""
         self.assertMatch({})
 
-        self.assertMatch({}, sources=set())
+        self.assertMatch({}, sources=None)
         self.assertMatch({}, sources={"a"})
 
-        self.assertMatch({}, trees=set())
+        self.assertMatch({}, trees=None)
         self.assertMatch({}, trees={"a"})
 
-        self.assertMatch({}, arches=set())
+        self.assertMatch({}, arches=None)
         self.assertMatch({}, arches={"a"})
 
-        self.assertMatch({}, sources=set(), trees=set())
-        self.assertMatch({}, sources=set(), trees={"a"})
-        self.assertMatch({}, sources={"a"}, trees=set())
+        self.assertMatch({}, sources=None, trees=None)
+        self.assertMatch({}, sources=None, trees={"a"})
+        self.assertMatch({}, sources={"a"}, trees=None)
         self.assertMatch({}, sources={"a"}, trees={"a"})
 
     def test_specific_sources(self):
         """Check patterns match specific/all sources correctly"""
         self.assertMismatch({"not": dict(sources=None)},
-                            sources=set())
+                            sources=None)
         self.assertMismatch({"not": dict(sources=None), "sources": "a"},
-                            sources=set())
+                            sources=None)
 
         self.assertMismatch(dict(sources=None), sources={"a"})
         self.assertMismatch(dict(sources=[None, "a"]), sources={"a"})
         self.assertMismatch(dict(sources=[None, "b"]), sources={"a"})
 
-        self.assertMatch(dict(sources=None), sources=set())
-        self.assertMatch(dict(sources=[None, "a"]), sources=set())
+        self.assertMatch(dict(sources=None), sources=None)
+        self.assertMatch(dict(sources=[None, "a"]), sources=None)
 
         self.assertMatch({"not": dict(sources=None)},
                          sources={"a"})
@@ -132,11 +132,11 @@ class DataPatternTest(unittest.TestCase):
     def test_two_params(self):
         """Check two-parameter patterns match correctly"""
         self.assertMatch(dict(sources="a", trees="A"),
-                         sources=set(), trees=set())
+                         sources=None, trees=None)
         self.assertMatch(dict(sources="a", trees="A"),
-                         sources=set(), trees={"A"})
+                         sources=None, trees={"A"})
         self.assertMatch(dict(sources="a", trees="A"),
-                         sources={"a"}, trees=set())
+                         sources={"a"}, trees=None)
         self.assertMatch(dict(sources="a", trees="A"),
                          sources={"a"}, trees={"A"})
 

@@ -63,33 +63,26 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
 
         Args:
             trees:          The name of the kernel tree we're executing
-                            against, or a set thereof. An empty set means all
-                            the trees.
-                            None (the default) is equivalent to an empty set.
+                            against, or a set thereof.
+                            None (the default) means all the trees.
             arches:         The name of the architecture we're executing on or
-                            a set thereof. An empty set means all the
-                            architectures.
-                            None (the default) is equivalent to an empty set.
+                            a set thereof.
+                            None (the default) means all the architectures.
             components:     The name of an extra component included into the
-                            tested kernel build, or a set thereof. An empty
-                            set means no extra components. None (the default)
-                            is equivalent to an empty set.
+                            tested kernel build, or a set thereof.
+                            None (the default) means all the extra components.
             sets:           The name of the set of tests to restrict the run
-                            to, or a set thereof. An empty set means all the
-                            test set names, i.e. no restriction. None (the
-                            default) is equivalent to an empty set.
+                            to, or a set thereof. None (the default) means all
+                            the sets (i.e. no restriction).
             sources:        The path to the source file we're covering, or a
-                            set thereof. An empty set means all the files.
-                            None (the default) is equivalent to an empty set.
+                            set thereof. None (the default) means all the
+                            files.
             location_types: The type of the location of the kernel we're
                             testing (a member of loc.TYPE_SET), or a set
-                            thereof. An empty set means all the types.
-                            None (the default) is equivalent to an empty set.
+                            thereof. None (the default) means all the types.
         """
         def normalize(arg):
-            if arg is None:
-                return set()
-            if isinstance(arg, set):
+            if arg is None or isinstance(arg, set):
                 return arg
             return {arg}
 
@@ -210,16 +203,19 @@ class Pattern(Object):  # pylint: disable=too-few-public-methods
                     result |= sub_result
         elif isinstance(node, RE):
             assert qualifier is not None, "Qualifier not specified"
-            value_set = getattr(target, qualifier)
-            for value in value_set:
-                if node.fullmatch(value):
-                    result = True
-                    break
+            value_set_or_none = getattr(target, qualifier)
+            if value_set_or_none is None:
+                result = True
             else:
-                result = (value_set == set())
+                for value in value_set_or_none:
+                    if node.fullmatch(value):
+                        result = True
+                        break
+                else:
+                    result = False
         elif node is None:
             assert qualifier is not None, "Qualifier not specified"
-            result = getattr(target, qualifier) == set()
+            result = getattr(target, qualifier) is None
         else:
             assert False, "Unknown node type: " + type(node).__name__
 
