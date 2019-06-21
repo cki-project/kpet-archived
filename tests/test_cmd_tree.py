@@ -28,6 +28,7 @@ class CmdTreeTest(unittest.TestCase):
         dbdir = os.path.join(os.path.dirname(__file__), 'assets/db/general')
         mock_args = mock.Mock()
         mock_args.db = dbdir
+        mock_args.regex = None
         self.assertRaises(misc.ActionNotFound, cmd_tree.main, mock_args)
         mock_args.action = 'list'
         with mock.patch('sys.stdout') as mock_stdout:
