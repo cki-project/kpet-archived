@@ -12,6 +12,8 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """The "arch" command"""
+import re
+
 from kpet import misc, data, cmd_misc
 
 
@@ -23,11 +25,13 @@ def build(cmds_parser, common_parser):
         "arch",
         help='Architecture to test on, default action "list"',
     )
-    action_subparser.add_parser(
+    list_parser = action_subparser.add_parser(
         "list",
         help='Output a list of known architecture names',
         parents=[common_parser],
     )
+    list_parser.add_argument('regex', nargs='?', default=None,
+                             help='Optional. Use this to filter results.')
 
 
 def main(args):
@@ -36,7 +40,10 @@ def main(args):
         raise Exception("\"{}\" is not a database directory".format(args.db))
     database = data.Base(args.db)
     if args.action == 'list':
+        regex = re.compile(args.regex) if args.regex else None
         for arch in sorted(database.arches):
-            print(arch)
+            # filter using regex; if it's not set, print all
+            if not regex or regex.match(arch):
+                print(arch)
     else:
         misc.raise_action_not_found(args.action, args.command)

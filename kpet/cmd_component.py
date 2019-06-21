@@ -12,6 +12,8 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """The "component" command"""
+import re
+
 from kpet import misc, data, cmd_misc
 
 
@@ -23,11 +25,13 @@ def build(cmds_parser, common_parser):
         "component",
         help='Build component, default action "list".',
     )
-    action_subparser.add_parser(
+    list_parser = action_subparser.add_parser(
         "list",
         help='List recognized build components.',
         parents=[common_parser],
     )
+    list_parser.add_argument('regex', nargs='?', default=None,
+                             help='Optional. Use this to filter results.')
 
 
 def main(args):
@@ -36,9 +40,11 @@ def main(args):
         raise Exception("\"{}\" is not a database directory".format(args.db))
     database = data.Base(args.db)
     if args.action == 'list':
+        regex = re.compile(args.regex) if args.regex else None
         max_name_length = max((len(k) for k in database.components), default=0)
         for name, description in sorted(database.components.items(),
                                         key=lambda i: i[0]):
-            print(f"{name: <{max_name_length}} {description}")
+            if not regex or regex.match(name):
+                print(f"{name: <{max_name_length}} {description}")
     else:
         misc.raise_action_not_found(args.action, args.command)
