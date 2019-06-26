@@ -357,6 +357,36 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         """
         return os.path.isfile(dir_path + "/index.yaml")
 
+    def validate_host_type_regex(self):
+        """
+        Check if any of the regexes are invalid.
+        Returns:
+            Raises a schema.Invalid exception when finding an invalid regex
+        """
+        host_types = list((self.host_types or {}).keys())
+
+        error = ("One of {0} regexes\n" +
+                 "doesn't match any of the available {1}\n" +
+                 "In suite: {2}\n" +
+                 "In case: {3}\n" +
+                 "The regex: {4}\n" +
+                 "The avaliable {1}: {5}")
+
+        for suite in self.suites or []:
+            for case in suite.cases or []:
+                host_type_regex = case.host_type_regex or \
+                        suite.host_type_regex or \
+                        self.host_type_regex
+
+                for host in host_types:
+                    if host_type_regex.fullmatch(host):
+                        break
+                else:
+                    raise Invalid(error, "host_type_regex", "host_types",
+                                  suite.description, case.name,
+                                  host_type_regex.pattern,
+                                  host_types)
+
     def __init__(self, dir_path):
         """
         Initialize a database object.
@@ -394,3 +424,5 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             self.sets = {}
         if self.suites is None:
             self.suites = []
+        # Regex check
+        self.validate_host_type_regex()

@@ -306,3 +306,25 @@ class IntegrationTests(unittest.TestCase):
             get_patch_path("misc/files_def.diff"),
             get_patch_path("misc/files_ghi.diff"),
             stdout_matching=r'.*<job>\s*</job>.*')
+
+    def assertKpetSchemaInvalidError(self, db_name, expectedError):
+        """
+        Assert kpet raises a Schema Invalid error.
+         Args:
+            db_name:    Name of the database asset to test against.
+        """
+        # It is thrown in the baseline output
+        self.assertKpetProduces(
+            kpet_run_generate, db_name,
+            status=1,
+            stdout_matching=r'.*',
+            stderr_matching=r'.*kpet.schema.Invalid: ' + expectedError + '.*')
+        # It is still thrown when all of the patches and extras are specified
+        self.assertKpetProduces(
+            kpet_run_generate, db_name,
+            get_patch_path("misc/files_abc.diff"),
+            get_patch_path("misc/files_def.diff"),
+            get_patch_path("misc/files_ghi.diff"),
+            status=1,
+            stdout_matching=r'.*',
+            stderr_matching=r'.*kpet.schema.Invalid: ' + expectedError + '.*')

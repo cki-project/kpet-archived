@@ -446,3 +446,145 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             kpet_run_generate, assets_path,
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
                             r'suite2\s*case2\s*</job>.*')
+
+    def test_multihost_one_type_suite_wrong_regex(self):
+        """Test multihost schema invalid error with wrong suite regexes"""
+        assets = {
+            "index.yaml": """
+            host_type_regex: ^normal
+            recipesets:
+                rcs1:
+                  - normal
+            arches:
+                - arch
+            trees:
+                tree: tree.xml
+            host_types:
+                normal: {}
+            suites:
+                - suite1.yaml
+                - suite2.yaml
+            """,
+            "suite1.yaml": """
+            description: suite1
+            maintainers:
+              - maint1
+            host_type_regex: normal
+            cases:
+                - name: case1
+                  max_duration_seconds: 600
+                  pattern:
+                    sources:
+                      or:
+                        - a
+            """,
+            "suite2.yaml": """
+            description: suite2
+            maintainers:
+              - maint1
+            host_type_regex: not_normal
+            cases:
+                - name: case2
+                  max_duration_seconds: 600
+                  pattern:
+                    sources:
+                      or:
+                        - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self.test_dir, assets)
+
+        self.assertKpetSchemaInvalidError(
+            assets_path,
+            "One of host_type_regex")
+
+    def test_multihost_one_type_case_wrong_regex(self):
+        """Test multihost schema invalid error with wrong case regexes"""
+        assets = {
+            "index.yaml": """
+            host_type_regex: ^normal
+            recipesets:
+                rcs1:
+                  - normal
+            arches:
+                - arch
+            trees:
+                tree: tree.xml
+            host_types:
+                normal: {}
+            suites:
+                - suite1.yaml
+                - suite2.yaml
+            """,
+            "suite1.yaml": SUITE_BASE.format(1) + """
+                - name: case1
+                  max_duration_seconds: 600
+                  host_type_regex: normal
+                  pattern:
+                    sources:
+                      or:
+                        - a
+            """,
+            "suite2.yaml": SUITE_BASE.format(2) + """
+                - name: case2
+                  max_duration_seconds: 600
+                  host_type_regex: not_normal
+                  pattern:
+                    sources:
+                      or:
+                        - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self.test_dir, assets)
+        self.assertKpetSchemaInvalidError(
+            assets_path,
+            "One of host_type_regex")
+
+    def test_multihost_one_type_wrong_regex(self):
+        """Test multihost schema invalid error with wrong db-level regex"""
+
+        assets = {
+            "index.yaml": """
+            host_type_regex: ^normal
+            recipesets:
+                rcs1:
+                  - normal
+            arches:
+                - arch
+            trees:
+                tree: tree.xml
+            host_types:
+                normal: {}
+            host_type_regex: not_normal
+            suites:
+                - suite1.yaml
+                - suite2.yaml
+            """,
+            "suite1.yaml": SUITE_BASE.format(1) + """
+                - name: case1
+                  max_duration_seconds: 600
+                  pattern:
+                    sources:
+                      or:
+                        - a
+            """,
+            "suite2.yaml": SUITE_BASE.format(2) + """
+                - name: case2
+                  max_duration_seconds: 600
+                  pattern:
+                    sources:
+                      or:
+                        - d
+            """,
+            "tree.xml": COMMONTREE_XML,
+        }
+
+        assets_path = create_asset_files(self.test_dir, assets)
+
+        self.assertKpetSchemaInvalidError(
+            assets_path,
+            "One of host_type_regex")
