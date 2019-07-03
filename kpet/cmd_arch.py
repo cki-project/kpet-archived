@@ -43,7 +43,7 @@ def main(args):
         regex = re.compile(args.regex) if args.regex else None
         for arch in sorted(database.arches):
             # filter using regex; if it's not set, print all
-            if not regex or regex.match(arch):
+            if not regex or regex.fullmatch(arch):
                 print(arch)
     else:
         misc.raise_action_not_found(args.action, args.command)

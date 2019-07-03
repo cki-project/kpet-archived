@@ -42,7 +42,7 @@ def main(args):
     if args.action == 'list':
         regex = re.compile(args.regex) if args.regex else None
         for tree in sorted(database.trees.keys()):
-            if not regex or regex.match(tree):
+            if not regex or regex.fullmatch(tree):
                 print(tree)
     else:
         misc.raise_action_not_found(args.action, args.command)
