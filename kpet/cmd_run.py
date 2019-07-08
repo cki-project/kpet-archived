@@ -17,7 +17,7 @@ import re
 import sys
 import tempfile
 import shutil
-from kpet import misc, targeted, data, run, cmd_misc, loc
+from kpet import misc, targeted, data, run, cmd_misc
 
 
 def build_target(parser):
@@ -66,12 +66,6 @@ def build_target(parser):
         metavar='REGEX',
         help='A regular expression matching the sets of tests ' +
         'to restrict the run to. See "kpet set list" for available sets.'
-    )
-    parser.add_argument(
-        '--type',
-        default='auto',
-        choices=['auto'] + sorted(loc.TYPE_SET),
-        help='Type of the kernel location. Default "auto".'
     )
     parser.add_argument(
         '-k',
@@ -193,26 +187,12 @@ def main_create_baserun(args, database):
         if not sets:
             raise Exception("No test sets matched specified regular " +
                             "expression: {}".format(args.sets))
-    if args.type == "auto":
-        loc_type = loc.type_detect(args.kernel)
-        if loc_type is None:
-            raise \
-                Exception(
-                    "Cannot determine the type of kernel location \"{}\". "
-                    "Expecting a path to/URL of a .tar.gz/.rpm file or "
-                    "a YUM/DNF repo. "
-                    "Use --type <TYPE> to force a specific type.".
-                    format(args.kernel))
-    else:
-        loc_type = args.type
-    assert loc.type_is_valid(loc_type)
 
     target = data.Target(trees=args.tree,
                          arches=args.arch,
                          components=components,
                          sets=sets,
-                         sources=src_files,
-                         location_types=loc_type)
+                         sources=src_files)
     return run.Base(database, target)
 
 

@@ -57,7 +57,7 @@ class Object:   # pylint: disable=too-few-public-methods
 class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
     """Execution target that suite/case patterns match against"""
     def __init__(self, trees=None, arches=None, components=None, sets=None,
-                 sources=None, location_types=None):
+                 sources=None):
         """
         Initialize a target.
 
@@ -77,9 +77,6 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
             sources:        The path to the source file we're covering, or a
                             set thereof. None (the default) means all the
                             files.
-            location_types: The type of the location of the kernel we're
-                            testing (a member of loc.TYPE_SET), or a set
-                            thereof. None (the default) means all the types.
         """
         def normalize(arg):
             if arg is None or isinstance(arg, set):
@@ -91,17 +88,13 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
         self.components = normalize(components)
         self.sets = normalize(sets)
         self.sources = normalize(sources)
-        # TODO: Remove once kpet-db switches to components
-        self.location_types = normalize(location_types)
 
 
 class Pattern(Object):  # pylint: disable=too-few-public-methods
     """Execution target pattern"""
 
     # Target field qualifiers
-    qualifiers = {"trees", "arches", "components", "sets", "sources",
-                  # TODO: Remove once kpet-db switches to components
-                  "location_types"}
+    qualifiers = {"trees", "arches", "components", "sets", "sources"}
 
     """An execution target pattern"""
     def __init__(self, data):
