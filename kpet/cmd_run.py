@@ -28,11 +28,6 @@ def build_target(parser):
         parser: The parser to add arguments to.
     """
     parser.add_argument(
-        '--pw-cookie',
-        default=None,
-        help='Patchwork session cookie in case a login is required'
-    )
-    parser.add_argument(
         '--cookies',
         metavar='FILE',
         default=None,
@@ -157,16 +152,6 @@ def main_create_baserun(args, database):
     cookies = cookiejar.MozillaCookieJar()
     if args.cookies:
         cookies.load(args.cookies)
-    if args.pw_cookie:
-        for mbox in args.mboxes:
-            if not misc.is_url(mbox):
-                continue
-            domain = mbox.rsplit('patch', 1)[0].strip('/').split('/')[-1]
-            cookie = cookiejar.Cookie(0, 'sessionid', args.pw_cookie,
-                                      None, False, domain, False, False,
-                                      '/', False, False, None, False,
-                                      None, None, {})
-            cookies.set_cookie(cookie)
     if args.mboxes:
         src_files = get_src_files(args.mboxes, cookies)
     else:
