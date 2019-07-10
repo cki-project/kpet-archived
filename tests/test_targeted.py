@@ -20,11 +20,9 @@ from kpet import targeted
 
 class TargetedTest(unittest.TestCase):
     """Test cases for targeted."""
-    def test_get_src_files(self):
+    def test_success(self):
         """
-        Check filenames are extracted from the patches and also if it
-        raises the UnrecognizedPatchFormat execption when the patch is not a
-        git diff output.
+        Check filenames are extracted from the patches successfully.
         """
         patches_dir = os.path.join(os.path.dirname(__file__),
                                    'assets/patches/format_assortment')
@@ -55,6 +53,11 @@ class TargetedTest(unittest.TestCase):
             expected_value,
             targeted.get_src_files(patches),
         )
+
+    def test_failure(self):
+        """
+        Check invalid patches fail to parse.
+        """
         bad_patch_map = {
             # Empty
             b'':
