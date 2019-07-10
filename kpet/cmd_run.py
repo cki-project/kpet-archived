@@ -17,7 +17,7 @@ import re
 import sys
 import tempfile
 import shutil
-from kpet import misc, targeted, data, run, cmd_misc
+from kpet import misc, patch, data, run, cmd_misc
 
 
 def build_target(parser, generate):
@@ -134,7 +134,7 @@ def get_src_files(patches, cookies=None):
     tmpdir = tempfile.mkdtemp(suffix='kpet')
     try:
         patches = misc.patch2localfile(patches, tmpdir, cookies)
-        return targeted.get_src_files(patches)
+        return patch.get_src_files(patches)
     finally:
         shutil.rmtree(tmpdir)
 
