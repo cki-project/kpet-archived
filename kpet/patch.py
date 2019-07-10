@@ -15,11 +15,11 @@
 import re
 
 
-class UnrecognizedPatchFormat(Exception):
+class UnrecognizedFormat(Exception):
     """Unrecognized patch format"""
 
 
-class UnrecognizedPatchPathFormat(Exception):
+class UnrecognizedPathFormat(Exception):
     """Unrecognized format of a path in a diff header of a patch"""
 
 
@@ -33,14 +33,14 @@ def __get_src_file_path(diff_header_path):
     Returns:
         Source file path if the file exists before/after the change.
     Raises:
-        UnrecognizedPatchPathFormat: the diff header file path was invalid.
+        UnrecognizedPathFormat: the diff header file path was invalid.
     """
     if diff_header_path == "/dev/null":
         return None
     slash_idx = diff_header_path.find("/")
     # If path has no slash, starts with a slash, or ends with a slash
     if slash_idx <= 0 or diff_header_path[-1] == "/":
-        raise UnrecognizedPatchPathFormat(diff_header_path)
+        raise UnrecognizedPathFormat(diff_header_path)
     # Strip top directory
     return diff_header_path[slash_idx + 1:]
 
@@ -53,8 +53,8 @@ def get_src_files(patch_path_list):
     Returns:
         A set of source file paths modified by the patches.
     Raises:
-        UnrecognizedPatchFormat: a patch format was invalid.
-        UnrecognizedPatchPathFormat: a path in a diff header was invalid.
+        UnrecognizedFormat: a patch format was invalid.
+        UnrecognizedPathFormat: a path in a diff header was invalid.
     """
     # pylint: disable=too-many-locals
     pattern = re.compile(r'^---$|'
@@ -82,7 +82,7 @@ def get_src_files(patch_path_list):
                         old_file = __get_src_file_path(change_old)
                         new_file = __get_src_file_path(change_new)
                         if not old_file and not new_file:
-                            raise UnrecognizedPatchFormat(patch_content)
+                            raise UnrecognizedFormat(patch_content)
                         if old_file:
                             patch_file_set.add(old_file)
                         if new_file:
@@ -93,5 +93,5 @@ def get_src_files(patch_path_list):
             if patch_file_set:
                 file_set |= patch_file_set
             else:
-                raise UnrecognizedPatchFormat(patch_content)
+                raise UnrecognizedFormat(patch_content)
     return file_set
