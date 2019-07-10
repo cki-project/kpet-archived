@@ -60,48 +60,48 @@ class PatchTest(unittest.TestCase):
         bad_patch_map = {
             # Empty
             b'':
-            patch.UnrecognizedPatchFormat,
+            patch.UnrecognizedFormat,
 
             # No diff headers
             b'text':
-            patch.UnrecognizedPatchFormat,
+            patch.UnrecognizedFormat,
 
             # Both files /dev/null
             b'--- /dev/null\n'
             b'+++ /dev/null':
-            patch.UnrecognizedPatchFormat,
+            patch.UnrecognizedFormat,
 
             # Headers without files
             b'--- \n'
             b'+++ /dev/null':
-            patch.UnrecognizedPatchFormat,
+            patch.UnrecognizedFormat,
             b'--- /dev/null\n'
             b'+++ ':
-            patch.UnrecognizedPatchFormat,
+            patch.UnrecognizedFormat,
 
             # No directory
             b'--- abc\n'
             b'+++ ghi/jkl':
-            patch.UnrecognizedPatchPathFormat,
+            patch.UnrecognizedPathFormat,
             b'--- abc/def\n'
             b'+++ jkl':
-            patch.UnrecognizedPatchPathFormat,
+            patch.UnrecognizedPathFormat,
 
             # Directory diff
             b'--- abc/def\n'
             b'+++ ghi/jkl/':
-            patch.UnrecognizedPatchPathFormat,
+            patch.UnrecognizedPathFormat,
             b'--- abc/def/\n'
             b'+++ ghi/jkl':
-            patch.UnrecognizedPatchPathFormat,
+            patch.UnrecognizedPathFormat,
 
             # An absolute path to a file
             b'--- /abc/def\n'
             b'+++ ghi/jkl':
-            patch.UnrecognizedPatchPathFormat,
+            patch.UnrecognizedPathFormat,
             b'--- abc/def\n'
             b'+++ /ghi/jkl':
-            patch.UnrecognizedPatchPathFormat,
+            patch.UnrecognizedPathFormat,
         }
         for bad_patch, exception in bad_patch_map.items():
             with tempfile.NamedTemporaryFile() as bad_patch_file:
