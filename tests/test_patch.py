@@ -11,24 +11,23 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-"""Test cases for targeted module"""
+"""Test cases for patch module"""
 import os
 import tempfile
 import unittest
-from kpet import targeted
+from kpet import patch
 
 
-class TargetedTest(unittest.TestCase):
-    """Test cases for targeted."""
+class PatchTest(unittest.TestCase):
+    """Test cases for patch module."""
     def test_success(self):
         """
         Check filenames are extracted from the patches successfully.
         """
         patches_dir = os.path.join(os.path.dirname(__file__),
                                    'assets/patches/format_assortment')
-        patches = []
-        for patch in sorted(os.listdir(patches_dir)):
-            patches.append(os.path.join(patches_dir, patch))
+        patches = [os.path.join(patches_dir, p) for p in
+                   sorted(os.listdir(patches_dir))]
         expected_value = {
             'Kconfig',
             'fs/ext4/ext4.h',
@@ -51,7 +50,7 @@ class TargetedTest(unittest.TestCase):
         }
         self.assertSequenceEqual(
             expected_value,
-            targeted.get_src_files(patches),
+            patch.get_src_files(patches),
         )
 
     def test_failure(self):
@@ -61,48 +60,48 @@ class TargetedTest(unittest.TestCase):
         bad_patch_map = {
             # Empty
             b'':
-            targeted.UnrecognizedPatchFormat,
+            patch.UnrecognizedPatchFormat,
 
             # No diff headers
             b'text':
-            targeted.UnrecognizedPatchFormat,
+            patch.UnrecognizedPatchFormat,
 
             # Both files /dev/null
             b'--- /dev/null\n'
             b'+++ /dev/null':
-            targeted.UnrecognizedPatchFormat,
+            patch.UnrecognizedPatchFormat,
 
             # Headers without files
             b'--- \n'
             b'+++ /dev/null':
-            targeted.UnrecognizedPatchFormat,
+            patch.UnrecognizedPatchFormat,
             b'--- /dev/null\n'
             b'+++ ':
-            targeted.UnrecognizedPatchFormat,
+            patch.UnrecognizedPatchFormat,
 
             # No directory
             b'--- abc\n'
             b'+++ ghi/jkl':
-            targeted.UnrecognizedPatchPathFormat,
+            patch.UnrecognizedPatchPathFormat,
             b'--- abc/def\n'
             b'+++ jkl':
-            targeted.UnrecognizedPatchPathFormat,
+            patch.UnrecognizedPatchPathFormat,
 
             # Directory diff
             b'--- abc/def\n'
             b'+++ ghi/jkl/':
-            targeted.UnrecognizedPatchPathFormat,
+            patch.UnrecognizedPatchPathFormat,
             b'--- abc/def/\n'
             b'+++ ghi/jkl':
-            targeted.UnrecognizedPatchPathFormat,
+            patch.UnrecognizedPatchPathFormat,
 
             # An absolute path to a file
             b'--- /abc/def\n'
             b'+++ ghi/jkl':
-            targeted.UnrecognizedPatchPathFormat,
+            patch.UnrecognizedPatchPathFormat,
             b'--- abc/def\n'
             b'+++ /ghi/jkl':
-            targeted.UnrecognizedPatchPathFormat,
+            patch.UnrecognizedPatchPathFormat,
         }
         for bad_patch, exception in bad_patch_map.items():
             with tempfile.NamedTemporaryFile() as bad_patch_file:
@@ -110,6 +109,6 @@ class TargetedTest(unittest.TestCase):
                 bad_patch_file.flush()
                 self.assertRaises(
                     exception,
-                    targeted.get_src_files,
+                    patch.get_src_files,
                     [bad_patch_file.name],
                 )
