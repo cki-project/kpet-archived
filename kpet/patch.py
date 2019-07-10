@@ -16,11 +16,11 @@ import re
 
 
 class UnrecognizedPatchFormat(Exception):
-    """Raised when can't extract any source file from a patch"""
+    """Unrecognized patch format"""
 
 
 class UnrecognizedPatchPathFormat(Exception):
-    """Raised when can't extract source file path from a diff header"""
+    """Unrecognized format of a path in a diff header of a patch"""
 
 
 def __get_src_file_path(diff_header_path):
