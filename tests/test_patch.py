@@ -50,7 +50,7 @@ class PatchTest(unittest.TestCase):
         }
         self.assertSequenceEqual(
             expected_value,
-            patch.path_list_get_src_files(patches),
+            patch.path_list_get_src_set(patches),
         )
 
     def test_failure(self):
@@ -109,6 +109,6 @@ class PatchTest(unittest.TestCase):
                 bad_patch_file.flush()
                 self.assertRaises(
                     exception,
-                    patch.path_list_get_src_files,
+                    patch.path_list_get_src_set,
                     [bad_patch_file.name],
                 )
