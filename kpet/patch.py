@@ -45,7 +45,7 @@ def __get_src_file_path(diff_header_path):
     return diff_header_path[slash_idx + 1:]
 
 
-def get_src_files(patch_path_list):
+def path_list_get_src_files(patch_path_list):
     """
     Get paths to source files modified by patches in the specified files.
     Args:

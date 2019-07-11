@@ -134,7 +134,7 @@ def get_src_files(patches, cookies=None):
     tmpdir = tempfile.mkdtemp(suffix='kpet')
     try:
         patches = misc.patch2localfile(patches, tmpdir, cookies)
-        return patch.get_src_files(patches)
+        return patch.path_list_get_src_files(patches)
     finally:
         shutil.rmtree(tmpdir)
 
