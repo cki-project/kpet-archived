@@ -57,7 +57,6 @@ def get_src_set(patch):
         The set of source file paths modified by the patch.
     Raises:
         UnrecognizedFormat: patch format was invalid.
-        UnrecognizedPathFormat: a path in a diff header was invalid.
     """
     pattern = re.compile(r'^---$|'
                          r'^--- (\S+)(\s.*)?$\n'
@@ -73,10 +72,13 @@ def get_src_set(patch):
             (change_old, _, change_new, _, rename_old, rename_new) = \
                 match.groups()
             if change_old and change_new:
-                old_file = __diff_header_path_get_src(change_old)
-                new_file = __diff_header_path_get_src(change_new)
+                try:
+                    old_file = __diff_header_path_get_src(change_old)
+                    new_file = __diff_header_path_get_src(change_new)
+                except UnrecognizedPathFormat:
+                    raise UnrecognizedFormat("Invalid path in a diff header")
                 if not old_file and not new_file:
-                    raise UnrecognizedFormat(patch)
+                    raise UnrecognizedFormat("No valid paths in a diff header")
                 if old_file:
                     src_set.add(old_file)
                 if new_file:
@@ -85,7 +87,7 @@ def get_src_set(patch):
                 src_set.add(rename_old)
                 src_set.add(rename_new)
     if not src_set:
-        raise UnrecognizedFormat(patch)
+        raise UnrecognizedFormat("No changed files")
     return src_set
 
 
@@ -130,10 +132,13 @@ def location_set_get_src_set(location_set, cookies=None):
     Returns:
         The set of paths to modified source files.
     Raises:
-        UnrecognizedFormat: a patch format was invalid.
-        UnrecognizedPathFormat: a path in a diff header was invalid.
+        UnrecognizedFormat: The format of a patch was invalid.
     """
     src_set = set()
     for location in location_set:
-        src_set |= get_src_set(location_load(location, cookies))
+        try:
+            src_set |= get_src_set(location_load(location, cookies))
+        except UnrecognizedFormat:
+            raise UnrecognizedFormat("Can't parse contents of {}".
+                                     format(location))
     return src_set
