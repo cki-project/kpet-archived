@@ -45,6 +45,47 @@ def __get_src_file_path(diff_header_path):
     return diff_header_path[slash_idx + 1:]
 
 
+def get_src_files(patch):
+    """
+    Get the set of paths to source files modified by the patch.
+    Args:
+        patch: Contents of the patch to extract modified paths from.
+    Returns:
+        The set of source file paths modified by the patch.
+    Raises:
+        UnrecognizedFormat: patch format was invalid.
+        UnrecognizedPathFormat: a path in a diff header was invalid.
+    """
+    pattern = re.compile(r'^---$|'
+                         r'^--- (\S+)(\s.*)?$\n'
+                         r'^\+\+\+ (\S+)(\s.*)?$|'
+                         r'^rename from (\S+)$\n'
+                         r'^rename to (\S+)$',
+                         re.MULTILINE)
+    file_set = set()
+    for match in re.finditer(pattern, patch):
+        if match.group(0) == "---":
+            file_set = set()
+        else:
+            (change_old, _, change_new, _, rename_old, rename_new) = \
+                match.groups()
+            if change_old and change_new:
+                old_file = __get_src_file_path(change_old)
+                new_file = __get_src_file_path(change_new)
+                if not old_file and not new_file:
+                    raise UnrecognizedFormat(patch)
+                if old_file:
+                    file_set.add(old_file)
+                if new_file:
+                    file_set.add(new_file)
+            else:
+                file_set.add(rename_old)
+                file_set.add(rename_new)
+    if not file_set:
+        raise UnrecognizedFormat(patch)
+    return file_set
+
+
 def path_list_get_src_files(patch_path_list):
     """
     Get paths to source files modified by patches in the specified files.
@@ -56,13 +97,6 @@ def path_list_get_src_files(patch_path_list):
         UnrecognizedFormat: a patch format was invalid.
         UnrecognizedPathFormat: a path in a diff header was invalid.
     """
-    # pylint: disable=too-many-locals
-    pattern = re.compile(r'^---$|'
-                         r'^--- (\S+)(\s.*)?$\n'
-                         r'^\+\+\+ (\S+)(\s.*)?$|'
-                         r'^rename from (\S+)$\n'
-                         r'^rename to (\S+)$',
-                         re.MULTILINE)
     file_set = set()
     for patch_path in patch_path_list:
         # Some upstream patches are encoded as cp1252, iso-8859-1, or utf-8.
@@ -70,28 +104,5 @@ def path_list_get_src_files(patch_path_list):
         #   http://python-notes.curiousefficiency.org/
         with open(patch_path, encoding="ascii",
                   errors="surrogateescape") as patch_file:
-            patch_content = patch_file.read()
-            patch_file_set = set()
-            for match in re.finditer(pattern, patch_content):
-                if match.group(0) == "---":
-                    patch_file_set = set()
-                else:
-                    (change_old, _, change_new, _, rename_old, rename_new) = \
-                        match.groups()
-                    if change_old and change_new:
-                        old_file = __get_src_file_path(change_old)
-                        new_file = __get_src_file_path(change_new)
-                        if not old_file and not new_file:
-                            raise UnrecognizedFormat(patch_content)
-                        if old_file:
-                            patch_file_set.add(old_file)
-                        if new_file:
-                            patch_file_set.add(new_file)
-                    else:
-                        patch_file_set.add(rename_old)
-                        patch_file_set.add(rename_new)
-            if patch_file_set:
-                file_set |= patch_file_set
-            else:
-                raise UnrecognizedFormat(patch_content)
+            file_set |= get_src_files(patch_file.read())
     return file_set
