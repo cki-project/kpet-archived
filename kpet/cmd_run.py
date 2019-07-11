@@ -15,8 +15,6 @@
 import http.cookiejar as cookiejar
 import re
 import sys
-import tempfile
-import shutil
 from kpet import misc, patch, data, run, cmd_misc
 
 
@@ -119,26 +117,6 @@ def build(cmds_parser, common_parser):
     build_target(print_test_cases_parser, generate=False)
 
 
-def get_src_files(patches, cookies=None):
-    """
-    Get the set of files modified by a list of patches.
-
-    Args:
-        patches:   List of patches, they can be local files or remote urls
-        cookies:   A jar of cookies to send when downloading patches.
-                   Optional.
-
-    Returns:
-        A set of source file paths modified by the patches.
-    """
-    tmpdir = tempfile.mkdtemp(suffix='kpet')
-    try:
-        patches = misc.patch2localfile(patches, tmpdir, cookies)
-        return patch.path_list_get_src_set(patches)
-    finally:
-        shutil.rmtree(tmpdir)
-
-
 # pylint: disable=too-many-branches
 def main_create_baserun(args, database):
     """
@@ -156,9 +134,9 @@ def main_create_baserun(args, database):
     if args.cookies:
         cookies.load(args.cookies)
     if args.mboxes:
-        src_files = get_src_files(args.mboxes, cookies)
+        src_set = patch.location_set_get_src_set(set(args.mboxes), cookies)
     else:
-        src_files = None
+        src_set = None
     if args.arch is not None and args.arch not in database.arches:
         raise Exception("Architecture \"{}\" not found".format(args.arch))
     if args.tree is not None and args.tree not in database.trees:
@@ -180,7 +158,7 @@ def main_create_baserun(args, database):
                          arches=args.arch,
                          components=components,
                          sets=sets,
-                         sources=src_files)
+                         sources=src_set)
     return run.Base(database, target)
 
 

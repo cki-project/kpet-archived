@@ -12,7 +12,10 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Patch operations"""
+
 import re
+from urllib.parse import urlparse
+import requests
 
 
 class UnrecognizedFormat(Exception):
@@ -86,35 +89,51 @@ def get_src_set(patch):
     return src_set
 
 
-def path_load(patch_path):
+def location_load(location, cookies=None):
     """
-    Load patch content from a file.
+    Load patch content from a patch location (URL or path).
 
     Args:
-        path:   A patch file path.
+        location:   A patch location (URL or path).
+        cookies:    A cookie jar object to use when fetching URL locations,
+                    if not None.
     Returns:
         The patch content.
     """
-    # Some upstream patches are encoded as cp1252, iso-8859-1, or utf-8.
-    # This is the recommended method from:
-    #   http://python-notes.curiousefficiency.org/
-    with open(patch_path, encoding="ascii",
-              errors="surrogateescape") as patch_file:
-        return patch_file.read()
+    # If it's a url
+    if urlparse(location).scheme:
+        response = requests.get(location, cookies=cookies)
+        response.raise_for_status()
+        content = response.content
+    # Else it's a local file
+    else:
+        # Some upstream patches are encoded as cp1252, iso-8859-1, or utf-8.
+        # This is the recommended method from:
+        #   http://python-notes.curiousefficiency.org/
+        with open(location, encoding="ascii",
+                  errors="surrogateescape") as patch_file:
+            content = patch_file.read()
+    return content
 
 
-def path_list_get_src_set(patch_path_list):
+def location_set_get_src_set(location_set, cookies=None):
     """
-    Get paths to source files modified by patches in the specified files.
+    Get the set of paths to source files modified by patches at a set of
+    locations.
+
     Args:
-        patch_path_list: List of patch file paths, they can't be URLs.
+        location_set:   A set of locations (URLs or paths), to load patches
+                        and extract the modified source files from. Can be any
+                        iterable beside the set.
+        cookies:        A cookie jar object to use when fetching URL
+                        locations, if not None.
     Returns:
-        A set of source file paths modified by the patches.
+        The set of paths to modified source files.
     Raises:
         UnrecognizedFormat: a patch format was invalid.
         UnrecognizedPathFormat: a path in a diff header was invalid.
     """
     src_set = set()
-    for patch_path in patch_path_list:
-        src_set |= get_src_set(path_load(patch_path))
+    for location in location_set:
+        src_set |= get_src_set(location_load(location, cookies))
     return src_set

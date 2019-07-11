@@ -13,8 +13,6 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Miscellaneous routines"""
 from urllib.parse import urlparse
-import tempfile
-import requests
 
 
 class ActionNotFound(Exception):
@@ -24,34 +22,6 @@ class ActionNotFound(Exception):
 def is_url(string):
     """Check if a string can be interpreted as a URL"""
     return bool(urlparse(string).scheme)
-
-
-def patch2localfile(patches, workdir, cookies=None):
-    """
-    Convert all patches to local files.
-
-    Args:
-        patches:    A list of patch paths or URLs.
-        workdir:    Directory to place downloaded patches in.
-        cookies:    A jar of cookies to send when downloading patches.
-                    Optional.
-
-    Returns:
-        A list of patch paths.
-    """
-    result = []
-    for patch in patches:
-        if is_url(patch):
-            response = requests.get(patch, cookies=cookies)
-            response.raise_for_status()
-            tmpfile = tempfile.mktemp(dir=workdir)
-            with open(tmpfile, 'wb') as file_handler:
-                file_handler.write(response.content)
-            result.append(tmpfile)
-        else:
-            # it's a local file
-            result.append(patch)
-    return result
 
 
 def raise_action_not_found(action, command):
