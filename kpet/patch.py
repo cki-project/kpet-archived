@@ -23,7 +23,7 @@ class UnrecognizedPathFormat(UnrecognizedFormat):
     """Unrecognized format of a path in a diff header of a patch"""
 
 
-def __get_src(diff_header_path):
+def __diff_header_path_get_src(diff_header_path):
     """
     Extract source file path from a path from a ---/+++ diff header.
     Return None if file doesn't exist before/after the change. Throw an
@@ -70,8 +70,8 @@ def get_src_set(patch):
             (change_old, _, change_new, _, rename_old, rename_new) = \
                 match.groups()
             if change_old and change_new:
-                old_file = __get_src(change_old)
-                new_file = __get_src(change_new)
+                old_file = __diff_header_path_get_src(change_old)
+                new_file = __diff_header_path_get_src(change_new)
                 if not old_file and not new_file:
                     raise UnrecognizedFormat(patch)
                 if old_file:
