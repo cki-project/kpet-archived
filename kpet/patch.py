@@ -19,7 +19,7 @@ class UnrecognizedFormat(Exception):
     """Unrecognized patch format"""
 
 
-class UnrecognizedPathFormat(Exception):
+class UnrecognizedPathFormat(UnrecognizedFormat):
     """Unrecognized format of a path in a diff header of a patch"""
 
 
