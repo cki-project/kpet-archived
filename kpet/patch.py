@@ -86,6 +86,23 @@ def get_src_set(patch):
     return src_set
 
 
+def path_load(patch_path):
+    """
+    Load patch content from a file.
+
+    Args:
+        path:   A patch file path.
+    Returns:
+        The patch content.
+    """
+    # Some upstream patches are encoded as cp1252, iso-8859-1, or utf-8.
+    # This is the recommended method from:
+    #   http://python-notes.curiousefficiency.org/
+    with open(patch_path, encoding="ascii",
+              errors="surrogateescape") as patch_file:
+        return patch_file.read()
+
+
 def path_list_get_src_set(patch_path_list):
     """
     Get paths to source files modified by patches in the specified files.
@@ -99,10 +116,5 @@ def path_list_get_src_set(patch_path_list):
     """
     src_set = set()
     for patch_path in patch_path_list:
-        # Some upstream patches are encoded as cp1252, iso-8859-1, or utf-8.
-        # This is the recommended method from:
-        #   http://python-notes.curiousefficiency.org/
-        with open(patch_path, encoding="ascii",
-                  errors="surrogateescape") as patch_file:
-            src_set |= get_src_set(patch_file.read())
+        src_set |= get_src_set(path_load(patch_path))
     return src_set
