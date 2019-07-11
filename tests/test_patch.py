@@ -57,58 +57,47 @@ class PatchTest(unittest.TestCase):
         """
         Check invalid patches fail to parse.
         """
-        bad_patch_map = {
+        bad_patch_list = [
             # Empty
-            b'':
-            patch.UnrecognizedFormat,
+            b'',
 
             # No diff headers
-            b'text':
-            patch.UnrecognizedFormat,
+            b'text',
 
             # Both files /dev/null
             b'--- /dev/null\n'
-            b'+++ /dev/null':
-            patch.UnrecognizedFormat,
+            b'+++ /dev/null',
 
             # Headers without files
             b'--- \n'
-            b'+++ /dev/null':
-            patch.UnrecognizedFormat,
+            b'+++ /dev/null',
             b'--- /dev/null\n'
-            b'+++ ':
-            patch.UnrecognizedFormat,
+            b'+++ ',
 
             # No directory
             b'--- abc\n'
-            b'+++ ghi/jkl':
-            patch.UnrecognizedPathFormat,
+            b'+++ ghi/jkl',
             b'--- abc/def\n'
-            b'+++ jkl':
-            patch.UnrecognizedPathFormat,
+            b'+++ jkl',
 
             # Directory diff
             b'--- abc/def\n'
-            b'+++ ghi/jkl/':
-            patch.UnrecognizedPathFormat,
+            b'+++ ghi/jkl/',
             b'--- abc/def/\n'
-            b'+++ ghi/jkl':
-            patch.UnrecognizedPathFormat,
+            b'+++ ghi/jkl',
 
             # An absolute path to a file
             b'--- /abc/def\n'
-            b'+++ ghi/jkl':
-            patch.UnrecognizedPathFormat,
+            b'+++ ghi/jkl',
             b'--- abc/def\n'
-            b'+++ /ghi/jkl':
-            patch.UnrecognizedPathFormat,
-        }
-        for bad_patch, exception in bad_patch_map.items():
+            b'+++ /ghi/jkl',
+        ]
+        for bad_patch in bad_patch_list:
             with tempfile.NamedTemporaryFile() as bad_patch_file:
                 bad_patch_file.write(bad_patch)
                 bad_patch_file.flush()
                 self.assertRaises(
-                    exception,
+                    patch.UnrecognizedFormat,
                     patch.location_set_get_src_set,
                     [bad_patch_file.name],
                 )
