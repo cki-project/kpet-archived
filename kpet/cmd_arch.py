@@ -40,10 +40,10 @@ def main(args):
         raise Exception("\"{}\" is not a database directory".format(args.db))
     database = data.Base(args.db)
     if args.action == 'list':
-        regex = re.compile(args.regex) if args.regex else None
+        regex = re.compile(args.regex or ".*")
         for arch in sorted(database.arches):
             # filter using regex; if it's not set, print all
-            if not regex or regex.fullmatch(arch):
+            if regex.fullmatch(arch):
                 print(arch)
     else:
         misc.raise_action_not_found(args.action, args.command)

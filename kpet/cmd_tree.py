@@ -40,9 +40,9 @@ def main(args):
         raise Exception("\"{}\" is not a database directory".format(args.db))
     database = data.Base(args.db)
     if args.action == 'list':
-        regex = re.compile(args.regex) if args.regex else None
+        regex = re.compile(args.regex or ".*")
         for tree in sorted(database.trees.keys()):
-            if not regex or regex.fullmatch(tree):
+            if regex.fullmatch(tree):
                 print(tree)
     else:
         misc.raise_action_not_found(args.action, args.command)
