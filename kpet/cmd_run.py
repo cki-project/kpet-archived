@@ -134,7 +134,8 @@ def main_create_baserun(args, database):
     if args.cookies:
         cookies.load(args.cookies)
     if args.mboxes:
-        src_set = patch.location_set_get_src_set(set(args.mboxes), cookies)
+        src_set = patch.get_src_set_from_location_set(set(args.mboxes),
+                                                      cookies)
     else:
         src_set = None
     if args.arch is not None and args.arch not in database.arches:
