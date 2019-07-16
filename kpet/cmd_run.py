@@ -37,14 +37,14 @@ def build_target(parser):
         '-t',
         '--tree',
         required=True,
-        help='Name of the specified kernel\'s tree. Required. ' +
+        help='Name of the specified kernel\'s tree. ' +
         'See "kpet tree list" for recognized trees.'
     )
     parser.add_argument(
         '-a',
         '--arch',
         required=True,
-        help='Architecture of the specified kernel. Required. ' +
+        help='Architecture of the specified kernel. ' +
         'See "kpet arch list" for supported architectures.'
     )
     parser.add_argument(
@@ -99,7 +99,7 @@ def build(cmds_parser, common_parser):
         '-k',
         '--kernel',
         required=True,
-        help='Kernel location. Must be accessible by Beaker. Required.'
+        help='Kernel location. Must be accessible by Beaker.'
     )
     generate_parser.add_argument(
         '--no-lint',
