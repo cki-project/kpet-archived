@@ -106,7 +106,7 @@ def load_from_location(location, cookies=None):
     if urlparse(location).scheme:
         response = requests.get(location, cookies=cookies)
         response.raise_for_status()
-        content = response.content
+        content = response.text
     # Else it's a local file
     else:
         # Some upstream patches are encoded as cp1252, iso-8859-1, or utf-8.
