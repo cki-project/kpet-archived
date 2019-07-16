@@ -61,7 +61,8 @@ INDEX_BASE_YAML = """
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 suites:
                     - suite.yaml
 """
