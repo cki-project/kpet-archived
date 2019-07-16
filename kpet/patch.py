@@ -26,7 +26,7 @@ class UnrecognizedPathFormat(UnrecognizedFormat):
     """Unrecognized format of a path in a diff header of a patch"""
 
 
-def __diff_header_path_get_src(diff_header_path):
+def _get_src_from_diff_header_path(diff_header_path):
     """
     Extract source file path from a path from a ---/+++ diff header.
     Return None if file doesn't exist before/after the change. Throw an
@@ -73,8 +73,8 @@ def get_src_set(patch):
                 match.groups()
             if change_old and change_new:
                 try:
-                    old_file = __diff_header_path_get_src(change_old)
-                    new_file = __diff_header_path_get_src(change_new)
+                    old_file = _get_src_from_diff_header_path(change_old)
+                    new_file = _get_src_from_diff_header_path(change_new)
                 except UnrecognizedPathFormat:
                     raise UnrecognizedFormat("Invalid path in a diff header")
                 if not old_file and not new_file:
@@ -91,7 +91,7 @@ def get_src_set(patch):
     return src_set
 
 
-def location_load(location, cookies=None):
+def load_from_location(location, cookies=None):
     """
     Load patch content from a patch location (URL or path).
 
@@ -118,7 +118,7 @@ def location_load(location, cookies=None):
     return content
 
 
-def location_set_get_src_set(location_set, cookies=None):
+def get_src_set_from_location_set(location_set, cookies=None):
     """
     Get the set of paths to source files modified by patches at a set of
     locations.
@@ -137,7 +137,7 @@ def location_set_get_src_set(location_set, cookies=None):
     src_set = set()
     for location in location_set:
         try:
-            src_set |= get_src_set(location_load(location, cookies))
+            src_set |= get_src_set(load_from_location(location, cookies))
         except UnrecognizedFormat:
             raise UnrecognizedFormat("Can't parse contents of {}".
                                      format(location))

@@ -50,7 +50,7 @@ class PatchTest(unittest.TestCase):
         }
         self.assertSequenceEqual(
             expected_value,
-            patch.location_set_get_src_set(patches),
+            patch.get_src_set_from_location_set(patches),
         )
 
     def test_failure(self):
@@ -98,6 +98,6 @@ class PatchTest(unittest.TestCase):
                 bad_patch_file.flush()
                 self.assertRaises(
                     patch.UnrecognizedFormat,
-                    patch.location_set_get_src_set,
+                    patch.get_src_set_from_location_set,
                     [bad_patch_file.name],
                 )
