@@ -181,7 +181,8 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 suites:
                     - suite1.yaml
                     - suite2.yaml
@@ -246,7 +247,8 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 suites:
                     - suite1.yaml
                     - suite2.yaml
@@ -317,7 +319,8 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 suites:
                     - suite1.yaml
                     - suite2.yaml

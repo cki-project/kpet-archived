@@ -34,7 +34,8 @@ INDEX_BASE = """
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 host_types:
                     normal: {}
 """
@@ -68,7 +69,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 host_types:
                     normal: {}
                 suites:
@@ -142,7 +144,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 host_types:
                     normal: {}
                     not_normal: {}
@@ -195,7 +198,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 host_types:
                     normal: {}
                     not_normal: {}
@@ -247,7 +251,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 host_types:
                     a: {}
                     b: {}
@@ -299,7 +304,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 host_types:
                     a: {}
                     b: {}
@@ -352,7 +358,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 host_types:
                     a: {}
                     b: {}
@@ -410,7 +417,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 host_types:
                     a: {}
                     b: {}
@@ -458,7 +466,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             arches:
                 - arch
             trees:
-                tree: tree.xml
+                tree:
+                    template: tree.xml
             host_types:
                 normal: {}
             suites:
@@ -511,7 +520,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             arches:
                 - arch
             trees:
-                tree: tree.xml
+                tree:
+                    template: tree.xml
             host_types:
                 normal: {}
             suites:
@@ -556,7 +566,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             arches:
                 - arch
             trees:
-                tree: tree.xml
+                tree:
+                    template: tree.xml
             host_types:
                 normal: {}
             host_type_regex: not_normal

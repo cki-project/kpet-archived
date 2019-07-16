@@ -41,7 +41,8 @@ class IntegrationMultihostNoTypesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
             """,
             "tree.xml": COMMONTREE_XML,
         }

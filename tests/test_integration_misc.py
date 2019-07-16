@@ -71,7 +71,8 @@ class IntegrationMiscTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
             """,
             "tree.xml": COMMONTREE_XML,
         }
@@ -102,7 +103,8 @@ class IntegrationMiscTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    missing_template: missing_template.xml
+                    missing_template:
+                        template: missing_template.xml
             """,
         }
 
@@ -119,7 +121,8 @@ class IntegrationMiscTests(IntegrationTests):
         assets = {
             "index.yaml": INDEX_BASE_YAML + """
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 suites:
                     - missing.yaml
             """,
@@ -220,7 +223,8 @@ class IntegrationMiscTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 suites:
                     - suite.yaml
             """,

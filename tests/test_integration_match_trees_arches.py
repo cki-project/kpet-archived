@@ -34,7 +34,8 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
                     - ""
                     - arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 suites:
                     - suite.yaml
             """,
@@ -74,7 +75,8 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
                     - arch
                     - not_arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 suites:
                     - suite.yaml
             """,
@@ -118,7 +120,8 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
                     - not_arch
                     - other_arch
                 trees:
-                    tree: tree.xml
+                    tree:
+                        template: tree.xml
                 suites:
                     - suite.yaml
             """,
@@ -167,8 +170,10 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    "": .xml
-                    tree: tree.xml
+                    "":
+                        template: .xml
+                    tree:
+                        template: tree.xml
                 suites:
                     - suite.yaml
             """,
@@ -207,9 +212,12 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    "": .xml
-                    tree: tree.xml
-                    not_tree: not_tree.xml
+                    "":
+                        template: .xml
+                    tree:
+                        template: tree.xml
+                    not_tree:
+                        template: not_tree.xml
                 suites:
                     - suite.yaml
             """,
@@ -252,10 +260,14 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
                 arches:
                     - arch
                 trees:
-                    "": .xml
-                    tree: tree.xml
-                    not_tree: not_tree.xml
-                    other_tree: other_tree.xml
+                    "":
+                        template: .xml
+                    tree:
+                        template: tree.xml
+                    not_tree:
+                        template: not_tree.xml
+                    other_tree:
+                        template: other_tree.xml
                 suites:
                     - suite.yaml
             """,
