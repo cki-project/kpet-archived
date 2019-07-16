@@ -63,12 +63,6 @@ def build_target(parser):
         'to restrict the run to. See "kpet set list" for available sets.'
     )
     parser.add_argument(
-        '-k',
-        '--kernel',
-        required=True,
-        help='Kernel location. Must be accessible by Beaker. Required.'
-    )
-    parser.add_argument(
         'mboxes',
         nargs='*',
         default=[],
@@ -100,6 +94,12 @@ def build(cmds_parser, common_parser):
         '--output',
         default=None,
         help='Path where will be saved the xml, default is stdout'
+    )
+    generate_parser.add_argument(
+        '-k',
+        '--kernel',
+        required=True,
+        help='Kernel location. Must be accessible by Beaker. Required.'
     )
     generate_parser.add_argument(
         '--no-lint',
