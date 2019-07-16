@@ -175,8 +175,10 @@ class Base:     # pylint: disable=too-few-public-methods
         """
         assert isinstance(database, data.Base)
         assert isinstance(target, data.Target)
-        assert target.trees <= set(database.trees.keys())
-        assert target.arches <= set(database.arches)
+        assert target.trees is None or \
+            target.trees <= set(database.trees.keys())
+        assert target.arches is None or \
+            target.arches <= set(database.arches)
 
         self.database = database
         self.target = target
@@ -198,8 +200,8 @@ class Base:     # pylint: disable=too-few-public-methods
         """
         assert isinstance(description, str)
         assert isinstance(kernel_location, str)
-        assert len(self.target.trees) == 1
-        assert len(self.target.arches) == 1
+        assert self.target.trees is not None and len(self.target.trees) == 1
+        assert self.target.arches is not None and len(self.target.arches) == 1
 
         tree_name = list(self.target.trees)[0]
         arch_name = list(self.target.arches)[0]
