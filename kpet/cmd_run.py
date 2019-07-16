@@ -20,12 +20,15 @@ import shutil
 from kpet import misc, targeted, data, run, cmd_misc
 
 
-def build_target(parser):
+def build_target(parser, generate):
     """
     Add target-specifying arguments to a "run" sub-command parser.
 
     Args:
         parser: The parser to add arguments to.
+        generate: True, if the options should have restrictions imposed on
+                  targets by template generation (kpet.run.Base.generate()).
+                  False if not.
     """
     parser.add_argument(
         '--cookies',
@@ -36,14 +39,14 @@ def build_target(parser):
     parser.add_argument(
         '-t',
         '--tree',
-        required=True,
+        required=generate,
         help='Name of the specified kernel\'s tree. ' +
         'See "kpet tree list" for recognized trees.'
     )
     parser.add_argument(
         '-a',
         '--arch',
-        required=True,
+        required=generate,
         help='Architecture of the specified kernel. ' +
         'See "kpet arch list" for supported architectures.'
     )
@@ -106,14 +109,14 @@ def build(cmds_parser, common_parser):
         action='store_true',
         help='Do not lint and reformat output XML'
     )
-    build_target(generate_parser)
+    build_target(generate_parser, generate=True)
 
     print_test_cases_parser = action_subparser.add_parser(
         "print-test-cases",
         help="Print test cases applicable to the patches",
         parents=[common_parser],
     )
-    build_target(print_test_cases_parser)
+    build_target(print_test_cases_parser, generate=False)
 
 
 def get_src_files(patches, cookies=None):
@@ -156,9 +159,9 @@ def main_create_baserun(args, database):
         src_files = get_src_files(args.mboxes, cookies)
     else:
         src_files = None
-    if args.arch not in database.arches:
+    if args.arch is not None and args.arch not in database.arches:
         raise Exception("Architecture \"{}\" not found".format(args.arch))
-    if args.tree not in database.trees:
+    if args.tree is not None and args.tree not in database.trees:
         raise Exception("Tree \"{}\" not found".format(args.tree))
     if args.components is None:
         components = set()
