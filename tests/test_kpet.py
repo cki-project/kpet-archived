@@ -54,12 +54,14 @@ class ArgumentParserTest(unittest.TestCase):
                               parser.parse_args, ['run', 'generate'])
 
         args = parser.parse_args(
-            ['run', 'generate', '-t', 'foo', '-k', 'bar', 'mbox1', 'mbox2']
+            ['run', 'generate', '-t', 'foo', '-k', 'bar', '-a', 'baz',
+             'mbox1', 'mbox2']
         )
         self.assertEqual('run', args.command)
         self.assertEqual('generate', args.action)
         self.assertEqual('foo', args.tree)
         self.assertEqual('bar', args.kernel)
+        self.assertEqual('baz', args.arch)
         self.assertListEqual(['mbox1', 'mbox2'], args.mboxes)
 
     def test_exec_command(self):
@@ -106,8 +108,8 @@ class ArgumentParserTest(unittest.TestCase):
         Check run generate command executes successfully
         """
         dbdir = os.path.join(os.path.dirname(__file__), 'assets/db/general')
-        args = ['--db', dbdir, 'run', 'generate', '-t', 'rhel7', '-k',
-                'kernel.tar.gz']
+        args = ['--db', dbdir, 'run', 'generate', '-t', 'rhel7',
+                '-a', 'x86_64', '-k', 'kernel.tar.gz']
         with mock.patch('sys.stdout') as mock_stdout:
             kpet.main(args)
         self.assertIn('<job>', mock_stdout.write.call_args_list[0][0][0])

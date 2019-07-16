@@ -43,7 +43,7 @@ def build_target(parser):
     parser.add_argument(
         '-a',
         '--arch',
-        default='x86_64',
+        required=True,
         help='Architecture of the specified kernel. Required. ' +
         'See "kpet arch list" for supported architectures.'
     )
