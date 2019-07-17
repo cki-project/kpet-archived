@@ -138,10 +138,15 @@ def main_create_baserun(args, database):
                                                       cookies)
     else:
         src_set = None
-    if args.arch is not None and args.arch not in database.arches:
-        raise Exception("Architecture \"{}\" not found".format(args.arch))
     if args.tree is not None and args.tree not in database.trees:
         raise Exception("Tree \"{}\" not found".format(args.tree))
+    if args.arch is not None:
+        if args.arch not in database.arches:
+            raise Exception("Architecture \"{}\" not found".format(args.arch))
+        if args.tree is not None and\
+           args.arch not in database.trees[args.tree]['arches']:
+            raise Exception("Arch \"{}\" not supported by tree \"{}\"".format(
+                args.arch, args.tree))
     if args.components is None:
         components = set()
     else:

@@ -47,7 +47,7 @@ class IntegrationMiscTests(IntegrationTests):
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             status=1,
-            stderr_matching=r'.*Architecture "arch" not found.*')
+            stderr_matching=r'.*Tree "tree" not found.*')
 
     def test_minimal_run_generate(self):
         """Test run generation with empty database"""
