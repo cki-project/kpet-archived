@@ -14,9 +14,10 @@
 """KPET data"""
 
 import os
+import re
 from kpet.schema import Invalid, Struct, Choice, NonEmptyList, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, \
-    Int, Null, RE
+    Int, Null, RE, Reduction, Succession
 
 # pylint: disable=raising-format-tuple,access-member-before-definition
 
@@ -380,11 +381,48 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                                   host_type_regex.pattern,
                                   host_types)
 
+    def convert_tree_arches(self):
+        """
+        Convert each tree's supported architecture specification from
+        a list of regexes to a list of architecture names matching those
+        regexes
+
+        Returns:
+            Raises a schema.Invalid exception when finding an invalid regex
+        """
+
+        wildcard = [re.compile(".*")]
+
+        for name, value in self.trees.items():
+            tree_arches = set()
+            for arch_regex in value.get("arches", wildcard):
+                regex_arches = set(filter(arch_regex.fullmatch, self.arches))
+                if regex_arches == set():
+                    error = ("One of 'trees: arches:' regexes\n" +
+                             "doesn't match any of the available arches\n" +
+                             "The regex: '{0}'\n" +
+                             "The avaliable arches: {1}")
+                    raise Invalid(error, arch_regex.pattern,
+                                  self.arches)
+                tree_arches |= regex_arches
+
+            self.trees[name]["arches"] = list(tree_arches)
+
     def __init__(self, dir_path):
         """
         Initialize a database object.
         """
         assert self.is_dir_valid(dir_path)
+
+        arches_schema = Reduction(Regex(), lambda x: [x], List(Regex()))
+        # TODO: Discard Succession once the database transitioned to
+        # the new type
+        tree_schema = Succession(
+            String(),
+            lambda x: dict(template=x),
+            Struct(required=dict(template=String()),
+                   optional=dict(arches=arches_schema))
+        )
 
         super().__init__(
             ScopedYAMLFile(
@@ -393,7 +431,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                     ),
                     optional=dict(
                         suites=List(YAMLFile(Class(Suite))),
-                        trees=Dict(String()),
+                        trees=Dict(tree_schema),
                         arches=List(String()),
                         components=Dict(String()),
                         sets=Dict(String()),
@@ -419,3 +457,6 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             self.suites = []
         # Regex check
         self.validate_host_type_regex()
+        # Replace the list of regexes with a list of available arches
+        # for easier usage
+        self.convert_tree_arches()

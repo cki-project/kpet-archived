@@ -225,7 +225,8 @@ class Base:     # pylint: disable=too-few-public-methods
                 default_for_string=True,
             ),
         )
-        template = jinja_env.get_template(self.database.trees[tree_name])
+        template = jinja_env.get_template(
+                        self.database.trees[tree_name]['template'])
         text = template.render(params)
 
         if lint:
