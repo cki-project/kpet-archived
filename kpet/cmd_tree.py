@@ -30,8 +30,12 @@ def build(cmds_parser, common_parser):
         help='List available kernel trees.',
         parents=[common_parser],
     )
+    list_parser.add_argument('-a', '--arch', metavar='REGEX',
+                             default=None,
+                             help='Limit output to trees with architectures '
+                             'matching the REGEX.')
     list_parser.add_argument('regex', nargs='?', default=None,
-                             help='Optional. Use this to filter results.')
+                             help='Limit output to trees matching the regex.')
 
 
 def main(args):
@@ -41,8 +45,14 @@ def main(args):
     database = data.Base(args.db)
     if args.action == 'list':
         regex = re.compile(args.regex or ".*")
-        for tree in sorted(database.trees.keys()):
-            if regex.fullmatch(tree):
-                print(tree)
+        arch_regex = re.compile(args.arch or ".*")
+        tree_names = set()
+        for name, value in database.trees.items():
+            filtered = list(filter(arch_regex.fullmatch, value['arches']))
+            if regex.fullmatch(name) and filtered:
+                tree_names.add(name)
+
+        for name in sorted(tree_names):
+            print(name)
     else:
         misc.raise_action_not_found(args.action, args.command)

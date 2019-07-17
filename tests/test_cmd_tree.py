@@ -28,6 +28,7 @@ class CmdTreeTest(unittest.TestCase):
         dbdir = os.path.join(os.path.dirname(__file__), 'assets/db/general')
         mock_args = mock.Mock()
         mock_args.db = dbdir
+        mock_args.arch = None
         mock_args.regex = None
         self.assertRaises(misc.ActionNotFound, cmd_tree.main, mock_args)
         mock_args.action = 'list'
@@ -35,6 +36,38 @@ class CmdTreeTest(unittest.TestCase):
             cmd_tree.main(mock_args)
         expected = [
             mock.call('rhel7'),
+            mock.call('\n'),
+            mock.call('rhel8'),
+            mock.call('\n'),
+        ]
+        self.assertListEqual(
+            expected,
+            mock_stdout.write.call_args_list,
+        )
+        mock_args.db = '/notfounddir'
+        self.assertRaises(Exception, cmd_tree.main, mock_args)
+
+    def test_list_arch_filter(self):
+        """
+        Check the proper exception is raised when action is not found, and if
+        an exception is raised when the database directory is invalid.
+        """
+        dbdir = os.path.join(os.path.dirname(__file__),
+                             'assets/db/general/limited')
+        mock_args = mock.Mock()
+        mock_args.db = dbdir
+        mock_args.arch = 'ppc64.*'
+        mock_args.regex = None
+        self.assertRaises(misc.ActionNotFound, cmd_tree.main, mock_args)
+        mock_args.action = 'list'
+        with mock.patch('sys.stdout') as mock_stdout:
+            cmd_tree.main(mock_args)
+        expected = [
+            mock.call('bar'),
+            mock.call('\n'),
+            mock.call('baz'),
+            mock.call('\n'),
+            mock.call('foo'),
             mock.call('\n'),
             mock.call('rhel8'),
             mock.call('\n'),

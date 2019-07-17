@@ -1,0 +1,39 @@
+trees:
+    rhel7:
+        template: rhel7
+        arches: x86_64
+    rhel8:
+        template: rhel8
+        arches: .*
+    upstream:
+        template: upstream
+        arches:
+            - x86_64
+            - aarch64
+    foo:
+        template: foo
+        arches:
+            - x86_64
+            - .*
+    bar:
+        template: bar
+        arches:
+            - ppc64le
+    baz:
+        template: baz
+        arches:
+            - ppc64.*
+host_type_regex: ^normal
+host_types:
+    normal: {}
+recipesets:
+    rcs1:
+      - normal
+arches:
+    - x86_64
+    - aarch64
+    - ppc64
+    - ppc64le
+suites:
+    - ../suites/default/index.yaml
+    - ../suites/fs/index.yaml
