@@ -185,7 +185,7 @@ class Base:     # pylint: disable=too-few-public-methods
         self.recipesets_of_hosts = self.__get_recipesets(database, target)
 
     # pylint: disable=too-many-arguments
-    def generate(self, description, kernel_location, lint):
+    def generate(self, description, kernel_location, lint, group=None):
         """
         Generate Beaker XML which would execute tests in the database.
         The target supplied at creation must have exactly one tree and exactly
@@ -213,6 +213,7 @@ class Base:     # pylint: disable=too-few-public-methods
             TREE=tree_name,
             RECIPESETS=self.recipesets_of_hosts,
             getenv=os.getenv,
+            group=group
         )
 
         jinja_env = jinja2.Environment(
