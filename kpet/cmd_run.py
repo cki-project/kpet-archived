@@ -35,6 +35,12 @@ def build_target(parser, generate):
         help='Cookies to send when downloading patches, Netscape-format file.'
     )
     parser.add_argument(
+        '-g',
+        '--group',
+        help='Name of the job group',
+        default='cki'
+    )
+    parser.add_argument(
         '-t',
         '--tree',
         required=generate,
@@ -178,7 +184,8 @@ def main_generate(args, baserun):
     """
     content = baserun.generate(description=args.description,
                                kernel_location=args.kernel,
-                               lint=not args.no_lint)
+                               lint=not args.no_lint,
+                               group=args.group)
     if not args.output:
         sys.stdout.write(content)
     else:
