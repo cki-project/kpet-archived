@@ -17,7 +17,7 @@ import os
 import re
 from kpet.schema import Invalid, Struct, Choice, NonEmptyList, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, \
-    Int, Null, RE, Reduction, Succession
+    Int, Null, RE, Reduction
 
 # pylint: disable=raising-format-tuple,access-member-before-definition
 
@@ -415,14 +415,6 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         assert self.is_dir_valid(dir_path)
 
         arches_schema = Reduction(Regex(), lambda x: [x], List(Regex()))
-        # TODO: Discard Succession once the database transitioned to
-        # the new type
-        tree_schema = Succession(
-            String(),
-            lambda x: dict(template=x),
-            Struct(required=dict(template=String()),
-                   optional=dict(arches=arches_schema))
-        )
 
         super().__init__(
             ScopedYAMLFile(
@@ -431,7 +423,10 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                     ),
                     optional=dict(
                         suites=List(YAMLFile(Class(Suite))),
-                        trees=Dict(tree_schema),
+                        trees=Dict(
+                            Struct(required=dict(template=String()),
+                                   optional=dict(arches=arches_schema))
+                        ),
                         arches=List(String()),
                         components=Dict(String()),
                         sets=Dict(String()),
