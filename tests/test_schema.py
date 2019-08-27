@@ -85,3 +85,11 @@ class SchemaTest(unittest.TestCase):
         test_struct = schema.Struct(optional={'test': schema.String()})
         with self.assertRaises(schema.Invalid):
             test_struct.validate({'test': 1})
+
+    def test_struct_validate_list_min_len(self):
+        """ Ensure that Struct.validate() checks for too short lists."""
+        test_struct = schema.Struct(
+            optional={'test': schema.List(schema.String(), min_len=1)}
+        )
+        with self.assertRaises(schema.Invalid):
+            test_struct.validate({'test': []})

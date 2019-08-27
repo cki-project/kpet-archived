@@ -396,36 +396,37 @@ class List(Node):
     """
     List schema, with every element matching a single specified schema.
     """
-    def __init__(self, element_schema):
+    def __init__(self, element_schema, min_len=0):
+        """
+        Initialize a List schema.
+
+        Args:
+            element_schema:  An instance of the specific Node type the list
+                items should be instance of.
+            min_len: Optional parameter to force the list to contain at least
+                "min_len" elements. Defaults to 0.
+        """
         assert isinstance(element_schema, Node)
+        assert isinstance(min_len, int)
+        assert min_len >= 0
         super().__init__(list)
         self.element_schema = element_schema
+        self.min_len = min_len
 
     def validate(self, data):
         super().validate(data)
+
+        if len(data) < self.min_len:
+            raise Invalid(
+                "This list must have at least {} elements, but only has {}!",
+                self.min_len, len(data)
+            )
+
         for index, value in enumerate(data):
             try:
                 self.element_schema.validate(value)
             except Invalid:
                 raise Invalid("Invalid value at index {}", index)
-
-    def recognize(self):
-        return List(self.element_schema.recognize())
-
-    def resolve(self, data):
-        self.validate(data)
-        return [self.element_schema.resolve(value) for value in data]
-
-
-class NonEmptyList(List):
-    """
-    List schema like List. Valid only if not empty.
-    """
-    def validate(self, data):
-        super().validate(data)
-
-        if not data:
-            raise Invalid("This list must not be empty!")
 
     def recognize(self):
         return List(self.element_schema.recognize())
