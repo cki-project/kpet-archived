@@ -15,7 +15,7 @@
 
 import os
 import re
-from kpet.schema import Invalid, Struct, Choice, NonEmptyList, \
+from kpet.schema import Invalid, Struct, Choice, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, \
     Int, Null, RE, Reduction
 
@@ -290,7 +290,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     kickstart=String(),
                     pattern=Class(Pattern),
                     url_suffix=String(),
-                    maintainers=NonEmptyList(String())
+                    maintainers=List(String(), min_len=1)
                 )
             ),
             data
