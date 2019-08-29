@@ -205,6 +205,7 @@ class Base:     # pylint: disable=too-few-public-methods
 
         tree_name = list(self.target.trees)[0]
         arch_name = list(self.target.arches)[0]
+        test_sets = list(self.target.sets) if self.target.sets else []
 
         params = dict(
             DESCRIPTION=description,
@@ -212,6 +213,7 @@ class Base:     # pylint: disable=too-few-public-methods
             ARCH=arch_name,
             TREE=tree_name,
             RECIPESETS=self.recipesets_of_hosts,
+            SETS=test_sets,
             getenv=os.getenv,
             group=group
         )
