@@ -8,3 +8,4 @@ kpet.egg-info
 build
 dist
 .idea
+.coverage.*

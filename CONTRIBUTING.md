@@ -6,12 +6,12 @@ Setup
 If you want to get started with KPET development, you can install the
 dependencies by running:
 ```bash
-$ pip install --user -e .
+$ pip install --user .[dev]
 ```
 
-Tests
------
-To run the tests, execute the following command:
+Tests + linting
+---------------
+To run the tests (together with linting), execute the following command:
 ```bash
-$ python3 setup.py test
+$ tox
 ```
