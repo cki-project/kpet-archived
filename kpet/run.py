@@ -203,6 +203,7 @@ class Base:     # pylint: disable=too-few-public-methods
         assert self.target.trees is not None and len(self.target.trees) == 1
         assert self.target.arches is not None and len(self.target.arches) == 1
 
+        enable_debug_kernel = 'debug' in self.target.sets
         tree_name = list(self.target.trees)[0]
         arch_name = list(self.target.arches)[0]
 
@@ -213,7 +214,8 @@ class Base:     # pylint: disable=too-few-public-methods
             TREE=tree_name,
             RECIPESETS=self.recipesets_of_hosts,
             getenv=os.getenv,
-            group=group
+            group=group,
+            enable_debug_kernel=enable_debug_kernel
         )
 
         jinja_env = jinja2.Environment(
