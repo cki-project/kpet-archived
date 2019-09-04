@@ -33,7 +33,7 @@ class CmdRunTest(unittest.TestCase):
         Check the success case.
         """
         database = data.Base(self.dbdir)
-        target = data.Target(arches='x86_64', trees='rhel7', sources=None)
+        target = data.Target(arches={'x86_64'}, trees={'rhel7'}, sources=None)
         baserun = run.Base(database, target)
         content = baserun.generate(description='Foo', kernel_location='bar',
                                    lint=True)
