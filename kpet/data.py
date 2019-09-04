@@ -60,9 +60,14 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
     Execution target which suite/case patterns match against.
 
     A target has a fixed collection of parameters, each of which can be
-    assigned a target set. A target set is either a set of strings, or None,
-    meaning a set containing all possible strings.
+    assigned a target set. A target set is either a set of strings, or
+    Target.ALL, meaning a set containing all possible strings.
     """
+
+    # Empty target set
+    NONE = set()
+    # Complete target set
+    ALL = None
 
     @staticmethod
     def set_is_valid(target_set):
@@ -75,7 +80,7 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
         Returns:
             True if the target set is valid, false otherwise.
         """
-        return target_set is None or \
+        return target_set == Target.ALL or \
             (isinstance(target_set, set) and
              all(isinstance(x, str) for x in target_set))
 
