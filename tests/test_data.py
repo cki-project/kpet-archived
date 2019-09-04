@@ -94,33 +94,33 @@ class DataPatternTest(unittest.TestCase):
         """Check empty patterns match anything"""
         self.assertMatch({})
 
-        self.assertMatch({}, sources=None)
+        self.assertMatch({}, sources=data.Target.ALL)
         self.assertMatch({}, sources={"a"})
 
-        self.assertMatch({}, trees=None)
+        self.assertMatch({}, trees=data.Target.ALL)
         self.assertMatch({}, trees={"a"})
 
-        self.assertMatch({}, arches=None)
+        self.assertMatch({}, arches=data.Target.ALL)
         self.assertMatch({}, arches={"a"})
 
-        self.assertMatch({}, sources=None, trees=None)
-        self.assertMatch({}, sources=None, trees={"a"})
-        self.assertMatch({}, sources={"a"}, trees=None)
+        self.assertMatch({}, sources=data.Target.ALL, trees=data.Target.ALL)
+        self.assertMatch({}, sources=data.Target.ALL, trees={"a"})
+        self.assertMatch({}, sources={"a"}, trees=data.Target.ALL)
         self.assertMatch({}, sources={"a"}, trees={"a"})
 
     def test_specific_sources(self):
         """Check patterns match specific/all sources correctly"""
         self.assertMismatch({"not": dict(sources=None)},
-                            sources=None)
+                            sources=data.Target.ALL)
         self.assertMismatch({"not": dict(sources=None), "sources": "a"},
-                            sources=None)
+                            sources=data.Target.ALL)
 
         self.assertMismatch(dict(sources=None), sources={"a"})
         self.assertMismatch(dict(sources=[None, "a"]), sources={"a"})
         self.assertMismatch(dict(sources=[None, "b"]), sources={"a"})
 
-        self.assertMatch(dict(sources=None), sources=None)
-        self.assertMatch(dict(sources=[None, "a"]), sources=None)
+        self.assertMatch(dict(sources=None), sources=data.Target.ALL)
+        self.assertMatch(dict(sources=[None, "a"]), sources=data.Target.ALL)
 
         self.assertMatch({"not": dict(sources=None)},
                          sources={"a"})
@@ -132,11 +132,11 @@ class DataPatternTest(unittest.TestCase):
     def test_two_params(self):
         """Check two-parameter patterns match correctly"""
         self.assertMatch(dict(sources="a", trees="A"),
-                         sources=None, trees=None)
+                         sources=data.Target.ALL, trees=data.Target.ALL)
         self.assertMatch(dict(sources="a", trees="A"),
-                         sources=None, trees={"A"})
+                         sources=data.Target.ALL, trees={"A"})
         self.assertMatch(dict(sources="a", trees="A"),
-                         sources={"a"}, trees=None)
+                         sources={"a"}, trees=data.Target.ALL)
         self.assertMatch(dict(sources="a", trees="A"),
                          sources={"a"}, trees={"A"})
 
