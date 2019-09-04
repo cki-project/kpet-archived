@@ -94,7 +94,9 @@ class DataPatternTest(unittest.TestCase):
         """Check empty patterns match anything"""
         self.assertMatch({})
 
+        self.assertMatch({}, sources=data.Target.ANY)
         self.assertMatch({}, sources=data.Target.ALL)
+        self.assertMatch({}, sources=data.Target.NONE)
         self.assertMatch({}, sources={"a"})
 
         self.assertMatch({}, trees=data.Target.ALL)
@@ -103,6 +105,8 @@ class DataPatternTest(unittest.TestCase):
         self.assertMatch({}, arches=data.Target.ALL)
         self.assertMatch({}, arches={"a"})
 
+        self.assertMatch({}, sources=data.Target.ANY, trees=data.Target.ANY)
+        self.assertMatch({}, sources=data.Target.NONE, trees=data.Target.NONE)
         self.assertMatch({}, sources=data.Target.ALL, trees=data.Target.ALL)
         self.assertMatch({}, sources=data.Target.ALL, trees={"a"})
         self.assertMatch({}, sources={"a"}, trees=data.Target.ALL)
@@ -135,6 +139,10 @@ class DataPatternTest(unittest.TestCase):
                          sources=data.Target.ALL, trees=data.Target.ALL)
         self.assertMatch(dict(sources="a", trees="A"),
                          sources=data.Target.ALL, trees={"A"})
+        self.assertMatch(dict(sources="a", trees="A"),
+                         sources=data.Target.ANY, trees=data.Target.ANY)
+        self.assertMatch(dict(sources="a", trees="A"),
+                         sources={"a"}, trees=data.Target.ANY)
         self.assertMatch(dict(sources="a", trees="A"),
                          sources={"a"}, trees=data.Target.ALL)
         self.assertMatch(dict(sources="a", trees="A"),
@@ -270,3 +278,62 @@ class DataPatternTest(unittest.TestCase):
         # Two falses in list
         self.assertMismatch([dict(trees="oof"), dict(arches="zab")],
                             trees={"foo"}, arches={"baz"})
+
+    def test_any(self):
+        """Check the "ANY" target sets are handled correctly"""
+        # Empty pattern
+        self.assertMatch({})
+        self.assertMatch({}, trees=data.Target.ANY)
+        self.assertMatch({}, trees=data.Target.ANY, sources=data.Target.ANY)
+
+        # Basic patterns
+        self.assertMatch(dict(trees=None), trees=data.Target.ANY)
+        self.assertMatch(dict(trees="foo"), trees=data.Target.ANY)
+        self.assertMatch(dict(trees="foo", sources="bar"),
+                         trees=data.Target.ANY, sources={"bar"})
+        self.assertMatch(dict(trees="foo", sources="bar"),
+                         trees={"foo"}, sources=data.Target.ANY)
+        self.assertMismatch(dict(trees="foo", sources="bar"),
+                            trees=data.Target.ANY, sources=data.Target.NONE)
+        self.assertMismatch(dict(trees="foo", sources="bar"),
+                            sources=data.Target.NONE)
+
+        # Negation
+        self.assertMatch({"not": dict(trees="foo")},
+                         trees=data.Target.ANY)
+        self.assertMatch({"not": {"not": dict(trees="foo")}},
+                         trees=data.Target.ANY)
+        self.assertMatch({"not": dict(trees="foo", sources="bar")},
+                         trees=data.Target.ANY, sources={"baz"})
+        self.assertMatch({"not": dict(trees="foo", sources="bar")},
+                         trees=data.Target.ANY, sources=data.Target.NONE)
+        self.assertMismatch({"not": dict(trees="foo", sources="bar")},
+                            trees=data.Target.ANY, sources={"bar"})
+        self.assertMismatch({"not": dict(trees="foo", sources="bar")},
+                            trees=data.Target.ANY, sources=data.Target.ALL)
+
+        # Disjunction
+        self.assertMismatch({"or": dict(trees="foo", sources="bar")},
+                            trees=data.Target.ANY, sources={"baz"})
+        self.assertMismatch({"or": dict(trees="foo", sources="bar")},
+                            trees=data.Target.ANY, sources=data.Target.NONE)
+        self.assertMatch({"or": dict(trees="foo", sources="bar")},
+                         trees=data.Target.ANY, sources={"bar"})
+        self.assertMatch({"or": dict(trees="foo", sources="bar")},
+                         trees=data.Target.ANY, sources=data.Target.ALL)
+
+        # A complex real-life case
+        self.assertMatch(dict(sets={"or": ["net", "kt1", "debug"]},
+                              trees={"not": {"or": ["rhel5.*"]}},
+                              sources={"or": [
+                                  "include/net/tcp.*",
+                                  "include/linux/tcp.*",
+                                  "include/uapi/linux/tcp.*",
+                                  "net/ipv4/tcp.*",
+                                  "net/ipv6/tcp.*"
+                              ]}),
+                         trees=data.Target.ANY,
+                         arches={"x86_64"},
+                         sets={"net"},
+                         components=data.Target.NONE,
+                         sources=data.Target.ALL)
