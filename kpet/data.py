@@ -172,15 +172,21 @@ class Pattern(Object):  # pylint: disable=too-few-public-methods
         assert isinstance(target, Target)
         assert qualifier is None or qualifier in self.qualifiers
 
+        if qualifier is not None and getattr(target, qualifier) is None:
+            return True, True
+
+        undefined = False
+        all_values = {'all'}
+
         if isinstance(node, dict):
             result = and_op
             for name, sub_node in node.items():
                 assert qualifier is None or name not in self.qualifiers, \
                        "Qualifier is already specified"
-                sub_result = self.__node_matches(
+                sub_result, undefined = self.__node_matches(
                     target, (name != "or"), sub_node,
                     name if name in self.qualifiers else qualifier)
-                if name == "not":
+                if name == "not" and not undefined:
                     sub_result = not sub_result
                 if and_op:
                     result &= sub_result
@@ -189,7 +195,7 @@ class Pattern(Object):  # pylint: disable=too-few-public-methods
         elif isinstance(node, list):
             result = and_op
             for sub_node in node:
-                sub_result = self.__node_matches(
+                sub_result, _ = self.__node_matches(
                     target, True, sub_node, qualifier)
                 if and_op:
                     result &= sub_result
@@ -197,11 +203,11 @@ class Pattern(Object):  # pylint: disable=too-few-public-methods
                     result |= sub_result
         elif isinstance(node, RE):
             assert qualifier is not None, "Qualifier not specified"
-            value_set_or_none = getattr(target, qualifier)
-            if value_set_or_none is None:
+            value_set = getattr(target, qualifier)
+            if value_set == all_values:
                 result = True
             else:
-                for value in value_set_or_none:
+                for value in value_set:
                     if node.fullmatch(value):
                         result = True
                         break
@@ -209,11 +215,12 @@ class Pattern(Object):  # pylint: disable=too-few-public-methods
                     result = False
         elif node is None:
             assert qualifier is not None, "Qualifier not specified"
-            result = getattr(target, qualifier) is None
+            result = getattr(target, qualifier) is None or\
+                getattr(target, qualifier) == all_values
         else:
             assert False, "Unknown node type: " + type(node).__name__
 
-        return result
+        return result, undefined
 
     def matches(self, target):
         """
@@ -226,7 +233,7 @@ class Pattern(Object):  # pylint: disable=too-few-public-methods
             True if the pattern matches the target, False otherwise.
         """
         assert isinstance(target, Target)
-        return self.__node_matches(target, True, self.data, None)
+        return self.__node_matches(target, True, self.data, None)[0]
 
 
 class Case(Object):     # pylint: disable=too-few-public-methods
