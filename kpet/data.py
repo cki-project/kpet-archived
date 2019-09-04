@@ -15,6 +15,7 @@
 
 import os
 import re
+from functools import reduce
 from kpet.schema import Invalid, Struct, Choice, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, \
     Int, Null, RE, Reduction
@@ -60,14 +61,21 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
     Execution target which suite/case patterns match against.
 
     A target has a fixed collection of parameters, each of which can be
-    assigned a target set. A target set is either a set of strings, or
-    Target.ALL, meaning a set containing all possible strings.
+    assigned a target set.
+
+    A target set is either:
+
+        - a set of strings,
+        - Target.ALL, meaning a set containing all possible strings, or
+        - Target.ANY, meaning any possible set of strings.
     """
 
     # Empty target set
     NONE = set()
     # Complete target set
-    ALL = None
+    ALL = ()
+    # Any target set
+    ANY = None
 
     @staticmethod
     def set_is_valid(target_set):
@@ -80,7 +88,8 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
         Returns:
             True if the target set is valid, false otherwise.
         """
-        return target_set == Target.ALL or \
+        return target_set == Target.ANY or \
+            target_set == Target.ALL or \
             (isinstance(target_set, set) and
              all(isinstance(x, str) for x in target_set))
 
@@ -190,41 +199,47 @@ class Pattern(Object):  # pylint: disable=too-few-public-methods
                         Cannot be None if node is a None or a regex.
 
         Returns:
-            True if the node matched, False otherwise.
+            True if the node matched, False if not,
+            and None if the result could be any.
         """
         assert isinstance(target, Target)
         assert qualifier is None or qualifier in self.qualifiers
 
+        def sub_op(result_x, result_y):
+            """Combine two sub-results using the specified operation"""
+            if result_x is None:
+                return result_y
+            if result_y is None:
+                return result_x
+            return result_x and result_y if and_op else result_x or result_y
+
         if isinstance(node, dict):
-            result = and_op
+            sub_results = []
             for name, sub_node in node.items():
                 assert qualifier is None or name not in self.qualifiers, \
                        "Qualifier is already specified"
                 sub_result = self.__node_matches(
                     target, (name != "or"), sub_node,
                     name if name in self.qualifiers else qualifier)
-                if name == "not":
+                if sub_result is not None and name == "not":
                     sub_result = not sub_result
-                if and_op:
-                    result &= sub_result
-                else:
-                    result |= sub_result
+                sub_results.append(sub_result)
+            result = reduce(sub_op, sub_results) if sub_results else and_op
         elif isinstance(node, list):
-            result = and_op
-            for sub_node in node:
-                sub_result = self.__node_matches(
-                    target, True, sub_node, qualifier)
-                if and_op:
-                    result &= sub_result
-                else:
-                    result |= sub_result
+            sub_results = [
+                self.__node_matches(target, True, sub_node, qualifier)
+                for sub_node in node
+            ]
+            result = reduce(sub_op, sub_results) if sub_results else and_op
         elif isinstance(node, RE):
             assert qualifier is not None, "Qualifier not specified"
-            value_set_or_none = getattr(target, qualifier)
-            if value_set_or_none is None:
+            param = getattr(target, qualifier)
+            if param == Target.ALL:
                 result = True
+            elif param == Target.ANY:
+                result = None
             else:
-                for value in value_set_or_none:
+                for value in param:
                     if node.fullmatch(value):
                         result = True
                         break
@@ -232,7 +247,11 @@ class Pattern(Object):  # pylint: disable=too-few-public-methods
                     result = False
         elif node is None:
             assert qualifier is not None, "Qualifier not specified"
-            result = getattr(target, qualifier) is None
+            param = getattr(target, qualifier)
+            if param == Target.ANY:
+                result = None
+            else:
+                result = (param == Target.ALL)
         else:
             assert False, "Unknown node type: " + type(node).__name__
 
@@ -246,10 +265,11 @@ class Pattern(Object):  # pylint: disable=too-few-public-methods
             target: The target (an instance of Target) to match.
 
         Returns:
-            True if the pattern matches the target, False otherwise.
+            True if the pattern matches the target, False if not.
         """
         assert isinstance(target, Target)
-        return self.__node_matches(target, True, self.data, None)
+        node_matches = self.__node_matches(target, True, self.data, None)
+        return node_matches is None or node_matches
 
 
 class Case(Object):     # pylint: disable=too-few-public-methods
