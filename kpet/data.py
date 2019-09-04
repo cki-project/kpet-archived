@@ -64,25 +64,24 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
 
         Args:
             trees:          The name of the kernel tree we're executing
-                            against, or a set thereof.
+                            against (a string), or a set thereof.
                             None (the default) means all the trees.
-            arches:         The name of the architecture we're executing on or
-                            a set thereof.
+            arches:         The name of the architecture we're executing on (a
+                            string), or a set thereof.
                             None (the default) means all the architectures.
             components:     The name of an extra component included into the
-                            tested kernel build, or a set thereof.
+                            tested kernel build (a string), or a set thereof.
                             None (the default) means all the extra components.
             sets:           The name of the set of tests to restrict the run
-                            to, or a set thereof. None (the default) means all
-                            the sets (i.e. no restriction).
-            sources:        The path to the source file we're covering, or a
-                            set thereof. None (the default) means all the
-                            files.
+                            to (a string), or a set thereof.
+                            None (the default) means all the sets (i.e. no
+                            restriction).
+            sources:        The path to the source file we're covering
+                            (a string), or a set thereof.
+                            None (the default) means all the files.
         """
         def normalize(arg):
-            if arg is None or isinstance(arg, set):
-                return arg
-            return {arg}
+            return {arg} if isinstance(arg, str) else arg
 
         self.trees = normalize(trees)
         self.arches = normalize(arches)
