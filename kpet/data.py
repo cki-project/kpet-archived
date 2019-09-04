@@ -63,6 +63,22 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
     assigned a target set. A target set is either a set of strings, or None,
     meaning a set containing all possible strings.
     """
+
+    @staticmethod
+    def set_is_valid(target_set):
+        """
+        Check if a target set is valid.
+
+        Args:
+            target_set: The target set to check.
+
+        Returns:
+            True if the target set is valid, false otherwise.
+        """
+        return target_set is None or \
+            (isinstance(target_set, set) and
+             all(isinstance(x, str) for x in target_set))
+
     def __init__(self, trees=None, arches=None, components=None, sets=None,
                  sources=None):
         """
@@ -80,6 +96,12 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
             sources:        A target set of paths to the source files to cover
                             with tests.
         """
+        assert Target.set_is_valid(trees)
+        assert Target.set_is_valid(arches)
+        assert Target.set_is_valid(components)
+        assert Target.set_is_valid(sets)
+        assert Target.set_is_valid(sources)
+
         self.trees = trees
         self.arches = arches
         self.components = components
