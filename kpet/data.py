@@ -63,31 +63,28 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
         Initialize a target.
 
         Args:
-            trees:          The name of the kernel tree we're executing
-                            against (a string), or a set thereof.
+            trees:          A set of names of the kernel trees we're executing
+                            against (strings).
                             None (the default) means all the trees.
-            arches:         The name of the architecture we're executing on (a
-                            string), or a set thereof.
+            arches:         A set of names of the architectures we're
+                            executing on (strings).
                             None (the default) means all the architectures.
-            components:     The name of an extra component included into the
-                            tested kernel build (a string), or a set thereof.
+            components:     A set of names of extra components included into
+                            the tested kernel build (strings).
                             None (the default) means all the extra components.
-            sets:           The name of the set of tests to restrict the run
-                            to (a string), or a set thereof.
+            sets:           A set of names of the sets of tests to restrict
+                            the run to (strings).
                             None (the default) means all the sets (i.e. no
                             restriction).
-            sources:        The path to the source file we're covering
-                            (a string), or a set thereof.
+            sources:        A set of paths to the source files we're covering
+                            (strings).
                             None (the default) means all the files.
         """
-        def normalize(arg):
-            return {arg} if isinstance(arg, str) else arg
-
-        self.trees = normalize(trees)
-        self.arches = normalize(arches)
-        self.components = normalize(components)
-        self.sets = normalize(sets)
-        self.sources = normalize(sources)
+        self.trees = trees
+        self.arches = arches
+        self.components = components
+        self.sets = sets
+        self.sources = sources
 
 
 class Pattern(Object):  # pylint: disable=too-few-public-methods

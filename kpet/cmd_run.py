@@ -166,8 +166,8 @@ def main_create_baserun(args, database):
             raise Exception("No test sets matched specified regular " +
                             "expression: {}".format(args.sets))
 
-    target = data.Target(trees=args.tree,
-                         arches=args.arch,
+    target = data.Target(trees={args.tree},
+                         arches={args.arch},
                          components=components,
                          sets=sets,
                          sources=src_set)
