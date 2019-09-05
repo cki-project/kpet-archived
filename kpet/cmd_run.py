@@ -143,7 +143,7 @@ def main_create_baserun(args, database):
         src_set = patch.get_src_set_from_location_set(set(args.mboxes),
                                                       cookies)
     else:
-        src_set = None
+        src_set = {'all'}
     if args.tree is not None and args.tree not in database.trees:
         raise Exception("Tree \"{}\" not found".format(args.tree))
     if args.arch is not None:
