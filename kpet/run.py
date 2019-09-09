@@ -160,6 +160,9 @@ class Base:     # pylint: disable=too-few-public-methods
                     pool_suites.remove(pool_suite)
             # Add host to list, if it has suites to run
             if suites:
+                suites = list(sorted(suites, key=lambda suite:
+                                     len([case for case in suite.cases if
+                                          case.waived])))
                 hosts.append(Host(host_type_name, host_type, suites))
 
         return hosts
