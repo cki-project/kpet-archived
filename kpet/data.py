@@ -38,7 +38,7 @@ class Object:   # pylint: disable=too-few-public-methods
         try:
             data = schema.resolve(data)
         except Invalid:
-            raise Invalid("Invalid {} data", type(self).__name__)
+            raise Invalid("Invalid {} data".format(type(self).__name__))
 
         # Recognize the schema
         schema = schema.recognize()
@@ -376,10 +376,10 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                     if host_type_regex.fullmatch(host):
                         break
                 else:
-                    raise Invalid(error, "host_type_regex", "host_types",
-                                  suite.description, case.name,
-                                  host_type_regex.pattern,
-                                  host_types)
+                    raise Invalid(error.format("host_type_regex", "host_types",
+                                               suite.description, case.name,
+                                               host_type_regex.pattern,
+                                               host_types))
 
     def convert_tree_arches(self):
         """
@@ -402,8 +402,8 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                              "doesn't match any of the available arches\n" +
                              "The regex: '{0}'\n" +
                              "The avaliable arches: {1}")
-                    raise Invalid(error, arch_regex.pattern,
-                                  self.arches)
+                    raise Invalid(error.format(arch_regex.pattern,
+                                               self.arches))
                 tree_arches |= regex_arches
 
             self.trees[name]["arches"] = list(tree_arches)

@@ -51,9 +51,6 @@ _ReError = _get_re_error_type()
 class Invalid(Exception):
     """Invalid data exception"""
 
-    def __init__(self, fmt, *args):
-        super().__init__(fmt.format(*args))
-
     def __str__(self):
         return super().__str__() + \
                (":\n" + str(self.__context__) if self.__context__ else "")
@@ -84,8 +81,9 @@ class Node:
             Invalid:    The data didn't match the schema.
         """
         if not isinstance(data, self.data_type):
-            raise Invalid("Invalid type: {}, expecting {}",
-                          type(data).__name__, self.data_type.__name__)
+            raise Invalid("Invalid type: {}, expecting {}".format(
+                type(data).__name__, self.data_type.__name__
+            ))
 
     def recognize(self):
         """
@@ -137,7 +135,7 @@ class Choice(Node):
                 return
             except Invalid as exc:
                 err_list.append(str(exc))
-        raise Invalid("{}", "\nand\n".join(err_list))
+        raise Invalid("\nand\n".join(err_list))
 
     def recognize(self):
         return Choice(*(schema.recognize() for schema in self.schemas))
@@ -191,7 +189,7 @@ class Attraction(Node):
                     return
                 except Invalid as exc:
                     err_list.append(str(exc))
-        raise Invalid("{}", "\nand\n".join(err_list))
+        raise Invalid("\nand\n".join(err_list))
 
     def recognize(self):
         return self.schemas_and_converters[-1].recognize()
@@ -363,7 +361,7 @@ class YAMLFile(String):
         try:
             return self.contents_schema.resolve(resolved_data)
         except Invalid:
-            raise Invalid("Invalid contents of {}", file_path)
+            raise Invalid("Invalid contents of {}".format(file_path))
 
 
 class ScopedYAMLFile(YAMLFile):
@@ -387,7 +385,7 @@ class ScopedYAMLFile(YAMLFile):
         try:
             return self.contents_schema.resolve(resolved_data)
         except Invalid:
-            raise Invalid("Invalid contents of {}", file_path)
+            raise Invalid("Invalid contents of {}".format(file_path))
         finally:
             os.chdir(orig_dir_path)
 
@@ -418,15 +416,15 @@ class List(Node):
 
         if len(data) < self.min_len:
             raise Invalid(
-                "This list must have at least {} elements, but only has {}!",
-                self.min_len, len(data)
+                "This list must have at least {} elements, "
+                "but only has {}!".format(self.min_len, len(data))
             )
 
         for index, value in enumerate(data):
             try:
                 self.element_schema.validate(value)
             except Invalid:
-                raise Invalid("Invalid value at index {}", index)
+                raise Invalid("Invalid value at index {}".format(index))
 
     def recognize(self):
         return List(self.element_schema.recognize())
@@ -450,12 +448,13 @@ class Dict(Node):
         super().validate(data)
         for key, value in data.items():
             if not isinstance(key, str):
-                raise Invalid("Key \"{}\" is {}, expecting a string",
-                              key, type(key).__name__)
+                raise Invalid("Key \"{}\" is {}, expecting a string".format(
+                    key, type(key).__name__
+                ))
             try:
                 self.value_schema.validate(value)
             except Invalid:
-                raise Invalid("Invalid value with key \"{}\"", key)
+                raise Invalid("Invalid value with key \"{}\"".format(key))
 
     def recognize(self):
         return Dict(self.value_schema.recognize())
@@ -506,22 +505,24 @@ class Struct(Dict):
         super().validate(data)
         for name, schema in self.required.items():
             if name not in data:
-                raise Invalid("Member \"{}\" is missing", name)
+                raise Invalid("Member \"{}\" is missing".format(name))
             value = data[name]
             try:
                 schema.validate(value)
             except Invalid:
-                raise Invalid("Member \"{}\" is invalid", name)
+                raise Invalid("Member \"{}\" is invalid".format(name))
         for name, schema in self.optional.items():
             if name in data:
                 value = data[name]
                 try:
                     schema.validate(value)
                 except Invalid:
-                    raise Invalid("Member \"{}\" is invalid", name)
+                    raise Invalid("Member \"{}\" is invalid".format(name))
         for key in data.keys():
             if key not in self.required and key not in self.optional:
-                raise Invalid("Unexpected member \"{}\" encountered", key)
+                raise Invalid("Unexpected member \"{}\" encountered".format(
+                    key
+                ))
 
     def recognize(self):
         recognized_required = {}

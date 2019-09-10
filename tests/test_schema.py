@@ -39,7 +39,7 @@ class SchemaTest(unittest.TestCase):
 
     def test_invalid_exc_type(self):
         """ Ensure Invalid exc. formatting is ok. """
-        inv = schema.Invalid('{}: {}', 'error', 'something failed')
+        inv = schema.Invalid('error: something failed')
         self.assertEqual(str(inv), 'error: something failed')
 
     def test_float(self):
