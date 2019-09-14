@@ -56,29 +56,29 @@ class Object:   # pylint: disable=too-few-public-methods
 
 
 class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
-    """Execution target that suite/case patterns match against"""
+    """
+    Execution target which suite/case patterns match against.
+
+    A target has a fixed collection of parameters, each of which can be
+    assigned a target set. A target set is either a set of strings, or None,
+    meaning a set containing all possible strings.
+    """
     def __init__(self, trees=None, arches=None, components=None, sets=None,
                  sources=None):
         """
         Initialize a target.
 
         Args:
-            trees:          A set of names of the kernel trees we're executing
-                            against (strings).
-                            None (the default) means all the trees.
-            arches:         A set of names of the architectures we're
-                            executing on (strings).
-                            None (the default) means all the architectures.
-            components:     A set of names of extra components included into
-                            the tested kernel build (strings).
-                            None (the default) means all the extra components.
-            sets:           A set of names of the sets of tests to restrict
-                            the run to (strings).
-                            None (the default) means all the sets (i.e. no
-                            restriction).
-            sources:        A set of paths to the source files we're covering
-                            (strings).
-                            None (the default) means all the files.
+            trees:          A target set of names of the kernel trees we're
+                            executing against.
+            arches:         A target set of names of the architectures we're
+                            executing on.
+            components:     A target set of names of extra components included
+                            into the tested kernel build.
+            sets:           A target set of names of the sets of tests to
+                            restrict the run to.
+            sources:        A target set of paths to the source files to cover
+                            with tests.
         """
         self.trees = trees
         self.arches = arches
