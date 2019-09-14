@@ -136,16 +136,22 @@ def main_create_baserun(args, database):
     Returns:
         Test execution data.
     """
+    target_trees = data.Target.ALL
+    target_arches = data.Target.ALL
+    target_components = data.Target.NONE
+    target_sets = data.Target.ALL
+    target_sources = data.Target.ALL
+
     cookies = cookiejar.MozillaCookieJar()
     if args.cookies:
         cookies.load(args.cookies)
     if args.mboxes:
-        src_set = patch.get_src_set_from_location_set(set(args.mboxes),
-                                                      cookies)
-    else:
-        src_set = None
-    if args.tree is not None and args.tree not in database.trees:
-        raise Exception("Tree \"{}\" not found".format(args.tree))
+        target_sources = patch.get_src_set_from_location_set(set(args.mboxes),
+                                                             cookies)
+    if args.tree is not None:
+        if args.tree not in database.trees:
+            raise Exception("Tree \"{}\" not found".format(args.tree))
+        target_trees = {args.tree}
     if args.arch is not None:
         if args.arch not in database.arches:
             raise Exception("Architecture \"{}\" not found".format(args.arch))
@@ -153,24 +159,22 @@ def main_create_baserun(args, database):
            args.arch not in database.trees[args.tree]['arches']:
             raise Exception("Arch \"{}\" not supported by tree \"{}\"".format(
                 args.arch, args.tree))
-    if args.components is None:
-        components = set()
-    else:
-        components = set(x for x in database.components
-                         if re.fullmatch(args.components, x))
-    if args.sets is None:
-        sets = None
-    else:
-        sets = set(x for x in database.sets if re.fullmatch(args.sets, x))
-        if not sets:
+        target_arches = {args.arch}
+    if args.components is not None:
+        target_components = set(x for x in database.components
+                                if re.fullmatch(args.components, x))
+    if args.sets is not None:
+        target_sets = set(x for x in database.sets
+                          if re.fullmatch(args.sets, x))
+        if not target_sets:
             raise Exception("No test sets matched specified regular " +
                             "expression: {}".format(args.sets))
 
-    target = data.Target(trees={args.tree},
-                         arches={args.arch},
-                         components=components,
-                         sets=sets,
-                         sources=src_set)
+    target = data.Target(trees=target_trees,
+                         arches=target_arches,
+                         components=target_components,
+                         sets=target_sets,
+                         sources=target_sources)
     return run.Base(database, target)
 
 
