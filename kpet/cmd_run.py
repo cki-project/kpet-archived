@@ -136,8 +136,8 @@ def main_create_baserun(args, database):
     Returns:
         Test execution data.
     """
-    target_trees = data.Target.ALL
-    target_arches = data.Target.ALL
+    target_trees = data.Target.ANY
+    target_arches = data.Target.ANY
     target_components = data.Target.NONE
     target_sets = data.Target.ALL
     target_sources = data.Target.ALL
