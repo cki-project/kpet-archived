@@ -79,14 +79,15 @@ class Base:     # pylint: disable=too-few-public-methods
     """A specific execution of tests in a database"""
 
     @staticmethod
-    def __get_recipesets(database, target):
+    def __get_recipesets(database, target, sets):
         """ Return a list of recipesets that contains a list of hosts."""
 
         assert isinstance(database, data.Base)
         assert isinstance(target, data.Target)
+        assert sets is None or isinstance(sets, set)
 
         # get hosts and their testcases
-        hosts = Base.__get_hosts(database, target)
+        hosts = Base.__get_hosts(database, target, sets)
 
         # load recipesets assignments from yaml
         db_recipesets = database.recipesets
@@ -106,34 +107,22 @@ class Base:     # pylint: disable=too-few-public-methods
         return recipesets_of_hosts
 
     @staticmethod
-    def __get_hosts(database, target):
+    def __distribute_into_hosts(database, pool_suites):
         """
-        Get a list of hosts to run.
+        Distribute suites and their cases to hosts
 
         Args:
-            database:   The database to get test data from.
-            target:     The target (a data.Target) to match/run tests against.
+            database:       The database to get host_types from.
+            pool_suites:    A list of tuples, each containing a suite
+                            and its cases selected for the run.
+        Returns:
+            A list of Host instances with suite runs assigned to them
         """
-        assert isinstance(database, data.Base)
-        assert isinstance(target, data.Target)
-
         host_types = \
             database.host_types \
             if database.host_types is not None \
             else {"": data.DEFAULT_HOST_TYPE}
 
-        # Build a pool of suites and cases
-        pool_suites = []
-        for suite in database.suites:
-            if suite.matches(target):
-                pool_cases = []
-                for case in suite.cases:
-                    if case.matches(target):
-                        pool_cases.append(case)
-                if pool_cases:
-                    pool_suites.append((suite, pool_cases))
-
-        # Distribute suites and their cases to hosts
         hosts = list()
         for host_type_name, host_type in host_types.items():
             # Create a suite run list
@@ -167,7 +156,40 @@ class Base:     # pylint: disable=too-few-public-methods
 
         return hosts
 
-    def __init__(self, database, target):
+    @staticmethod
+    def __get_hosts(database, target, sets):
+        """
+        Get a list of hosts to run.
+
+        Args:
+            database:   The database to get test data from.
+            target:     The target (a data.Target) to match/run tests against.
+            sets:       A set of names of test sets to have their members
+                        included into the run. None if all suites and cases
+                        should be included, regardless if members or not.
+        Returns:
+            A list of Host instances with suite runs assigned to them
+        """
+        assert isinstance(database, data.Base)
+        assert isinstance(target, data.Target)
+        assert sets is None or isinstance(sets, set)
+
+        # Build a pool of suites and cases
+        pool_suites = []
+        for suite in database.suites:
+            if suite.matches(target) and \
+               (sets is None or suite.sets & sets):
+                pool_cases = []
+                for case in suite.cases:
+                    if case.matches(target) and \
+                       (sets is None or case.sets & sets):
+                        pool_cases.append(case)
+                if pool_cases:
+                    pool_suites.append((suite, pool_cases))
+
+        return Base.__distribute_into_hosts(database, pool_suites)
+
+    def __init__(self, database, target, sets):
         """
         Initialize a test run.
 
@@ -175,9 +197,13 @@ class Base:     # pylint: disable=too-few-public-methods
             database:   The database to get test data from.
             target:     The target (a data.Target) to match/run tests against.
                         The target's tree must be present in the database.
+            sets:       A set of names of test sets to have their members
+                        included into the run. None if all suites and cases
+                        should be included, regardless if members or not.
         """
         assert isinstance(database, data.Base)
         assert isinstance(target, data.Target)
+        assert sets is None or isinstance(sets, set)
         assert target.trees is None or \
             target.trees <= set(database.trees.keys())
         assert target.arches is None or \
@@ -185,7 +211,8 @@ class Base:     # pylint: disable=too-few-public-methods
 
         self.database = database
         self.target = target
-        self.recipesets_of_hosts = self.__get_recipesets(database, target)
+        self.recipesets_of_hosts = self.__get_recipesets(database, target,
+                                                         sets)
 
     # pylint: disable=too-many-arguments
     def generate(self, description, kernel_location, lint, group=None):
