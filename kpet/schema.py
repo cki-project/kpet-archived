@@ -53,7 +53,8 @@ class Invalid(Exception):
 
     def __str__(self):
         return super().__str__() + \
-               (":\n" + str(self.__context__) if self.__context__ else "")
+               (":\n" + str(self.__context__) if self.__context__ is not None
+                else "")
 
 
 class Node:
@@ -260,13 +261,12 @@ class Reduction(Attraction):
                 # If we found our schema (and converted data) already
                 if first_valid_schema:
                     break
-                else:
-                    # Try to validate the data
-                    try:
-                        schema_or_converter.validate(data)
-                        first_valid_schema = schema_or_converter
-                    except Invalid:
-                        pass
+                # Try to validate the data
+                try:
+                    schema_or_converter.validate(data)
+                    first_valid_schema = schema_or_converter
+                except Invalid:
+                    pass
             # Else it's a conversion function, and if we found valid schema
             elif first_valid_schema:
                 # Convert the data for the next converter/last schema
