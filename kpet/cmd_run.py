@@ -139,8 +139,8 @@ def main_create_baserun(args, database):
     target_trees = data.Target.ANY
     target_arches = data.Target.ANY
     target_components = data.Target.NONE
-    target_sets = data.Target.ALL
     target_sources = data.Target.ALL
+    sets = None
 
     cookies = cookiejar.MozillaCookieJar()
     if args.cookies:
@@ -164,18 +164,18 @@ def main_create_baserun(args, database):
         target_components = set(x for x in database.components
                                 if re.fullmatch(args.components, x))
     if args.sets is not None:
-        target_sets = set(x for x in database.sets
-                          if re.fullmatch(args.sets, x))
-        if not target_sets:
+        sets = set(x for x in database.sets if re.fullmatch(args.sets, x))
+        if database.sets and not sets:
             raise Exception("No test sets matched specified regular " +
                             "expression: {}".format(args.sets))
 
     target = data.Target(trees=target_trees,
                          arches=target_arches,
                          components=target_components,
-                         sets=target_sets,
+                         # TODO: Remove after sets conversion
+                         sets=data.Target.ANY,
                          sources=target_sources)
-    return run.Base(database, target)
+    return run.Base(database, target, sets)
 
 
 def main_generate(args, baserun):
