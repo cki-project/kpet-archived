@@ -80,8 +80,21 @@ class Base:     # pylint: disable=too-few-public-methods
 
     @staticmethod
     def __get_recipesets(database, target, sets):
-        """ Return a list of recipesets that contains a list of hosts."""
+        """
+        Distribute hosts, suites and cases to recipesets.
 
+        Args:
+            database:   The database to get test data from.
+            target:     The target (a data.Target) to match/run tests against.
+                        The target's tree must be present in the database.
+            sets:       A set of names of test sets to have their members
+                        included into the run. None if all suites and cases
+                        should be included, regardless if members or not.
+
+        Returns:
+            A list of recipesets - host synchronization domains - lists which
+            contain hosts with suites and their cases to be executed on them.
+        """
         assert isinstance(database, data.Base)
         assert isinstance(target, data.Target)
         assert sets is None or isinstance(sets, set)
