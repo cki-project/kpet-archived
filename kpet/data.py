@@ -325,6 +325,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     cases=List(Class(Case))
                 ),
                 optional=dict(
+                    name=String(),
                     host_type_regex=Regex(),
                     hostRequires=String(),
                     partitions=String(),
