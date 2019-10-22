@@ -77,6 +77,7 @@ Each recipe set is a *list* of "host" objects containing these attributes:
 
 Each suite is an object with the following attributes:
 
+* `name`: Name of the test suite.
 * `description`: Description of the test suite.
 * `hostRequires`: Jinja2 template path with the host requirements for
   the test run. Copied from the kpet database value of the same name.

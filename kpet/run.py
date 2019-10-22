@@ -35,6 +35,7 @@ class Suite:
         for case in cases:
             assert case in suite.cases
 
+        self.name = suite.name
         self.description = suite.description
         self.hostRequires = suite.hostRequires  # pylint: disable=invalid-name
         self.partitions = suite.partitions
