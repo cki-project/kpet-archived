@@ -172,8 +172,6 @@ def main_create_baserun(args, database):
     target = data.Target(trees=target_trees,
                          arches=target_arches,
                          components=target_components,
-                         # TODO: Remove after sets conversion
-                         sets=data.Target.ANY,
                          sources=target_sources)
     return run.Base(database, target, sets)
 

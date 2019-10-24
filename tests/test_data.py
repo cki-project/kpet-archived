@@ -323,8 +323,7 @@ class DataPatternTest(unittest.TestCase):
                          trees=data.Target.ANY, sources=data.Target.ALL)
 
         # A complex real-life case
-        self.assertMatch(dict(sets={"or": ["net", "kt1", "debug"]},
-                              trees={"not": {"or": ["rhel5.*"]}},
+        self.assertMatch(dict(trees={"not": {"or": ["rhel5.*"]}},
                               sources={"or": [
                                   "include/net/tcp.*",
                                   "include/linux/tcp.*",
@@ -334,6 +333,5 @@ class DataPatternTest(unittest.TestCase):
                               ]}),
                          trees=data.Target.ANY,
                          arches={"x86_64"},
-                         sets={"net"},
                          components=data.Target.NONE,
                          sources=data.Target.ALL)
