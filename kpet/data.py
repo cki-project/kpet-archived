@@ -93,8 +93,7 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
             (isinstance(target_set, set) and
              all(isinstance(x, str) for x in target_set))
 
-    def __init__(self, trees=None, arches=None, components=None, sets=None,
-                 sources=None):
+    def __init__(self, trees=None, arches=None, components=None, sources=None):
         """
         Initialize a target.
 
@@ -105,21 +104,17 @@ class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
                             executing on.
             components:     A target set of names of extra components included
                             into the tested kernel build.
-            sets:           A target set of names of the sets of tests to
-                            restrict the run to.
             sources:        A target set of paths to the source files to cover
                             with tests.
         """
         assert Target.set_is_valid(trees)
         assert Target.set_is_valid(arches)
         assert Target.set_is_valid(components)
-        assert Target.set_is_valid(sets)
         assert Target.set_is_valid(sources)
 
         self.trees = trees
         self.arches = arches
         self.components = components
-        self.sets = sets
         self.sources = sources
 
 
@@ -127,8 +122,7 @@ class Pattern(Object):  # pylint: disable=too-few-public-methods
     """Execution target pattern"""
 
     # Target field qualifiers
-    # TODO remove sets after conversion
-    qualifiers = {"trees", "arches", "components", "sets", "sources"}
+    qualifiers = {"trees", "arches", "components", "sources"}
 
     """An execution target pattern"""
     def __init__(self, data):
@@ -465,35 +459,6 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             A schema.Invalid exception when finding an invalid regex
         """
 
-        # TODO: Remove after kpet-db switches to sets
-        def get_sets_from_pattern(pattern):
-            """
-            Generate a set of set names matched by a target pattern, or return
-            None, if the pattern doesn't attempt to match sets.
-
-            Args:
-                pattern:    The pattern to get the set names for.
-
-            Returns:
-                A list of set names matched by the pattern, or None,
-                signifying a missing set, if it doesn't try to match them.
-            """
-            sets = set(self.sets.keys())
-            matches = set()
-            for set_name in sets:
-                target = Target(trees=Target.ANY,
-                                arches=Target.ANY,
-                                components=Target.ANY,
-                                sets=set([set_name]),
-                                sources=Target.ANY)
-                if pattern.matches(target):
-                    matches.add(set_name)
-            if matches == sets:
-                # If a pattern matches every set it should mean it doesn't try
-                # to match them.
-                return None
-            return matches
-
         def get_sets_from_regex_list(regex_list):
             """
             Generate a set of set names matching any regular expressions from
@@ -522,33 +487,15 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                 sets |= match
             return sets
 
-        # TODO: Remove after kpet-db switches to sets
-        def merge_sets(set_x, set_y):
-            """
-            Merge two sets of set names, either of which could be None,
-            signifying a missing set.
-
-            Args:
-                set_x:  The first set to merge, or None for missing set.
-                set_y:  The second set to merge, or None for missing set.
-
-            Return: The merged name sets, or None, if both were missing.
-            """
-            if set_x is None:
-                return set_y
-            if set_y is None:
-                return set_x
-            return set_x | set_y
-
         for suite in self.suites:
-            suite.sets = merge_sets(get_sets_from_regex_list(suite.sets),
-                                    get_sets_from_pattern(suite.pattern))
+            suite.sets = get_sets_from_regex_list(suite.sets)
+
             if suite.sets is None:
                 suite.sets = set()
 
             for case in suite.cases:
-                case.sets = merge_sets(get_sets_from_regex_list(case.sets),
-                                       get_sets_from_pattern(case.pattern))
+                case.sets = get_sets_from_regex_list(case.sets)
+
                 if case.sets is None:
                     case.sets = suite.sets
 
