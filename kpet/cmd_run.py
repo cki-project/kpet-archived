@@ -18,15 +18,14 @@ import sys
 from kpet import misc, patch, data, run, cmd_misc
 
 
-def build_target(parser, generate):
+def build_common(parser, generate):
     """
-    Add target-specifying arguments to a "run" sub-command parser.
+    Add arguments to a "run" sub-command parser, which are common between
+    sub-commands.
 
     Args:
         parser: The parser to add arguments to.
-        generate: True, if the options should have restrictions imposed on
-                  targets by template generation (kpet.run.Base.generate()).
-                  False if not.
+        generate: True, if adding arguments for "generate" sub-command.
     """
     parser.add_argument(
         '--cookies',
@@ -113,14 +112,14 @@ def build(cmds_parser, common_parser):
         action='store_true',
         help='Do not lint or reformat output XML'
     )
-    build_target(generate_parser, generate=True)
+    build_common(generate_parser, generate=True)
 
     print_test_cases_parser = action_subparser.add_parser(
         "print-test-cases",
         help="Print test cases applicable to the patches",
         parents=[common_parser],
     )
-    build_target(print_test_cases_parser, generate=False)
+    build_common(print_test_cases_parser, generate=False)
 
 
 # pylint: disable=too-many-branches
