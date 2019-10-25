@@ -41,11 +41,11 @@ def main(args):
         raise Exception("\"{}\" is not a database directory".format(args.db))
     database = data.Base(args.db)
     if args.action == 'list':
-        regex = re.compile(args.regex) if args.regex else None
+        regex = re.compile(args.regex or ".*")
         max_name_length = max((len(k) for k in database.components), default=0)
         for name, description in sorted(database.components.items(),
                                         key=lambda i: i[0]):
-            if not regex or regex.match(name):
+            if regex.match(name):
                 print(f"{name: <{max_name_length}} {description}")
     else:
         misc.raise_action_not_found(args.action, args.command)
