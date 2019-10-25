@@ -35,8 +35,8 @@ def build(cmds_parser, common_parser):
                              help='Limit output to architectures with trees '
                              'matching the REGEX.')
     list_parser.add_argument('regex', nargs='?', default=None,
-                             help='Limit output to architectures '
-                             'matching the regex.')
+                             help='Regular expression fully matching '
+                                  'names of architectures to output.')
 
 
 def main(args):
