@@ -98,8 +98,9 @@ def build(cmds_parser, common_parser):
     generate_parser.add_argument(
         '-o',
         '--output',
+        metavar='FILE',
         default=None,
-        help='Path where will be saved the xml, default is stdout'
+        help='File to write the output to, default is stdout'
     )
     generate_parser.add_argument(
         '-k',
