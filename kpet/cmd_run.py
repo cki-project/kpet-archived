@@ -111,7 +111,7 @@ def build(cmds_parser, common_parser):
     generate_parser.add_argument(
         '--no-lint',
         action='store_true',
-        help='Do not lint and reformat output XML'
+        help='Do not lint or reformat output XML'
     )
     build_target(generate_parser, generate=True)
 
