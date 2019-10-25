@@ -19,8 +19,8 @@
               {% set maint = suite['maintainers']|join(", ")|e %}
               <param name="_MAINTAINERS" value="{{ maint }}"/>
 
-              {% for param in case['task_params'] %}
-              <param name="{{ param }}" value="{{ case['task_params'][param] }}"/>
+              {% for name in case.environment %}
+              <param name="{{ name }}" value="{{ case.environment[name] }}"/>
               {% endfor %}
             </params>
         </task>
