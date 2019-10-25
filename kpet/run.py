@@ -269,6 +269,7 @@ class Base:     # pylint: disable=too-few-public-methods
                 enabled_extensions=('xml'),
                 default_for_string=True,
             ),
+            undefined=jinja2.StrictUndefined,
         )
         template = jinja_env.get_template(
                         self.database.trees[tree_name]['template'])
