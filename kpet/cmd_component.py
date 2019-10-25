@@ -31,7 +31,8 @@ def build(cmds_parser, common_parser):
         parents=[common_parser],
     )
     list_parser.add_argument('regex', nargs='?', default=None,
-                             help='Optional. Use this to filter results.')
+                             help='Regular expression fully matching '
+                                  'names of components to output.')
 
 
 def main(args):
