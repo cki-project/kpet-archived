@@ -243,6 +243,7 @@ class Base:     # pylint: disable=too-few-public-methods
         """
         assert isinstance(description, str)
         assert isinstance(kernel_location, str)
+        assert isinstance(lint, bool)
         assert self.target.trees is not None and len(self.target.trees) == 1
         assert self.target.arches is not None and len(self.target.arches) == 1
 
