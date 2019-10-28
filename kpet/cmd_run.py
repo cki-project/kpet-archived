@@ -113,6 +113,16 @@ def build(cmds_parser, common_parser):
         action='store_true',
         help='Do not lint or reformat output XML'
     )
+    generate_parser.add_argument(
+        '-v',
+        '--variable',
+        metavar='NAME=VALUE',
+        action='append',
+        dest='variables',
+        default=[],
+        help='Assign a value to a template variable. '
+             'See "kpet variable list" for recognized variables.'
+    )
     build_common(generate_parser, generate=True)
 
     print_test_cases_parser = action_subparser.add_parser(
@@ -176,17 +186,52 @@ def main_create_baserun(args, database):
     return run.Base(database, target, sets)
 
 
-def main_generate(args, baserun):
+def main_generate(args, baserun, database):
     """
     Execute `run generate`
 
     Args:
         args:       Parsed command-line arguments.
         baserun:    Test execution data.
+        database:   The database to get additional data from.
     """
+
+    # Parse variable assignments
+    variables = {n: i['default']
+                 for n, i in database.variables.items()
+                 if 'default' in i}
+    for assignment in args.variables:
+        match = re.fullmatch("([^=]+)=(.*)", assignment)
+        if match is None:
+            raise Exception(f"Invalid variable assignment: \"{assignment}\"")
+        variables[match.group(1)] = match.group(2)
+
+    # Check if all variables are known
+    unknown_variables = \
+        ", ".join(set(variables.keys()) - set(database.variables.keys()))
+    if unknown_variables:
+        raise Exception(f"Unknown variables specified: {unknown_variables}.\n"
+                        "Run \"kpet variable list\" "
+                        "to see recognized variables.")
+
+    # Check if all variables without defaults are set
+    unset_variables = \
+        ", ".join(
+            set(filter(lambda k: "default" not in database.variables[k],
+                       database.variables.keys())) -
+            set(variables.keys())
+        )
+    if unset_variables:
+        raise Exception(f"Required variables not set: {unset_variables}.\n"
+                        "Run \"kpet variable list\" "
+                        "to see variable descriptions.\n"
+                        "Use -v/--variable NAME=VALUE option "
+                        "to specify variable values.")
+
     content = baserun.generate(description=args.description,
                                kernel_location=args.kernel,
                                lint=not args.no_lint,
+                               variables=variables,
                                group=args.group)
     if not args.output:
         sys.stdout.write(content)
@@ -221,7 +266,7 @@ def main(args):
     database = data.Base(args.db)
 
     if args.action == 'generate':
-        main_generate(args, main_create_baserun(args, database))
+        main_generate(args, main_create_baserun(args, database), database)
     elif args.action == 'print-test-cases':
         main_print_test_cases(args, main_create_baserun(args, database))
     else:
