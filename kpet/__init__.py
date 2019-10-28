@@ -42,7 +42,6 @@ def main(args=None):
     logging.getLogger().setLevel(os.environ.get('LOG_LEVEL', 'INFO'))
     description = "KPET - Kernel Patch-Evaluated Testing"
     common_parser = argparse.ArgumentParser(add_help=False)
-    common_parser.add_argument('--verbose', '-v', action='count')
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('-d', '--debug', action='store_true',
                         help='Enable debug (backtrace) output on error')
