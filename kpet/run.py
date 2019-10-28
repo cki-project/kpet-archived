@@ -228,7 +228,8 @@ class Base:     # pylint: disable=too-few-public-methods
                                                          sets)
 
     # pylint: disable=too-many-arguments
-    def generate(self, description, kernel_location, lint, group=None):
+    def generate(self, description, kernel_location, lint, variables,
+                 group=None):
         """
         Generate Beaker XML which would execute tests in the database.
         The target supplied at creation must have exactly one tree and exactly
@@ -238,12 +239,14 @@ class Base:     # pylint: disable=too-few-public-methods
             description:        The run description string.
             kernel_location:    Kernel location string (a tarball or RPM URL).
             lint:               Lint and reformat the XML output, if True.
+            variables:          A dictionary of extra template variables.
         Returns:
             The beaker XML string.
         """
         assert isinstance(description, str)
         assert isinstance(kernel_location, str)
         assert isinstance(lint, bool)
+        assert isinstance(variables, dict)
         assert self.target.trees is not None and len(self.target.trees) == 1
         assert self.target.arches is not None and len(self.target.arches) == 1
 
@@ -256,6 +259,7 @@ class Base:     # pylint: disable=too-few-public-methods
             ARCH=arch_name,
             TREE=tree_name,
             RECIPESETS=self.recipesets_of_hosts,
+            VARIABLES=variables,
             getenv=os.getenv,
             group=group
         )

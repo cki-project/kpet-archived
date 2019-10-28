@@ -528,7 +528,11 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                         sets=Dict(String()),
                         host_types=Dict(Class(HostType)),
                         host_type_regex=Regex(),
-                        recipesets=Dict(List(String()))
+                        recipesets=Dict(List(String())),
+                        variables=Dict(
+                            Struct(required=dict(description=String()),
+                                   optional=dict(default=String()))
+                        ),
                     )
                 )
             ),
@@ -546,6 +550,8 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             self.sets = {}
         if self.suites is None:
             self.suites = []
+        if self.variables is None:
+            self.variables = dict()
         # Regex check
         self.validate_host_type_regex()
         # Replace the list of regexes with a list of available arches

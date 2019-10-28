@@ -16,7 +16,8 @@ import argparse
 import os
 import sys
 import logging
-from kpet import cmd_run, cmd_tree, cmd_arch, cmd_component, cmd_set
+from kpet import cmd_run, cmd_tree, cmd_arch, cmd_component, cmd_set, \
+                 cmd_variable
 from kpet import misc
 
 
@@ -57,6 +58,7 @@ def main(args=None):
     cmd_arch.build(cmds_parser, common_parser)
     cmd_component.build(cmds_parser, common_parser)
     cmd_set.build(cmds_parser, common_parser)
+    cmd_variable.build(cmds_parser, common_parser)
 
     args = parser.parse_args(args)
 
@@ -70,6 +72,7 @@ def main(args=None):
         'arch': [cmd_arch.main, args],
         'component': [cmd_component.main, args],
         'set': [cmd_set.main, args],
+        'variable': [cmd_variable.main, args],
     }
     try:
         exec_command(args, commands)
