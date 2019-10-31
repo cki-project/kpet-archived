@@ -13,7 +13,6 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Execution of tests from the database"""
 
-import os
 import jinja2
 from lxml import etree
 from kpet import data
@@ -259,7 +258,6 @@ class Base:     # pylint: disable=too-few-public-methods
             TREE=tree_name,
             RECIPESETS=self.recipesets_of_hosts,
             VARIABLES=variables,
-            getenv=os.getenv,
         )
 
         jinja_env = jinja2.Environment(
