@@ -35,8 +35,13 @@ class CmdRunTest(unittest.TestCase):
         database = data.Base(self.dbdir)
         target = data.Target(arches={'x86_64'}, trees={'rhel7'}, sources=None)
         baserun = run.Base(database, target, None)
+        variables = {
+            n: i['default']
+            for n, i in database.variables.items()
+            if 'default' in i
+        }
         content = baserun.generate(description='Foo', kernel_location='bar',
-                                   lint=True, variables=dict())
+                                   lint=True, variables=variables)
         with open(os.path.join(self.dbdir, 'rhel7_rendered.xml')) as fhandle:
             content_expected = fhandle.read()
         self.assertEqual(content_expected, content)

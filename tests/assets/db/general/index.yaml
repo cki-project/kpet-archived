@@ -14,3 +14,7 @@ arches:
 suites:
     - suites/default/index.yaml
     - suites/fs/index.yaml
+variables:
+  suites_zip_url:
+    description: A URL of the ZIP archive containing test suite code
+    default: https://github.com/CKI-project/tests-beaker/archive/master.zip
