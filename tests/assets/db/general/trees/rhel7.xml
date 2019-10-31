@@ -1,15 +1,12 @@
-{% set TESTS_BEAKER_ZIP_URL = getenv('TESTS_BEAKER_ZIP_URL') or "https://github.com/CKI-project/tests-beaker/archive/master.zip" %}
-
-
 {% macro host_add_tasks(host) -%}
   {% for suite in host.suites %}
     {% for case in suite.cases %}
         <task name="{{ case['name'] }}" role="{{ case['role'] }}">
             {% if case['url_suffix'] is not none %}
-                <fetch url="{{ TESTS_BEAKER_ZIP_URL }}#{{ case['url_suffix'] }}"/>
+                <fetch url="{{ VARIABLES.suites_zip_url }}#{{ case['url_suffix'] }}"/>
             {% else %}
                 {% if suite['url_suffix'] is not none %}
-                    <fetch url="{{ TESTS_BEAKER_ZIP_URL }}#{{ suite['url_suffix'] }}"/>
+                    <fetch url="{{ VARIABLES.suites_zip_url }}#{{ suite['url_suffix'] }}"/>
                 {% endif %}
             {% endif %}
             <params>
