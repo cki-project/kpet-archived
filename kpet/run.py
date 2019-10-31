@@ -228,8 +228,7 @@ class Base:     # pylint: disable=too-few-public-methods
                                                          sets)
 
     # pylint: disable=too-many-arguments
-    def generate(self, description, kernel_location, lint, variables,
-                 group=None):
+    def generate(self, description, kernel_location, lint, variables):
         """
         Generate Beaker XML which would execute tests in the database.
         The target supplied at creation must have exactly one tree and exactly
@@ -261,7 +260,6 @@ class Base:     # pylint: disable=too-few-public-methods
             RECIPESETS=self.recipesets_of_hosts,
             VARIABLES=variables,
             getenv=os.getenv,
-            group=group
         )
 
         jinja_env = jinja2.Environment(
