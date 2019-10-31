@@ -30,10 +30,85 @@ How to run it
 -------------
 To preview patch generated test cases:
 ```bash
-$ kpet --db . run print-test-cases 001.patch
+$ kpet run print-test-cases 001.patch
 ```
 
-To generate complete beaker xml:
+To generate complete Beaker XML:
 ```bash
-$ kpet --db . run generate --description 'skt ##KVER##' -a aarch64 -k '##KPG_URL##' -t upstream 001.patch
+$ kpet run generate --description 'skt ##KVER##' -a aarch64 -k '##KPG_URL##' -t upstream 001.patch
 ```
+
+You have to run these commands in the kpet database directory, or specify
+the `--db` option to point to the kpet database directory.
+
+Exported variables for kpet database templates
+----------------------------------------------
+The following variables are passed to the Beaker templates in the kpet
+database. They effectively are the interface between kpet and
+whichever database you decide to use:
+
+* `DESCRIPTION`: Description for the Beaker test run.
+* `KURL`: URL of the kernel to be tested. Could be a tarball, a yum repo, etc.
+* `ARCH`: Name of the architecture to run the tests on.
+* `TREE`: Name of the tree to run the tests on.
+* `VARIABLES`: Dictionary with extra template variables.
+* `RECIPESETS`: List of recipe sets. See below for details.
+
+Each recipe set is a *list* of "host" objects containing these attributes:
+
+* `hostname`: Hostname if this will run on a specific machine, None otherwise.
+* `ignore_panic`: If kernel panics should be ignored when running
+  tests. Copied from the kpet database value of the same name.
+* `hostRequires`: Jinja2 template path with the host requirements for
+  the test run. Copied from the kpet database value of the same name.
+* `partitions`: Jinja2 template path with custom partition
+  configuration. Copied from the kpet database value of the same name. See
+  https://beaker-project.org/docs/user-guide/customizing-partitions.html
+  for more information.
+* `kickstart`: Jinja2 template path with custom Anaconda kickstart
+  configuration. Copied from the kpet database value of the same name. See
+  https://beaker-project.org/docs/admin-guide/kickstarts.html for more
+  information.
+* `suites`: List of test suites.
+
+Each suite is an object with the following attributes:
+
+* `description`: Description of the test suite.
+* `hostRequires`: Jinja2 template path with the host requirements for
+  the test run. Copied from the kpet database value of the same name.
+* `partitions`: Jinja2 template path with custom partition
+  configuration. Copied from the kpet database value of the same name. See
+  https://beaker-project.org/docs/user-guide/customizing-partitions.html
+  for more information.
+* `kickstart`: Jinja2 template path with custom Anaconda kickstart
+  configuration. Copied from the kpet database value of the same name. See
+  https://beaker-project.org/docs/admin-guide/kickstarts.html for more
+  information.
+* `maintainers`: List of strings with the names and emails of the test
+  maintainers.
+* `url_suffix`: URL suffix to use in the Beaker task fetch URL,
+  ie. the bit after the "#".
+* `cases`: List of test cases.
+
+Each case is an object with the following attributes:
+
+* `name`: Test case name.
+* `max_duration_seconds`: Maximum number of seconds the test will be
+  allowed to run.
+* `hostRequires`: Jinja2 template path with the host requirements for
+  the test run. Copied from the kpet database value of the same name.
+* `partitions`: Jinja2 template path with custom partition
+  configuration. Copied from the kpet database value of the same name. See
+  https://beaker-project.org/docs/user-guide/customizing-partitions.html
+  for more information.
+* `kickstart`: Jinja2 template path with custom Anaconda kickstart
+  configuration. Copied from the kpet database value of the same name. See
+  https://beaker-project.org/docs/admin-guide/kickstarts.html for more
+  information.
+* `waived`: True if the test's failure should be ignored regarding the
+  test run success/failure, eg. because it's new or unstable.
+* `role`: The value for the Beaker task's role attribute.
+* `url_suffix`: URL suffix to use in the Beaker task fetch URL,
+  ie. the bit after the "#".
+* `environment`: Dictionary with environment variables that should be
+  set when running this test case.
