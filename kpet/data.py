@@ -396,8 +396,8 @@ class Base(Object):     # pylint: disable=too-few-public-methods
     def validate_host_type_regex(self):
         """
         Check if any of the regexes are invalid.
-        Returns:
-            Raises a schema.Invalid exception when finding an invalid regex
+        Raises:
+            schema.Invalid when finding an invalid regex
         """
         host_types = list((self.host_types or {}).keys())
 
