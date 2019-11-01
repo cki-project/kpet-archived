@@ -255,7 +255,7 @@ def main_print_test_cases(args, baserun):
 def main(args):
     """Main function for the `run` command"""
     if not data.Base.is_dir_valid(args.db):
-        raise Exception("\"{}\" is not a database directory".format(args.db))
+        misc.raise_invalid_database(args.db)
     database = data.Base(args.db)
 
     if args.action == 'generate':
