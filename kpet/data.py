@@ -331,6 +331,9 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     kickstart=String(),
                     pattern=Class(Pattern),
                     sets=sets_schema,
+                    origin=String(),
+                    # TODO Make required once url_suffix is removed
+                    location=String(),
                     url_suffix=String(),
                     maintainers=List(String(), min_len=1)
                 )
@@ -422,6 +425,33 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                                                suite.description, case.name,
                                                host_type_regex.pattern,
                                                host_types))
+
+    def validate_suite_origins(self):
+        """
+        Check that suite origins are valid.
+        Raises:
+            schema.Invalid when finding an invalid origin.
+        """
+        for suite in self.suites:
+            if self.origins is None:
+                if suite.origin is not None:
+                    raise Invalid(
+                        f'Suite "{suite.description}" has origin specified, '
+                        f'but available origins are not defined in '
+                        f'the database.'
+                    )
+            else:
+                if suite.origin is None:
+                    raise Invalid(
+                        f'Suite "{suite.description}" has no origin specified'
+                    )
+                if suite.origin not in self.origins:
+                    raise Invalid(
+                        f'Suite "{suite.description}" has unknown origin '
+                        f'specified: "{suite.origin}".\n'
+                        f'Expecting one of the following: '
+                        f'{", ".join(self.origins.keys())}.'
+                    )
 
     def convert_tree_arches(self):
         """
@@ -533,6 +563,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                             Struct(required=dict(description=String()),
                                    optional=dict(default=String()))
                         ),
+                        origins=Dict(String()),
                     )
                 )
             ),
@@ -552,6 +583,8 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             self.suites = []
         if self.variables is None:
             self.variables = dict()
+        # Validate suite origins
+        self.validate_suite_origins()
         # Regex check
         self.validate_host_type_regex()
         # Replace the list of regexes with a list of available arches
