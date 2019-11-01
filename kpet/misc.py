@@ -32,3 +32,11 @@ def raise_action_not_found(action, command):
             command
         )
     )
+
+
+def raise_invalid_database(database):
+    """Raise an exception for a wrong database"""
+    raise Exception(
+        '"{}" is not a database directory. '
+        'Maybe you need the --db option?'.format(database)
+    )
