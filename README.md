@@ -88,6 +88,18 @@ Each suite is an object with the following attributes:
   maintainers.
 * `url_suffix`: URL suffix to use in the Beaker task fetch URL,
   ie. the bit after the "#".
+* `origin`: The name of a test suite origin - the source for the suite's code.
+  One of the keys from the `origins` dictionary in the database's top
+  `index.yaml` file. Undefined, if the latter is not defined. Examples:
+  `github`, `beaker`, or `suites_zip`. See the `origins` dictionary in the
+  database's top `index.yaml` for the available origins and the meanings they
+  assign to `location` values.
+* `location`: The location of the suite's code, with whatever meaning the
+  database choses to assign to it, but must be interpreted according to the
+  `origin`, if specified. Examples: a tarball URL, a path inside a common
+  tarball, a Beaker task name. See the `origins` dictionary in the database's
+  top `index.yaml` for the available origins and the meanings they assign to
+  `location` values.
 * `cases`: List of test cases.
 
 Each case is an object with the following attributes:
