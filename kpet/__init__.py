@@ -13,9 +13,7 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Main entry point and command line parsing"""
 import argparse
-import os
 import sys
-import logging
 from kpet import cmd_run, cmd_tree, cmd_arch, cmd_component, cmd_set, \
                  cmd_variable
 from kpet import misc
@@ -34,14 +32,13 @@ def exec_command(args, commands):
     except SystemExit:
         pass
     except:  # noqa: E731 don't use bare except pylint:disable=bad-option-value
-        logging.error('While executing command "%s"', args.command)
+        print('Error: While executing command "{}"'.format(args.command),
+              file=sys.stderr)
         raise
 
 
 def main(args=None):
     """Entry point for kpet tool"""
-    logging.basicConfig(format="%(created)10.6f:%(levelname)s:%(message)s")
-    logging.getLogger().setLevel(os.environ.get('LOG_LEVEL', 'INFO'))
     description = "KPET - Kernel Patch-Evaluated Testing"
     common_parser = argparse.ArgumentParser(add_help=False)
     parser = argparse.ArgumentParser(description=description)
@@ -78,6 +75,6 @@ def main(args=None):
     try:
         exec_command(args, commands)
     except misc.ActionNotFound:
-        logging.error('No action specified')
+        print('Error: No action specified', file=sys.stderr)
         parser.print_help()
         parser.print_help(file=sys.stderr)
