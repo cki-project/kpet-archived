@@ -23,7 +23,7 @@ def build(cmds_parser, common_parser):
         cmds_parser,
         common_parser,
         "component",
-        help='Build component, default action "list".',
+        help='Build component',
     )
     list_parser = action_subparser.add_parser(
         "list",

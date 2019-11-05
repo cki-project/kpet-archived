@@ -23,7 +23,7 @@ def build(cmds_parser, common_parser):
         cmds_parser,
         common_parser,
         "set",
-        help='Test set, default action "list".',
+        help='Test set',
     )
     list_parser = action_subparser.add_parser(
         "list",
