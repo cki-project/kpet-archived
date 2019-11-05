@@ -23,7 +23,7 @@ def build(cmds_parser, common_parser):
         cmds_parser,
         common_parser,
         "variable",
-        help='Template variable, default action "list".',
+        help='Template variable',
     )
 
     list_parser = action_subparser.add_parser(

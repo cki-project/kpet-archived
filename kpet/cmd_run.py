@@ -76,7 +76,7 @@ def build(cmds_parser, common_parser):
         cmds_parser,
         common_parser,
         'run',
-        help='Test suite run, default action "generate"',
+        help='Test suite run',
     )
     generate_parser = action_subparser.add_parser(
         "generate",

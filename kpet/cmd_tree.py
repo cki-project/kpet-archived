@@ -23,7 +23,7 @@ def build(cmds_parser, common_parser):
         cmds_parser,
         common_parser,
         "tree",
-        help='Kernel tree, default action "list".',
+        help='Kernel tree',
     )
     list_parser = action_subparser.add_parser(
         "list",
