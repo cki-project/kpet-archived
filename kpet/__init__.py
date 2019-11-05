@@ -24,7 +24,8 @@ from kpet import misc
 def exec_command(args, commands):
     """Call the associated command handler"""
     try:
-        command = commands[args.command]
+        command_name = args.command if args.command is not None else "help"
+        command = commands[command_name]
     except KeyError:
         print('Not implemented yet', file=sys.stderr)
         return
