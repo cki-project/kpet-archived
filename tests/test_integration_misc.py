@@ -14,7 +14,8 @@
 """Integration miscellaneous tests"""
 from tests.test_integration import (IntegrationTests, kpet_run_generate,
                                     kpet_with_db, COMMONTREE_XML,
-                                    INDEX_BASE_YAML, create_asset_files)
+                                    INDEX_BASE_YAML, create_asset_files,
+                                    SUITE_BASE)
 
 
 class IntegrationMiscTests(IntegrationTests):
@@ -284,3 +285,37 @@ class IntegrationMiscTests(IntegrationTests):
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+
+    def test_preparation_tasks_are_added(self):
+        """Test source-matching with a specific case"""
+        assets = {
+            "index.yaml": """
+                host_type_regex: ^normal
+                host_types:
+                    normal:
+                        tasks: tasks.xml
+                recipesets:
+                    rcs1:
+                      - normal
+                arches:
+                    - arch
+                trees:
+                    tree:
+                        template: tree.xml
+                suites:
+                    - suite1.yaml
+            """,
+            "suite1.yaml": SUITE_BASE.format(1) + """
+                    - name: case1
+                      max_duration_seconds: 600
+            """,
+            "tree.xml": COMMONTREE_XML,
+            "tasks.xml": "<task>Some preparation task</task>"
+        }
+
+        assets_path = create_asset_files(self.test_dir, assets)
+
+        # Only non-specific case matches baseline
+        self.assertKpetProduces(
+            kpet_run_generate, assets_path,
+            stdout_matching=r'.*<task>\s*Some preparation task\s*</task>.*')
