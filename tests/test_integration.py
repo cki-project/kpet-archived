@@ -46,6 +46,9 @@ COMMONTREE_XML = """
           {{ case.name }}
         {% endfor %}
       {% endfor %}
+      {% if HOST.tasks %}
+        {% include HOST.tasks %}
+      {% endif %}
     {% endfor %}
   {% endfor %}
 </job>

@@ -69,6 +69,10 @@ Each recipe set is a *list* of "host" objects containing these attributes:
   configuration. Copied from the kpet database value of the same name. See
   https://beaker-project.org/docs/admin-guide/kickstarts.html for more
   information.
+* `tasks`: Jinja2 template path with custom tasks (<task> elements)
+  for the host type. Copied from the kpet database value of the same
+  name. See https://beaker-project.org/docs/user-guide/tasks.html for
+  more information.
 * `suites`: List of test suites.
 
 Each suite is an object with the following attributes:

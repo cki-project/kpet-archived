@@ -70,6 +70,7 @@ class Host:
         self.hostRequires = type.hostRequires
         self.partitions = type.partitions
         self.kickstart = type.kickstart
+        self.tasks = type.tasks
         self.suites = suites
 
         self.name = name
