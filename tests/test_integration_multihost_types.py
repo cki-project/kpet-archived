@@ -53,8 +53,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
 
         assets_path = create_asset_files(self.test_dir, assets)
 
-        self.assertKpetSrcMatchesNoneOfTwoSuites(
-            assets_path)
+        self.assertKpetSrcMatchesNoneOfTwoSuites(assets_path)
 
     def test_multihost_one_type_no_regex_two_suites(self):
         """Test multihost support with one type, no regex, and two suites"""
