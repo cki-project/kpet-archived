@@ -322,6 +322,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
             Struct(
                 required=dict(
                     description=String(),
+                    location=String(),
                     cases=List(Class(Case))
                 ),
                 optional=dict(
@@ -332,8 +333,6 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     pattern=Class(Pattern),
                     sets=sets_schema,
                     origin=String(),
-                    # TODO Make required once url_suffix is removed
-                    location=String(),
                     url_suffix=String(),
                     maintainers=List(String(), min_len=1)
                 )
