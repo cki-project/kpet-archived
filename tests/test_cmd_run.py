@@ -32,6 +32,7 @@ class CmdRunTest(unittest.TestCase):
         """
         Check the success case.
         """
+        self.maxDiff = None  # pylint: disable=invalid-name
         database = data.Base(self.dbdir)
         target = data.Target(arches={'x86_64'}, trees={'rhel7'}, sources=None)
         baserun = run.Base(database, target, None)
