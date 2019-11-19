@@ -43,7 +43,6 @@ class Suite:
         self.maintainers = suite.maintainers
         self.origin = suite.origin
         self.location = suite.location
-        self.url_suffix = suite.url_suffix
 
 
 class Host:
