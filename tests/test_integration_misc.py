@@ -199,6 +199,7 @@ class IntegrationMiscTests(IntegrationTests):
             """,
             "suite.yaml": """
                 description: "Suite data with missing nodes"
+                location: somewhere
                 maintainers:
                   - maint1
             """,
@@ -231,6 +232,7 @@ class IntegrationMiscTests(IntegrationTests):
             """,
             "suite.yaml": """
                 description: Empty suite
+                location: somewhere
                 maintainers:
                   - maint1
                 cases: []
@@ -250,6 +252,7 @@ class IntegrationMiscTests(IntegrationTests):
             "index.yaml": INDEX_BASE_YAML,
             "suite.yaml": """
                 description: suite1
+                location: somewhere
                 maintainers:
                   - maint1
                 cases:
@@ -271,6 +274,7 @@ class IntegrationMiscTests(IntegrationTests):
             "index.yaml": INDEX_BASE_YAML,
             "suite.yaml": """
                 description: suite1
+                location: somewhere
                 maintainers:
                   - maint1
                 cases:

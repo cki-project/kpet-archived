@@ -1,7 +1,7 @@
 description: 'layout of ltplite for KPET'
 maintainers:
   - maint1
-url_suffix: distribution/ltp/lite
+location: distribution/ltp/lite
 cases:
     -   name: /kernel/distribution/ltp/lite
         max_duration_seconds: 600
