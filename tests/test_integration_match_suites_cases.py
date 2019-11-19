@@ -255,6 +255,7 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
             """,
             "suite1.yaml": """
                 description: suite1
+                location: somewhere
                 maintainers:
                   - maint1
                 pattern:

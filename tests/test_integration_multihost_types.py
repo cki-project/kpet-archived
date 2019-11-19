@@ -154,6 +154,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             """,
             "suite1.yaml": """
                 description: suite1
+                location: somewhere
                 maintainers:
                   - maint1
                 host_type_regex: normal
@@ -167,6 +168,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             """,
             "suite2.yaml": """
                 description: suite2
+                location: somewhere
                 maintainers:
                   - maint1
                 host_type_regex: not_normal
@@ -475,6 +477,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             """,
             "suite1.yaml": """
             description: suite1
+            location: somewhere
             maintainers:
               - maint1
             host_type_regex: normal
@@ -488,6 +491,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
             """,
             "suite2.yaml": """
             description: suite2
+            location: somewhere
             maintainers:
               - maint1
             host_type_regex: not_normal

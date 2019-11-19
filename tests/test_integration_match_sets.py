@@ -44,6 +44,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                 """,
             "suite1.yaml": """
                   description: suite1
+                  location: somewhere
                   maintainers:
                     - maint1
                   sets:
@@ -54,6 +55,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
             """,
             "suite2.yaml": """
                   description: suite2
+                  location: somewhere
                   maintainers:
                     - maint2
                   sets:
@@ -105,6 +107,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                 """,
             "suite1.yaml": """
                   description: suite1
+                  location: somewhere
                   maintainers:
                     - maint1
                   sets:
@@ -117,6 +120,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
             """,
             "suite2.yaml": """
                   description: suite2
+                  location: somewhere
                   maintainers:
                     - maint2
                   sets:
@@ -169,6 +173,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                 """,
             "suite1.yaml": """
                   description: suite1
+                  location: somewhere
                   maintainers:
                     - maint1
                   sets:
@@ -219,6 +224,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                 """,
             "suite1.yaml": """
                   description: suite1
+                  location: somewhere
                   maintainers:
                     - maint1
                   sets:
@@ -268,6 +274,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                 """,
             "suite1.yaml": """
                   description: suite1
+                  location: somewhere
                   maintainers:
                     - maint1
                   sets:
@@ -318,6 +325,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                 """,
             "suite1.yaml": """
                   description: suite1
+                  location: somewhere
                   maintainers:
                     - maint1
                   sets:

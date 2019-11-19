@@ -1,5 +1,5 @@
 description: 'layout of xfs tests for KPET'
-url_suffix: /filesystems/xfs/xfstests
+location: /filesystems/xfs/xfstests
 maintainers:
   - maint1
 cases:
