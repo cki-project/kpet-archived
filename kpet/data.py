@@ -287,7 +287,6 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                     pattern=Class(Pattern),
                     waived=Boolean(),
                     role=String(),
-                    url_suffix=String(),
                     environment=Dict(String()),
                 )
             ),
@@ -333,7 +332,6 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     pattern=Class(Pattern),
                     sets=sets_schema,
                     origin=String(),
-                    url_suffix=String(),
                     maintainers=List(String(), min_len=1)
                 )
             ),
