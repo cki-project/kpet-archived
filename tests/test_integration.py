@@ -152,7 +152,7 @@ def kpet_run_generate(db_name, *args):
     Returns:
         Exit status, standard output, standard error
     """
-    return kpet_with_db(db_name,
+    return kpet_with_db(db_name, "--debug",
                         "run", "generate", "-t", "tree",
                         "-k", "kernel.tar.gz", "-a", "arch", *args)
 
