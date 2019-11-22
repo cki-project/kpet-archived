@@ -64,9 +64,10 @@ def build_common(parser, generate):
     )
     parser.add_argument(
         'mboxes',
+        metavar='MBOX',
         nargs='*',
         default=[],
-        help='List of mbox URLs/paths comprising the patch series'
+        help='URL/path of a mailbox containing tested patches'
     )
 
 
