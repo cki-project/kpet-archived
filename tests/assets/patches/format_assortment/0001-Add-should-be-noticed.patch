@@ -1,0 +1,29 @@
+From 168c187821474fc1f85309c7781b482708395264 Mon Sep 17 00:00:00 2001
+From: Nikolai Kondrashov <spbnick@gmail.com>
+Date: Fri, 22 Nov 2019 14:31:23 +0200
+Subject: [PATCH 1/1] Add should-be-noticed
+
+diff --git a/should-not-be-noticed b/should-not-be-noticed
+new file mode 100644
+index 000000000000..6abaa150253e
+--- /dev/null
++++ b/should-not-be-noticed
+@@ -0,0 +1 @@
++Should not be noticed
+--
+2.24.0
+---
+ should-be-noticed | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 should-be-noticed
+
+diff --git a/should-be-noticed b/should-be-noticed
+new file mode 100644
+index 000000000000..09f4a97fd2db
+--- /dev/null
++++ b/should-be-noticed
+@@ -0,0 +1 @@
++Should be noticed
+-- 
+2.24.0
+
