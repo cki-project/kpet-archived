@@ -51,11 +51,6 @@ _ReError = _get_re_error_type()
 class Invalid(Exception):
     """Invalid data exception"""
 
-    def __str__(self):
-        return super().__str__() + \
-               (":\n" + str(self.__context__) if self.__context__ is not None
-                else "")
-
 
 class Node:
     """

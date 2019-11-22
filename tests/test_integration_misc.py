@@ -150,7 +150,7 @@ class IntegrationMiscTests(IntegrationTests):
         assets_path = create_asset_files(self.test_dir, assets)
 
         self.assertKpetProduces(kpet_with_db, assets_path,
-                                "tree", "list",
+                                "--debug", "tree", "list",
                                 status=1,
                                 stderr_matching=r'.*yaml.parser.ParserError.*')
 
@@ -170,7 +170,7 @@ class IntegrationMiscTests(IntegrationTests):
         assets_path = create_asset_files(self.test_dir, assets)
 
         self.assertKpetProduces(kpet_with_db, assets_path,
-                                "tree", "list",
+                                "--debug", "tree", "list",
                                 status=1,
                                 stderr_matching=r'.*yaml.parser.ParserError.*')
 

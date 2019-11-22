@@ -196,7 +196,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
             kpet_run_generate, assets_path, "-s", "foo", status=1,
             stderr_matching=r'.*kpet.schema.Invalid: Case sets are not a '
                             r'subset of suite sets in suite:\s*'
-                            r'suite1\s*case: case1\s*')
+                            r'suite1\s*case: case1\b.*')
 
     def test_match_nonexistent_set_case_error(self):
         """

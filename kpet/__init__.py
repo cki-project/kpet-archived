@@ -14,6 +14,7 @@
 """Main entry point and command line parsing"""
 import argparse
 import sys
+import traceback
 from kpet import cmd_run, cmd_tree, cmd_arch, cmd_component, cmd_set, \
                  cmd_variable, cmd_patch
 from kpet import misc
@@ -31,10 +32,6 @@ def exec_command(args, commands):
         command[0](*command[1:])
     except SystemExit:
         pass
-    except:  # noqa: E731 don't use bare except pylint:disable=bad-option-value
-        print('Error: While executing command "{}"'.format(args.command),
-              file=sys.stderr)
-        raise
 
 
 def main(args=None):
@@ -61,9 +58,6 @@ def main(args=None):
 
     args = parser.parse_args(args)
 
-    if not args.debug:
-        sys.tracebacklimit = 0
-
     commands = {
         'help': [parser.print_help],
         'run': [cmd_run.main, args],
@@ -80,3 +74,20 @@ def main(args=None):
         print('Error: No action specified', file=sys.stderr)
         parser.print_help()
         parser.print_help(file=sys.stderr)
+    except Exception as exc:  # pylint: disable=broad-except
+        if args.debug:
+            traceback.print_exc(file=sys.stderr)
+            print("", file=sys.stderr)
+
+        # The actual exception thrown won't necessarily make much
+        # sense (too generic), so print all the context recursively so
+        # that the user understand what exactly has happened.
+        indentation = ""
+        # pylint: disable=using-constant-test
+        while exc:
+            print(indentation + str(exc) + (":" if exc.__context__ else ""),
+                  file=sys.stderr)
+            indentation += "  "
+            exc = exc.__context__
+
+        sys.exit(1)
