@@ -58,7 +58,7 @@ def get_src_set(patch):
     Raises:
         UnrecognizedFormat: patch format was invalid.
     """
-    pattern = re.compile(r'^---$|'
+    pattern = re.compile(r'^From (.|\n)*?^---$|'
                          r'^--- (\S+)(\s.*)?$\n'
                          r'^\+\+\+ (\S+)(\s.*)?$|'
                          r'^rename from (\S+)$\n'
@@ -66,10 +66,8 @@ def get_src_set(patch):
                          re.MULTILINE)
     src_set = set()
     for match in re.finditer(pattern, patch):
-        if match.group(0) == "---":
-            src_set = set()
-        else:
-            (change_old, _, change_new, _, rename_old, rename_new) = \
+        if not match.group(0).startswith("From "):
+            (_, change_old, _, change_new, _, rename_old, rename_new) = \
                 match.groups()
             if change_old and change_new:
                 try:

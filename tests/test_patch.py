@@ -24,10 +24,12 @@ class PatchTest(unittest.TestCase):
         """
         Check filenames are extracted from the patches successfully.
         """
+        self.maxDiff = None  # pylint: disable=invalid-name
         patches_dir = os.path.join(os.path.dirname(__file__),
                                    'assets/patches/format_assortment')
         patches = [os.path.join(patches_dir, p) for p in
-                   sorted(os.listdir(patches_dir))]
+                   sorted(os.listdir(patches_dir))
+                   if not p.startswith(".")]
         expected_value = {
             'Kconfig',
             'fs/ext4/ext4.h',
@@ -47,6 +49,23 @@ class PatchTest(unittest.TestCase):
             'new_file',
             'Documentation/video-output.txt',
             'Documentation/video_output.txt',
+            'Makefile',
+            'arch/arm64/include/asm/asm-uaccess.h',
+            'arch/arm64/include/asm/uaccess.h',
+            'arch/arm64/lib/clear_user.S',
+            'arch/arm64/lib/copy_from_user.S',
+            'arch/arm64/lib/copy_in_user.S',
+            'arch/arm64/lib/copy_to_user.S',
+            'arch/arm64/lib/uaccess_flushcache.c',
+            'drivers/block/nbd.c',
+            'drivers/char/hw_random/core.c',
+            'drivers/char/random.c',
+            'drivers/net/ethernet/hisilicon/hns3/hns3_ethtool.c',
+            'drivers/net/phy/mdio_bus.c',
+            'fs/afs/rxrpc.c',
+            'kernel/fork.c',
+            'net/ipv4/ipmr.c',
+            'should-be-noticed',
         }
         self.assertSequenceEqual(
             expected_value,

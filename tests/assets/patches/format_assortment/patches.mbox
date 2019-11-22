@@ -1,0 +1,734 @@
+From b696083d5e9bd65a964211bb121513298efec187 Mon Sep 17 00:00:00 2001
+From: Salil Mehta <salil.mehta@huawei.com>
+Date: Fri, 15 Nov 2019 11:52:32 +0000
+Subject: [PATCH 01/10] net: hns3: cleanup of stray struct
+ hns3_link_mode_mapping
+
+This patch cleans-up the stray left over code. It has no
+functionality impact.
+
+Signed-off-by: Salil Mehta <salil.mehta@huawei.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+---
+ drivers/net/ethernet/hisilicon/hns3/hns3_ethtool.c | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/drivers/net/ethernet/hisilicon/hns3/hns3_ethtool.c b/drivers/net/ethernet/hisilicon/hns3/hns3_ethtool.c
+index 680c3508876d..52c9d204fe3d 100644
+--- a/drivers/net/ethernet/hisilicon/hns3/hns3_ethtool.c
++++ b/drivers/net/ethernet/hisilicon/hns3/hns3_ethtool.c
+@@ -70,11 +70,6 @@ static const struct hns3_stats hns3_rxq_stats[] = {
+ #define HNS3_NIC_LB_TEST_TX_CNT_ERR	2
+ #define HNS3_NIC_LB_TEST_RX_CNT_ERR	3
+ 
+-struct hns3_link_mode_mapping {
+-	u32 hns3_link_mode;
+-	u32 ethtool_link_mode;
+-};
+-
+ static int hns3_lp_setup(struct net_device *ndev, enum hnae3_loop loop, bool en)
+ {
+ 	struct hnae3_handle *h = hns3_get_handle(ndev);
+-- 
+2.24.0
+
+
+From 7901cd97963d6cbde88fa25a4a446db3554c16c6 Mon Sep 17 00:00:00 2001
+From: Guillaume Nault <gnault@redhat.com>
+Date: Fri, 15 Nov 2019 18:29:52 +0100
+Subject: [PATCH 02/10] ipmr: Fix skb headroom in ipmr_get_route().
+
+In route.c, inet_rtm_getroute_build_skb() creates an skb with no
+headroom. This skb is then used by inet_rtm_getroute() which may pass
+it to rt_fill_info() and, from there, to ipmr_get_route(). The later
+might try to reuse this skb by cloning it and prepending an IPv4
+header. But since the original skb has no headroom, skb_push() triggers
+skb_under_panic():
+
+skbuff: skb_under_panic: text:00000000ca46ad8a len:80 put:20 head:00000000cd28494e data:000000009366fd6b tail:0x3c end:0xec0 dev:veth0
+------------[ cut here ]------------
+kernel BUG at net/core/skbuff.c:108!
+invalid opcode: 0000 [#1] SMP KASAN PTI
+CPU: 6 PID: 587 Comm: ip Not tainted 5.4.0-rc6+ #1
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.12.0-2.fc30 04/01/2014
+RIP: 0010:skb_panic+0xbf/0xd0
+Code: 41 a2 ff 8b 4b 70 4c 8b 4d d0 48 c7 c7 20 76 f5 8b 44 8b 45 bc 48 8b 55 c0 48 8b 75 c8 41 54 41 57 41 56 41 55 e8 75 dc 7a ff <0f> 0b 0f 1f 44 00 00 66 2e 0f 1f 84 00 00 00 00 00 0f 1f 44 00 00
+RSP: 0018:ffff888059ddf0b0 EFLAGS: 00010286
+RAX: 0000000000000086 RBX: ffff888060a315c0 RCX: ffffffff8abe4822
+RDX: 0000000000000000 RSI: 0000000000000008 RDI: ffff88806c9a79cc
+RBP: ffff888059ddf118 R08: ffffed100d9361b1 R09: ffffed100d9361b0
+R10: ffff88805c68aee3 R11: ffffed100d9361b1 R12: ffff88805d218000
+R13: ffff88805c689fec R14: 000000000000003c R15: 0000000000000ec0
+FS:  00007f6af184b700(0000) GS:ffff88806c980000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 00007ffc8204a000 CR3: 0000000057b40006 CR4: 0000000000360ee0
+DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+Call Trace:
+ skb_push+0x7e/0x80
+ ipmr_get_route+0x459/0x6fa
+ rt_fill_info+0x692/0x9f0
+ inet_rtm_getroute+0xd26/0xf20
+ rtnetlink_rcv_msg+0x45d/0x630
+ netlink_rcv_skb+0x1a5/0x220
+ rtnetlink_rcv+0x15/0x20
+ netlink_unicast+0x305/0x3a0
+ netlink_sendmsg+0x575/0x730
+ sock_sendmsg+0xb5/0xc0
+ ___sys_sendmsg+0x497/0x4f0
+ __sys_sendmsg+0xcb/0x150
+ __x64_sys_sendmsg+0x48/0x50
+ do_syscall_64+0xd2/0xac0
+ entry_SYSCALL_64_after_hwframe+0x49/0xbe
+
+Actually the original skb used to have enough headroom, but the
+reserve_skb() call was lost with the introduction of
+inet_rtm_getroute_build_skb() by commit 404eb77ea766 ("ipv4: support
+sport, dport and ip_proto in RTM_GETROUTE").
+
+We could reserve some headroom again in inet_rtm_getroute_build_skb(),
+but this function shouldn't be responsible for handling the special
+case of ipmr_get_route(). Let's handle that directly in
+ipmr_get_route() by calling skb_realloc_headroom() instead of
+skb_clone().
+
+Fixes: 404eb77ea766 ("ipv4: support sport, dport and ip_proto in RTM_GETROUTE")
+Signed-off-by: Guillaume Nault <gnault@redhat.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+---
+ net/ipv4/ipmr.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/net/ipv4/ipmr.c b/net/ipv4/ipmr.c
+index 716d5472c022..58007439cffd 100644
+--- a/net/ipv4/ipmr.c
++++ b/net/ipv4/ipmr.c
+@@ -2289,7 +2289,8 @@ int ipmr_get_route(struct net *net, struct sk_buff *skb,
+ 			rcu_read_unlock();
+ 			return -ENODEV;
+ 		}
+-		skb2 = skb_clone(skb, GFP_ATOMIC);
++
++		skb2 = skb_realloc_headroom(skb, sizeof(struct iphdr));
+ 		if (!skb2) {
+ 			read_unlock(&mrt_lock);
+ 			rcu_read_unlock();
+-- 
+2.24.0
+
+
+From 08e97aec700aeff54c4847f170e566cbd7e14e81 Mon Sep 17 00:00:00 2001
+From: Herbert Xu <herbert@gondor.apana.org.au>
+Date: Sun, 17 Nov 2019 08:48:17 +0800
+Subject: [PATCH 03/10] Revert "hwrng: core - Freeze khwrng thread during
+ suspend"
+
+This reverts commit 03a3bb7ae631 ("hwrng: core - Freeze khwrng
+thread during suspend"), ff296293b353 ("random: Support freezable
+kthreads in add_hwgenerator_randomness()") and 59b569480dc8 ("random:
+Use wait_event_freezable() in add_hwgenerator_randomness()").
+
+These patches introduced regressions and we need more time to
+get them ready for mainline.
+
+Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+---
+ drivers/char/hw_random/core.c | 5 +----
+ drivers/char/random.c         | 4 +---
+ 2 files changed, 2 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/char/hw_random/core.c b/drivers/char/hw_random/core.c
+index 80b850ef1bf6..8d53b8ef545c 100644
+--- a/drivers/char/hw_random/core.c
++++ b/drivers/char/hw_random/core.c
+@@ -13,7 +13,6 @@
+ #include <linux/delay.h>
+ #include <linux/device.h>
+ #include <linux/err.h>
+-#include <linux/freezer.h>
+ #include <linux/fs.h>
+ #include <linux/hw_random.h>
+ #include <linux/kernel.h>
+@@ -422,9 +421,7 @@ static int hwrng_fillfn(void *unused)
+ {
+ 	long rc;
+ 
+-	set_freezable();
+-
+-	while (!kthread_freezable_should_stop(NULL)) {
++	while (!kthread_should_stop()) {
+ 		struct hwrng *rng;
+ 
+ 		rng = get_current_rng();
+diff --git a/drivers/char/random.c b/drivers/char/random.c
+index 5b799aa973a3..5d5ea4ce1442 100644
+--- a/drivers/char/random.c
++++ b/drivers/char/random.c
+@@ -327,7 +327,6 @@
+ #include <linux/percpu.h>
+ #include <linux/cryptohash.h>
+ #include <linux/fips.h>
+-#include <linux/freezer.h>
+ #include <linux/ptrace.h>
+ #include <linux/workqueue.h>
+ #include <linux/irq.h>
+@@ -2440,8 +2439,7 @@ void add_hwgenerator_randomness(const char *buffer, size_t count,
+ 	 * We'll be woken up again once below random_write_wakeup_thresh,
+ 	 * or when the calling thread is about to terminate.
+ 	 */
+-	wait_event_freezable(random_write_wait,
+-			kthread_should_stop() ||
++	wait_event_interruptible(random_write_wait, kthread_should_stop() ||
+ 			ENTROPY_BITS(&input_pool) <= random_write_wakeup_bits);
+ 	mix_pool_bytes(poolp, buffer, count);
+ 	credit_entropy_bits(poolp, entropy);
+-- 
+2.24.0
+
+
+From af42d3466bdc8f39806b26f593604fdc54140bcb Mon Sep 17 00:00:00 2001
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Sun, 17 Nov 2019 14:47:30 -0800
+Subject: [PATCH 04/10] Linux 5.4-rc8
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 42bfda209cb8..9cd289196267 100644
+--- a/Makefile
++++ b/Makefile
+@@ -2,7 +2,7 @@
+ VERSION = 5
+ PATCHLEVEL = 4
+ SUBLEVEL = 0
+-EXTRAVERSION = -rc7
++EXTRAVERSION = -rc8
+ NAME = Kleptomaniac Octopus
+ 
+ # *DOCUMENTATION*
+-- 
+2.24.0
+
+
+From dff10bbea4be47bdb615b036c834a275b7c68133 Mon Sep 17 00:00:00 2001
+From: Sun Ke <sunke32@huawei.com>
+Date: Tue, 19 Nov 2019 14:09:11 +0800
+Subject: [PATCH 05/10] nbd:fix memory leak in nbd_get_socket()
+
+Before returning NULL, put the sock first.
+
+Cc: stable@vger.kernel.org
+Fixes: cf1b2326b734 ("nbd: verify socket is supported during setup")
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+Reviewed-by: Mike Christie <mchristi@redhat.com>
+Signed-off-by: Sun Ke <sunke32@huawei.com>
+Signed-off-by: Jens Axboe <axboe@kernel.dk>
+---
+ drivers/block/nbd.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/block/nbd.c b/drivers/block/nbd.c
+index a94ee45440b3..19e75999bb15 100644
+--- a/drivers/block/nbd.c
++++ b/drivers/block/nbd.c
+@@ -993,6 +993,7 @@ static struct socket *nbd_get_socket(struct nbd_device *nbd, unsigned long fd,
+ 	if (sock->ops->shutdown == sock_no_shutdown) {
+ 		dev_err(disk_to_dev(nbd->disk), "Unsupported socket: shutdown callout must be supported.\n");
+ 		*err = -EINVAL;
++		sockfd_put(sock);
+ 		return NULL;
+ 	}
+ 
+-- 
+2.24.0
+
+
+From fd8f64df95204951c3edd4c4a7817c909d55a100 Mon Sep 17 00:00:00 2001
+From: Geert Uytterhoeven <geert+renesas@glider.be>
+Date: Tue, 19 Nov 2019 12:25:24 +0100
+Subject: [PATCH 06/10] mdio_bus: Fix init if CONFIG_RESET_CONTROLLER=n
+
+Commit 1d4639567d97 ("mdio_bus: Fix PTR_ERR applied after initialization
+to constant") accidentally changed a check from -ENOTSUPP to -ENOSYS,
+causing failures if reset controller support is not enabled.  E.g. on
+r7s72100/rskrza1:
+
+    sh-eth e8203000.ethernet: MDIO init failed: -524
+    sh-eth: probe of e8203000.ethernet failed with error -524
+
+Seen on r8a7740/armadillo, r7s72100/rskrza1, and r7s9210/rza2mevb.
+
+Fixes: 1d4639567d97 ("mdio_bus: Fix PTR_ERR applied after initialization to constant")
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: YueHaibing <yuehaibing@huawei.com>
+Cc: David S. Miller <davem@davemloft.net>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+---
+ drivers/net/phy/mdio_bus.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/phy/mdio_bus.c b/drivers/net/phy/mdio_bus.c
+index 35876562e32a..dbacb0031877 100644
+--- a/drivers/net/phy/mdio_bus.c
++++ b/drivers/net/phy/mdio_bus.c
+@@ -65,7 +65,7 @@ static int mdiobus_register_reset(struct mdio_device *mdiodev)
+ 		reset = devm_reset_control_get_exclusive(&mdiodev->dev,
+ 							 "phy");
+ 	if (IS_ERR(reset)) {
+-		if (PTR_ERR(reset) == -ENOENT || PTR_ERR(reset) == -ENOSYS)
++		if (PTR_ERR(reset) == -ENOENT || PTR_ERR(reset) == -ENOTSUPP)
+ 			reset = NULL;
+ 		else
+ 			return PTR_ERR(reset);
+-- 
+2.24.0
+
+
+From c74386d50fbaf4a54fd3fe560f1abc709c0cff4b Mon Sep 17 00:00:00 2001
+From: David Howells <dhowells@redhat.com>
+Date: Tue, 19 Nov 2019 21:00:36 +0000
+Subject: [PATCH 07/10] afs: Fix missing timeout reset
+
+In afs_wait_for_call_to_complete(), rather than immediately aborting an
+operation if a signal occurs, the code attempts to wait for it to
+complete, using a schedule timeout of 2*RTT (or min 2 jiffies) and a
+check that we're still receiving relevant packets from the server before
+we consider aborting the call.  We may even ping the server to check on
+the status of the call.
+
+However, there's a missing timeout reset in the event that we do
+actually get a packet to process, such that if we then get a couple of
+short stalls, we then time out when progress is actually being made.
+
+Fix this by resetting the timeout any time we get something to process.
+If it's the failure of the call then the call state will get changed and
+we'll exit the loop shortly thereafter.
+
+A symptom of this is data fetches and stores failing with EINTR when
+they really shouldn't.
+
+Fixes: bc5e3a546d55 ("rxrpc: Use MSG_WAITALL to tell sendmsg() to temporarily ignore signals")
+Signed-off-by: David Howells <dhowells@redhat.com>
+Reviewed-by: Marc Dionne <marc.dionne@auristor.com>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+---
+ fs/afs/rxrpc.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/fs/afs/rxrpc.c b/fs/afs/rxrpc.c
+index 0e5269374ac1..61498d9f06ef 100644
+--- a/fs/afs/rxrpc.c
++++ b/fs/afs/rxrpc.c
+@@ -637,6 +637,7 @@ long afs_wait_for_call_to_complete(struct afs_call *call,
+ 			call->need_attention = false;
+ 			__set_current_state(TASK_RUNNING);
+ 			afs_deliver_to_call(call);
++			timeout = rtt2;
+ 			continue;
+ 		}
+ 
+-- 
+2.24.0
+
+
+From 9e77716a75bc6cf54965e5ec069ba7c02b32251c Mon Sep 17 00:00:00 2001
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Date: Wed, 20 Nov 2019 01:33:20 +0100
+Subject: [PATCH 08/10] fork: fix pidfd_poll()'s return type
+
+pidfd_poll() is defined as returning 'unsigned int' but the
+.poll method is declared as returning '__poll_t', a bitwise type.
+
+Fix this by using the proper return type and using the EPOLL
+constants instead of the POLL ones, as required for __poll_t.
+
+Fixes: b53b0b9d9a61 ("pidfd: add polling support")
+Cc: Joel Fernandes (Google) <joel@joelfernandes.org>
+Cc: stable@vger.kernel.org # 5.3
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Reviewed-by: Christian Brauner <christian.brauner@ubuntu.com>
+Link: https://lore.kernel.org/r/20191120003320.31138-1-luc.vanoostenryck@gmail.com
+Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
+---
+ kernel/fork.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/kernel/fork.c b/kernel/fork.c
+index 55af6931c6ec..13b38794efb5 100644
+--- a/kernel/fork.c
++++ b/kernel/fork.c
+@@ -1708,11 +1708,11 @@ static void pidfd_show_fdinfo(struct seq_file *m, struct file *f)
+ /*
+  * Poll support for process exit notification.
+  */
+-static unsigned int pidfd_poll(struct file *file, struct poll_table_struct *pts)
++static __poll_t pidfd_poll(struct file *file, struct poll_table_struct *pts)
+ {
+ 	struct task_struct *task;
+ 	struct pid *pid = file->private_data;
+-	int poll_flags = 0;
++	__poll_t poll_flags = 0;
+ 
+ 	poll_wait(file, &pid->wait_pidfd, pts);
+ 
+@@ -1724,7 +1724,7 @@ static unsigned int pidfd_poll(struct file *file, struct poll_table_struct *pts)
+ 	 * group, then poll(2) should block, similar to the wait(2) family.
+ 	 */
+ 	if (!task || (task->exit_state && thread_group_empty(task)))
+-		poll_flags = POLLIN | POLLRDNORM;
++		poll_flags = EPOLLIN | EPOLLRDNORM;
+ 	rcu_read_unlock();
+ 
+ 	return poll_flags;
+-- 
+2.24.0
+
+
+From 94bb804e1e6f0a9a77acf20d7c70ea141c6c821e Mon Sep 17 00:00:00 2001
+From: Pavel Tatashin <pasha.tatashin@soleen.com>
+Date: Tue, 19 Nov 2019 17:10:06 -0500
+Subject: [PATCH 09/10] arm64: uaccess: Ensure PAN is re-enabled after
+ unhandled uaccess fault
+
+A number of our uaccess routines ('__arch_clear_user()' and
+'__arch_copy_{in,from,to}_user()') fail to re-enable PAN if they
+encounter an unhandled fault whilst accessing userspace.
+
+For CPUs implementing both hardware PAN and UAO, this bug has no effect
+when both extensions are in use by the kernel.
+
+For CPUs implementing hardware PAN but not UAO, this means that a kernel
+using hardware PAN may execute portions of code with PAN inadvertently
+disabled, opening us up to potential security vulnerabilities that rely
+on userspace access from within the kernel which would usually be
+prevented by this mechanism. In other words, parts of the kernel run the
+same way as they would on a CPU without PAN implemented/emulated at all.
+
+For CPUs not implementing hardware PAN and instead relying on software
+emulation via 'CONFIG_ARM64_SW_TTBR0_PAN=y', the impact is unfortunately
+much worse. Calling 'schedule()' with software PAN disabled means that
+the next task will execute in the kernel using the page-table and ASID
+of the previous process even after 'switch_mm()', since the actual
+hardware switch is deferred until return to userspace. At this point, or
+if there is a intermediate call to 'uaccess_enable()', the page-table
+and ASID of the new process are installed. Sadly, due to the changes
+introduced by KPTI, this is not an atomic operation and there is a very
+small window (two instructions) where the CPU is configured with the
+page-table of the old task and the ASID of the new task; a speculative
+access in this state is disastrous because it would corrupt the TLB
+entries for the new task with mappings from the previous address space.
+
+As Pavel explains:
+
+  | I was able to reproduce memory corruption problem on Broadcom's SoC
+  | ARMv8-A like this:
+  |
+  | Enable software perf-events with PERF_SAMPLE_CALLCHAIN so userland's
+  | stack is accessed and copied.
+  |
+  | The test program performed the following on every CPU and forking
+  | many processes:
+  |
+  |	unsigned long *map = mmap(NULL, PAGE_SIZE, PROT_READ|PROT_WRITE,
+  |				  MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+  |	map[0] = getpid();
+  |	sched_yield();
+  |	if (map[0] != getpid()) {
+  |		fprintf(stderr, "Corruption detected!");
+  |	}
+  |	munmap(map, PAGE_SIZE);
+  |
+  | From time to time I was getting map[0] to contain pid for a
+  | different process.
+
+Ensure that PAN is re-enabled when returning after an unhandled user
+fault from our uaccess routines.
+
+Cc: Catalin Marinas <catalin.marinas@arm.com>
+Reviewed-by: Mark Rutland <mark.rutland@arm.com>
+Tested-by: Mark Rutland <mark.rutland@arm.com>
+Cc: <stable@vger.kernel.org>
+Fixes: 338d4f49d6f7 ("arm64: kernel: Add support for Privileged Access Never")
+Signed-off-by: Pavel Tatashin <pasha.tatashin@soleen.com>
+[will: rewrote commit message]
+Signed-off-by: Will Deacon <will@kernel.org>
+---
+ arch/arm64/lib/clear_user.S     | 1 +
+ arch/arm64/lib/copy_from_user.S | 1 +
+ arch/arm64/lib/copy_in_user.S   | 1 +
+ arch/arm64/lib/copy_to_user.S   | 1 +
+ 4 files changed, 4 insertions(+)
+
+diff --git a/arch/arm64/lib/clear_user.S b/arch/arm64/lib/clear_user.S
+index 10415572e82f..322b55664cca 100644
+--- a/arch/arm64/lib/clear_user.S
++++ b/arch/arm64/lib/clear_user.S
+@@ -48,5 +48,6 @@ EXPORT_SYMBOL(__arch_clear_user)
+ 	.section .fixup,"ax"
+ 	.align	2
+ 9:	mov	x0, x2			// return the original size
++	uaccess_disable_not_uao x2, x3
+ 	ret
+ 	.previous
+diff --git a/arch/arm64/lib/copy_from_user.S b/arch/arm64/lib/copy_from_user.S
+index 680e74409ff9..8472dc7798b3 100644
+--- a/arch/arm64/lib/copy_from_user.S
++++ b/arch/arm64/lib/copy_from_user.S
+@@ -66,5 +66,6 @@ EXPORT_SYMBOL(__arch_copy_from_user)
+ 	.section .fixup,"ax"
+ 	.align	2
+ 9998:	sub	x0, end, dst			// bytes not copied
++	uaccess_disable_not_uao x3, x4
+ 	ret
+ 	.previous
+diff --git a/arch/arm64/lib/copy_in_user.S b/arch/arm64/lib/copy_in_user.S
+index 0bedae3f3792..8e0355c1e318 100644
+--- a/arch/arm64/lib/copy_in_user.S
++++ b/arch/arm64/lib/copy_in_user.S
+@@ -68,5 +68,6 @@ EXPORT_SYMBOL(__arch_copy_in_user)
+ 	.section .fixup,"ax"
+ 	.align	2
+ 9998:	sub	x0, end, dst			// bytes not copied
++	uaccess_disable_not_uao x3, x4
+ 	ret
+ 	.previous
+diff --git a/arch/arm64/lib/copy_to_user.S b/arch/arm64/lib/copy_to_user.S
+index 2d88c736e8f2..6085214654dc 100644
+--- a/arch/arm64/lib/copy_to_user.S
++++ b/arch/arm64/lib/copy_to_user.S
+@@ -65,5 +65,6 @@ EXPORT_SYMBOL(__arch_copy_to_user)
+ 	.section .fixup,"ax"
+ 	.align	2
+ 9998:	sub	x0, end, dst			// bytes not copied
++	uaccess_disable_not_uao x3, x4
+ 	ret
+ 	.previous
+-- 
+2.24.0
+
+
+From e50be648aaa3da196d4f4ed49d1c5d4ec105fa4a Mon Sep 17 00:00:00 2001
+From: Pavel Tatashin <pasha.tatashin@soleen.com>
+Date: Wed, 20 Nov 2019 12:07:40 -0500
+Subject: [PATCH 10/10] arm64: uaccess: Remove uaccess_*_not_uao asm macros
+
+It is safer and simpler to drop the uaccess assembly macros in favour of
+inline C functions. Although this bloats the Image size slightly, it
+aligns our user copy routines with '{get,put}_user()' and generally
+makes the code a lot easier to reason about.
+
+Cc: Catalin Marinas <catalin.marinas@arm.com>
+Reviewed-by: Mark Rutland <mark.rutland@arm.com>
+Tested-by: Mark Rutland <mark.rutland@arm.com>
+Signed-off-by: Pavel Tatashin <pasha.tatashin@soleen.com>
+[will: tweaked commit message and changed temporary variable names]
+Signed-off-by: Will Deacon <will@kernel.org>
+---
+ arch/arm64/include/asm/asm-uaccess.h | 17 -----------------
+ arch/arm64/include/asm/uaccess.h     | 27 ++++++++++++++++++++++-----
+ arch/arm64/lib/clear_user.S          |  3 ---
+ arch/arm64/lib/copy_from_user.S      |  3 ---
+ arch/arm64/lib/copy_in_user.S        |  3 ---
+ arch/arm64/lib/copy_to_user.S        |  3 ---
+ arch/arm64/lib/uaccess_flushcache.c  |  6 +++++-
+ 7 files changed, 27 insertions(+), 35 deletions(-)
+
+diff --git a/arch/arm64/include/asm/asm-uaccess.h b/arch/arm64/include/asm/asm-uaccess.h
+index 5bf963830b17..c764cc8fb3b6 100644
+--- a/arch/arm64/include/asm/asm-uaccess.h
++++ b/arch/arm64/include/asm/asm-uaccess.h
+@@ -58,23 +58,6 @@ alternative_else_nop_endif
+ 	.endm
+ #endif
+ 
+-/*
+- * These macros are no-ops when UAO is present.
+- */
+-	.macro	uaccess_disable_not_uao, tmp1, tmp2
+-	uaccess_ttbr0_disable \tmp1, \tmp2
+-alternative_if ARM64_ALT_PAN_NOT_UAO
+-	SET_PSTATE_PAN(1)
+-alternative_else_nop_endif
+-	.endm
+-
+-	.macro	uaccess_enable_not_uao, tmp1, tmp2, tmp3
+-	uaccess_ttbr0_enable \tmp1, \tmp2, \tmp3
+-alternative_if ARM64_ALT_PAN_NOT_UAO
+-	SET_PSTATE_PAN(0)
+-alternative_else_nop_endif
+-	.endm
+-
+ /*
+  * Remove the address tag from a virtual address, if present.
+  */
+diff --git a/arch/arm64/include/asm/uaccess.h b/arch/arm64/include/asm/uaccess.h
+index 097d6bfac0b7..127712b0b970 100644
+--- a/arch/arm64/include/asm/uaccess.h
++++ b/arch/arm64/include/asm/uaccess.h
+@@ -378,20 +378,34 @@ do {									\
+ extern unsigned long __must_check __arch_copy_from_user(void *to, const void __user *from, unsigned long n);
+ #define raw_copy_from_user(to, from, n)					\
+ ({									\
+-	__arch_copy_from_user((to), __uaccess_mask_ptr(from), (n));	\
++	unsigned long __acfu_ret;					\
++	uaccess_enable_not_uao();					\
++	__acfu_ret = __arch_copy_from_user((to),			\
++				      __uaccess_mask_ptr(from), (n));	\
++	uaccess_disable_not_uao();					\
++	__acfu_ret;							\
+ })
+ 
+ extern unsigned long __must_check __arch_copy_to_user(void __user *to, const void *from, unsigned long n);
+ #define raw_copy_to_user(to, from, n)					\
+ ({									\
+-	__arch_copy_to_user(__uaccess_mask_ptr(to), (from), (n));	\
++	unsigned long __actu_ret;					\
++	uaccess_enable_not_uao();					\
++	__actu_ret = __arch_copy_to_user(__uaccess_mask_ptr(to),	\
++				    (from), (n));			\
++	uaccess_disable_not_uao();					\
++	__actu_ret;							\
+ })
+ 
+ extern unsigned long __must_check __arch_copy_in_user(void __user *to, const void __user *from, unsigned long n);
+ #define raw_copy_in_user(to, from, n)					\
+ ({									\
+-	__arch_copy_in_user(__uaccess_mask_ptr(to),			\
+-			    __uaccess_mask_ptr(from), (n));		\
++	unsigned long __aciu_ret;					\
++	uaccess_enable_not_uao();					\
++	__aciu_ret = __arch_copy_in_user(__uaccess_mask_ptr(to),	\
++				    __uaccess_mask_ptr(from), (n));	\
++	uaccess_disable_not_uao();					\
++	__aciu_ret;							\
+ })
+ 
+ #define INLINE_COPY_TO_USER
+@@ -400,8 +414,11 @@ extern unsigned long __must_check __arch_copy_in_user(void __user *to, const voi
+ extern unsigned long __must_check __arch_clear_user(void __user *to, unsigned long n);
+ static inline unsigned long __must_check __clear_user(void __user *to, unsigned long n)
+ {
+-	if (access_ok(to, n))
++	if (access_ok(to, n)) {
++		uaccess_enable_not_uao();
+ 		n = __arch_clear_user(__uaccess_mask_ptr(to), n);
++		uaccess_disable_not_uao();
++	}
+ 	return n;
+ }
+ #define clear_user	__clear_user
+diff --git a/arch/arm64/lib/clear_user.S b/arch/arm64/lib/clear_user.S
+index 322b55664cca..aeafc03e961a 100644
+--- a/arch/arm64/lib/clear_user.S
++++ b/arch/arm64/lib/clear_user.S
+@@ -20,7 +20,6 @@
+  * Alignment fixed up by hardware.
+  */
+ ENTRY(__arch_clear_user)
+-	uaccess_enable_not_uao x2, x3, x4
+ 	mov	x2, x1			// save the size for fixup return
+ 	subs	x1, x1, #8
+ 	b.mi	2f
+@@ -40,7 +39,6 @@ uao_user_alternative 9f, strh, sttrh, wzr, x0, 2
+ 	b.mi	5f
+ uao_user_alternative 9f, strb, sttrb, wzr, x0, 0
+ 5:	mov	x0, #0
+-	uaccess_disable_not_uao x2, x3
+ 	ret
+ ENDPROC(__arch_clear_user)
+ EXPORT_SYMBOL(__arch_clear_user)
+@@ -48,6 +46,5 @@ EXPORT_SYMBOL(__arch_clear_user)
+ 	.section .fixup,"ax"
+ 	.align	2
+ 9:	mov	x0, x2			// return the original size
+-	uaccess_disable_not_uao x2, x3
+ 	ret
+ 	.previous
+diff --git a/arch/arm64/lib/copy_from_user.S b/arch/arm64/lib/copy_from_user.S
+index 8472dc7798b3..ebb3c06cbb5d 100644
+--- a/arch/arm64/lib/copy_from_user.S
++++ b/arch/arm64/lib/copy_from_user.S
+@@ -54,10 +54,8 @@
+ 
+ end	.req	x5
+ ENTRY(__arch_copy_from_user)
+-	uaccess_enable_not_uao x3, x4, x5
+ 	add	end, x0, x2
+ #include "copy_template.S"
+-	uaccess_disable_not_uao x3, x4
+ 	mov	x0, #0				// Nothing to copy
+ 	ret
+ ENDPROC(__arch_copy_from_user)
+@@ -66,6 +64,5 @@ EXPORT_SYMBOL(__arch_copy_from_user)
+ 	.section .fixup,"ax"
+ 	.align	2
+ 9998:	sub	x0, end, dst			// bytes not copied
+-	uaccess_disable_not_uao x3, x4
+ 	ret
+ 	.previous
+diff --git a/arch/arm64/lib/copy_in_user.S b/arch/arm64/lib/copy_in_user.S
+index 8e0355c1e318..3d8153a1ebce 100644
+--- a/arch/arm64/lib/copy_in_user.S
++++ b/arch/arm64/lib/copy_in_user.S
+@@ -56,10 +56,8 @@
+ end	.req	x5
+ 
+ ENTRY(__arch_copy_in_user)
+-	uaccess_enable_not_uao x3, x4, x5
+ 	add	end, x0, x2
+ #include "copy_template.S"
+-	uaccess_disable_not_uao x3, x4
+ 	mov	x0, #0
+ 	ret
+ ENDPROC(__arch_copy_in_user)
+@@ -68,6 +66,5 @@ EXPORT_SYMBOL(__arch_copy_in_user)
+ 	.section .fixup,"ax"
+ 	.align	2
+ 9998:	sub	x0, end, dst			// bytes not copied
+-	uaccess_disable_not_uao x3, x4
+ 	ret
+ 	.previous
+diff --git a/arch/arm64/lib/copy_to_user.S b/arch/arm64/lib/copy_to_user.S
+index 6085214654dc..357eae2c18eb 100644
+--- a/arch/arm64/lib/copy_to_user.S
++++ b/arch/arm64/lib/copy_to_user.S
+@@ -53,10 +53,8 @@
+ 
+ end	.req	x5
+ ENTRY(__arch_copy_to_user)
+-	uaccess_enable_not_uao x3, x4, x5
+ 	add	end, x0, x2
+ #include "copy_template.S"
+-	uaccess_disable_not_uao x3, x4
+ 	mov	x0, #0
+ 	ret
+ ENDPROC(__arch_copy_to_user)
+@@ -65,6 +63,5 @@ EXPORT_SYMBOL(__arch_copy_to_user)
+ 	.section .fixup,"ax"
+ 	.align	2
+ 9998:	sub	x0, end, dst			// bytes not copied
+-	uaccess_disable_not_uao x3, x4
+ 	ret
+ 	.previous
+diff --git a/arch/arm64/lib/uaccess_flushcache.c b/arch/arm64/lib/uaccess_flushcache.c
+index cbfcbe6470a5..bfa30b75b2b8 100644
+--- a/arch/arm64/lib/uaccess_flushcache.c
++++ b/arch/arm64/lib/uaccess_flushcache.c
+@@ -28,7 +28,11 @@ void memcpy_page_flushcache(char *to, struct page *page, size_t offset,
+ unsigned long __copy_user_flushcache(void *to, const void __user *from,
+ 				     unsigned long n)
+ {
+-	unsigned long rc = __arch_copy_from_user(to, from, n);
++	unsigned long rc;
++
++	uaccess_enable_not_uao();
++	rc = __arch_copy_from_user(to, from, n);
++	uaccess_disable_not_uao();
+ 
+ 	/* See above */
+ 	__clean_dcache_area_pop(to, n - rc);
+-- 
+2.24.0
+
