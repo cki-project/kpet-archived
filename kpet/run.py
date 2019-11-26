@@ -36,6 +36,7 @@ class Suite:
             assert case in suite.cases
 
         self.name = suite.name
+        # TODO Remove once database transitions to names
         self.description = suite.description
         self.hostRequires = suite.hostRequires  # pylint: disable=invalid-name
         self.partitions = suite.partitions
