@@ -340,6 +340,8 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
         )
         if self.pattern is None:
             self.pattern = Pattern({})
+        if self.name is None:
+            self.name = self.description
 
     def matches(self, target):
         """
