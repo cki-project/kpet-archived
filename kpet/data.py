@@ -320,12 +320,13 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
         super().__init__(
             Struct(
                 required=dict(
-                    description=String(),
                     location=String(),
                     cases=List(Class(Case))
                 ),
                 optional=dict(
                     name=String(),
+                    # TODO Remove once database transitions to names
+                    description=String(),
                     host_type_regex=Regex(),
                     hostRequires=String(),
                     partitions=String(),
@@ -340,7 +341,11 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
         )
         if self.pattern is None:
             self.pattern = Pattern({})
+        # TODO Remove once database transitions to names
         if self.name is None:
+            if self.description is None:
+                raise Invalid(
+                    'The suite has neither name nor description specified.')
             self.name = self.description
 
     def matches(self, target):
