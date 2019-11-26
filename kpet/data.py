@@ -423,7 +423,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                         break
                 else:
                     raise Invalid(error.format("host_type_regex", "host_types",
-                                               suite.description, case.name,
+                                               suite.name, case.name,
                                                host_type_regex.pattern,
                                                host_types))
 
@@ -437,18 +437,18 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             if self.origins is None:
                 if suite.origin is not None:
                     raise Invalid(
-                        f'Suite "{suite.description}" has origin specified, '
+                        f'Suite "{suite.name}" has origin specified, '
                         f'but available origins are not defined in '
                         f'the database.'
                     )
             else:
                 if suite.origin is None:
                     raise Invalid(
-                        f'Suite "{suite.description}" has no origin specified'
+                        f'Suite "{suite.name}" has no origin specified'
                     )
                 if suite.origin not in self.origins:
                     raise Invalid(
-                        f'Suite "{suite.description}" has unknown origin '
+                        f'Suite "{suite.name}" has unknown origin '
                         f'specified: "{suite.origin}".\n'
                         f'Expecting one of the following: '
                         f'{", ".join(self.origins.keys())}.'
@@ -533,7 +533,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                 if not case.sets <= suite.sets:
                     raise Invalid("Case sets are not a subset of suite sets "
                                   "in suite: {}\ncase: {}".
-                                  format(suite.description, case.name))
+                                  format(suite.name, case.name))
 
     def __init__(self, dir_path):
         """
