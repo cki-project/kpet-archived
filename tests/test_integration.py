@@ -41,7 +41,7 @@ COMMONTREE_XML = """
     {% for HOST in recipeset %}
       HOST
       {% for suite in HOST.suites %}
-        {{ suite.description }}
+        {{ suite.name }}
         {% for case in suite.cases %}
           {{ case.name }}
         {% endfor %}
