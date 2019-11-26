@@ -35,6 +35,7 @@ class Suite:
         for case in cases:
             assert case in suite.cases
 
+        self.id = suite.id  # pylint: disable=invalid-name
         self.name = suite.name
         # TODO Remove once database transitions to names
         self.description = suite.description
