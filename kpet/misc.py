@@ -24,6 +24,23 @@ def is_url(string):
     return bool(urlparse(string).scheme)
 
 
+def get_repeated(iterable):
+    """
+    Get the set of repeated items from an iterable.
+
+    Args:
+        iterable:   The iterable to get repeated items from.
+
+    Returns:
+        The set of repeated items.
+    """
+    item_set = set()
+    repeated_item_set = set()
+    for item in iterable:
+        (repeated_item_set if item in item_set else item_set).add(item)
+    return repeated_item_set
+
+
 def raise_action_not_found(action, command):
     """Raise the ActionNotFound exception"""
     raise ActionNotFound(
