@@ -19,7 +19,7 @@ from tests.test_integration import (IntegrationTests, kpet_run_generate,
 
 
 class IntegrationMiscTests(IntegrationTests):
-    """Integration tests expecting empty results or errors"""
+    """Miscellaneous integration tests"""
 
     def test_empty_tree_list(self):
         """Test tree listing with empty database"""
