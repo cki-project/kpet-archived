@@ -129,3 +129,5 @@ Each case is an object with the following attributes:
   ie. the bit after the "#".
 * `environment`: Dictionary with environment variables that should be
   set when running this test case.
+* `maintainers`: List of strings with the names and emails of the test
+  case maintainers.

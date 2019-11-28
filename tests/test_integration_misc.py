@@ -354,3 +354,47 @@ class IntegrationMiscTests(IntegrationTests):
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             stdout_matching=r'.*<job>\s*first_suite_with_name\s*</job>.*')
+
+    def test_cases_expose_their_maintainers(self):
+        """Test cases' "Maintainers" field should be exposed to templates"""
+        maintainer_name = "Some Maintainer <someone@maintainers.org>"
+        escaped_maintainer_name = (
+            maintainer_name.replace("<", "&lt;").replace(">", "&gt;")
+        )
+        assets = {
+            "index.yaml": INDEX_BASE_YAML,
+            "suite.yaml": """
+                name: first_suite_with_name
+                description: suite1
+                location: somewhere
+                cases:
+                    - name: case1
+                      max_duration_seconds: 600
+                      maintainers:
+                          - {}
+            """.format(maintainer_name),
+            "tree.xml": """
+            <job>
+              {% for recipeset in RECIPESETS %}
+                {% for HOST in recipeset %}
+                  {% for suite in HOST.suites %}
+                    {{ suite.name }}
+                    {% for case in suite.cases %}
+                      Maintainers:
+                      {% for maintainer in case.maintainers %}
+                        # {{ maintainer | e }}
+                      {% endfor %}
+                    {% endfor %}
+                  {% endfor %}
+                {% endfor %}
+              {% endfor %}
+            </job>
+            """,
+        }
+
+        assets_path = create_asset_files(self.test_dir, assets)
+
+        self.assertKpetProduces(
+            kpet_run_generate, assets_path,
+            stdout_matching=r'.*<job>.*first_suite_with_name.*'
+                            r'# {}.*</job>.*'.format(escaped_maintainer_name))

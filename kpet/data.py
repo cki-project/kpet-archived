@@ -291,6 +291,7 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                     waived=Boolean(),
                     role=String(),
                     environment=Dict(String()),
+                    maintainers=List(String()),
                 )
             ),
             data
@@ -301,6 +302,8 @@ class Case(Object):     # pylint: disable=too-few-public-methods
             self.environment = {}
         if self.role is None:
             self.role = 'STANDALONE'
+        if self.maintainers is None:
+            self.maintainers = []
 
     def matches(self, target):
         """
