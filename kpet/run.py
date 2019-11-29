@@ -18,6 +18,24 @@ from lxml import etree
 from kpet import data
 
 
+class Case:
+    # pylint: disable=too-few-public-methods,too-many-instance-attributes
+    """A test case run"""
+    def __init__(self, case):
+        """
+        Initialize a test case run.
+
+        Args:
+            case:          The test cases to run.
+        """
+        exported_attributes = ["name", "max_duration_seconds", "hostRequires",
+                               "partitions", "kickstart", "waived", "role",
+                               "environment", "maintainers"]
+
+        for attr in exported_attributes:
+            setattr(self, attr, getattr(case, attr))
+
+
 class Suite:
     # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """A test suite run"""
@@ -28,12 +46,11 @@ class Suite:
 
         Args:
             suite:          The suite to run.
-            cases:          List of the suite's cases to run.
+            cases:          List of the suite's cases to run (kpet.run.Case
+                            objects).
         """
         assert isinstance(suite, data.Suite)
         assert isinstance(cases, list)
-        for case in cases:
-            assert case in suite.cases
 
         # TODO Remove "description" once database transitions to names
         exported_attributes = ["id", "name", "description",
@@ -157,7 +174,7 @@ class Base:     # pylint: disable=too-few-public-methods
                         pool_cases.remove(case)
                 # Add the suite run to the list, if it has cases to run
                 if cases:
-                    suites.append(Suite(suite, cases))
+                    suites.append(Suite(suite, [Case(c) for c in cases]))
                 # Remove suite from the pool, if it has no more cases
                 if not pool_cases:
                     pool_suites.remove(pool_suite)
