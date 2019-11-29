@@ -91,8 +91,6 @@ Each suite is an object with the following attributes:
   information.
 * `maintainers`: List of strings with the names and emails of the test
   maintainers.
-* `url_suffix`: URL suffix to use in the Beaker task fetch URL,
-  ie. the bit after the "#".
 * `origin`: The name of a test suite origin - the source for the suite's code.
   One of the keys from the `origins` dictionary in the database's top
   `index.yaml` file. Undefined, if the latter is not defined. Examples:
@@ -125,8 +123,6 @@ Each case is an object with the following attributes:
 * `waived`: True if the test's failure should be ignored regarding the
   test run success/failure, eg. because it's new or unstable.
 * `role`: The value for the Beaker task's role attribute.
-* `url_suffix`: URL suffix to use in the Beaker task fetch URL,
-  ie. the bit after the "#".
 * `environment`: Dictionary with environment variables that should be
   set when running this test case.
 * `maintainers`: List of strings with the names and emails of the test
