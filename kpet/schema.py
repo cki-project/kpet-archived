@@ -280,8 +280,25 @@ class Null(Node):
 
 class String(Node):
     """String schema"""
-    def __init__(self):
+    def __init__(self, pattern="(.|\\n)*"):
+        """
+        Initialize a string schema.
+
+        Args:
+            pattern: Regular expression pattern the string must match as a
+                     whole. Optional, the default matches anything.
+        """
         super().__init__(str)
+        assert isinstance(pattern, str)
+        self.regex = re.compile(pattern)
+
+    def validate(self, data):
+        super().validate(data)
+        if not self.regex.fullmatch(data):
+            raise Invalid(
+                f"String \"{data}\" doesn't match "
+                f"regular expression \"{self.regex.pattern}\""
+            )
 
 
 class Int(Node):
