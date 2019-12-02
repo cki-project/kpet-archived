@@ -446,23 +446,36 @@ class List(Node):
         return [self.element_schema.resolve(value) for value in data]
 
 
+# Default dictionary key schema
+DICT_KEY_SCHEMA_DEFAULT = String()
+
+
 class Dict(Node):
     """
-    Dictionary schema, with string keys and every value matching a single
-    specified schema.
+    Dictionary schema, with separate schemas for all keys and all values.
     """
-    def __init__(self, value_schema):
+    def __init__(self, value_schema, key_schema=DICT_KEY_SCHEMA_DEFAULT):
+        """
+        Initialize a dictionary schema.
+
+        Args:
+            value_schema:   Schema for dictionary values.
+            key_schema:     Schema for dictionary keys.
+                            Optional. Default is String().
+        """
+        assert isinstance(key_schema, Node)
         assert isinstance(value_schema, Node)
         super().__init__(dict)
+        self.key_schema = key_schema
         self.value_schema = value_schema
 
     def validate(self, data):
         super().validate(data)
         for key, value in data.items():
-            if not isinstance(key, str):
-                raise Invalid("Key \"{}\" is {}, expecting a string".format(
-                    key, type(key).__name__
-                ))
+            try:
+                self.key_schema.validate(key)
+            except Invalid:
+                raise Invalid("Invalid key \"{}\"".format(key))
             try:
                 self.value_schema.validate(value)
             except Invalid:
