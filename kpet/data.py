@@ -456,8 +456,8 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                  "The regex: {4}\n" +
                  "The avaliable {1}: {5}")
 
-        for suite in self.suites or []:
-            for case in suite.cases or []:
+        for suite in self.suites:
+            for case in suite.cases:
                 host_type_regex = case.host_type_regex or \
                         suite.host_type_regex or \
                         self.host_type_regex
