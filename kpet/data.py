@@ -356,7 +356,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     pattern=Class(Pattern),
                     sets=sets_schema,
                     origin=String(),
-                    maintainers=List(String(), min_len=1)
+                    maintainers=List(String())
                 )
             ),
             data
@@ -370,6 +370,8 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     'The suite has neither name nor description specified.')
             self.name = self.description
         self.validate_case_ids()
+        if self.maintainers is None:
+            self.maintainers = []
 
     def matches(self, target):
         """
