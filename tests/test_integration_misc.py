@@ -335,6 +335,7 @@ class IntegrationMiscTests(IntegrationTests):
                 cases:
                     - name: case1
                       max_duration_seconds: 600
+                      maintainers: ["maint1"]
             """,
             "tree.xml": """
             <job>

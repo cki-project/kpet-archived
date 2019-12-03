@@ -36,6 +36,7 @@ SUITE_1_WITH_ONE_CASE_YAML = """
     id: suite1
     name: Suite
     location: somewhere
+    maintainers: ["maint1"]
     cases:
         - id: case
           name: Case
@@ -46,6 +47,7 @@ SUITE_2_WITH_ONE_CASE_YAML = """
     id: suite2
     name: Suite
     location: somewhere
+    maintainers: ["maint1"]
     cases:
         - id: case
           name: Case
@@ -56,6 +58,7 @@ SUITE_1_WITH_TWO_DIFFERENT_CASES = """
     id: suite1
     name: Suite
     location: somewhere
+    maintainers: ["maint1"]
     cases:
         - id: case1
           name: Case
@@ -70,6 +73,7 @@ SUITE_2_WITH_TWO_DIFFERENT_CASES = """
     id: suite2
     name: Suite
     location: somewhere
+    maintainers: ["maint1"]
     cases:
         - id: case1
           name: Case
@@ -84,6 +88,7 @@ SUITE_1_WITH_TWO_SAME_CASES = """
     id: suite1
     name: Suite
     location: somewhere
+    maintainers: ["maint1"]
     cases:
         - id: case1
           name: Case

@@ -334,6 +334,19 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
             raise Invalid(f"The suite has repeated case IDs: "
                           f"{repeated_id_set}")
 
+    def validate_maintainers(self):
+        """
+        Check that every test case has a maintainer.
+        Raises:
+            schema.Invalid when a test case doesn't have any maintainers
+        """
+        for case in self.cases or []:
+            if not case.maintainers and not self.maintainers:
+                raise Invalid("There has to be a maintainer for each "
+                              "test, either at suite level or at case "
+                              "level; in suite: {}\ncase: {}".
+                              format(self.name, case.name))
+
     def __init__(self, data):
         sets_schema = Reduction(Regex(), lambda x: [x], List(Regex()))
 
@@ -372,6 +385,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
         self.validate_case_ids()
         if self.maintainers is None:
             self.maintainers = []
+        self.validate_maintainers()
 
     def matches(self, target):
         """
