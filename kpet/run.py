@@ -35,17 +35,14 @@ class Suite:
         for case in cases:
             assert case in suite.cases
 
-        self.id = suite.id  # pylint: disable=invalid-name
-        self.name = suite.name
-        # TODO Remove once database transitions to names
-        self.description = suite.description
-        self.hostRequires = suite.hostRequires  # pylint: disable=invalid-name
-        self.partitions = suite.partitions
-        self.kickstart = suite.kickstart
+        # TODO Remove "description" once database transitions to names
+        exported_attributes = ["id", "name", "description",
+                               "hostRequires", "partitions",
+                               "kickstart", "maintainers", "origin",
+                               "location"]
+        for attr in exported_attributes:
+            setattr(self, attr, getattr(suite, attr))
         self.cases = cases
-        self.maintainers = suite.maintainers
-        self.origin = suite.origin
-        self.location = suite.location
 
 
 class Host:
