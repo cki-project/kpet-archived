@@ -77,6 +77,7 @@ Each recipe set is a *list* of "host" objects containing these attributes:
 
 Each suite is an object with the following attributes:
 
+* `id`: ID of the test suite, unique within all suites.
 * `name`: Name of the test suite.
 * `description`: Description of the test suite.
 * `hostRequires`: Jinja2 template path with the host requirements for
@@ -107,6 +108,7 @@ Each suite is an object with the following attributes:
 
 Each case is an object with the following attributes:
 
+* `id`: ID of the test case, unique within the suite.
 * `name`: Test case name.
 * `max_duration_seconds`: Maximum number of seconds the test will be
   allowed to run.
