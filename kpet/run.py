@@ -78,8 +78,7 @@ class Host:
         """
         assert isinstance(type, data.HostType)
         assert isinstance(suites, list)
-        for suite in suites:
-            assert isinstance(suite, Suite)
+        assert all(isinstance(suite, Suite) for suite in suites)
 
         self.ignore_panic = type.ignore_panic
         # pylint: disable=invalid-name
