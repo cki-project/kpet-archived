@@ -373,6 +373,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     pattern=Class(Pattern),
                     sets=sets_schema,
                     origin=String(),
+                    waived=Boolean(),
                     maintainers=List(String())
                 )
             ),

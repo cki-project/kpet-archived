@@ -90,6 +90,8 @@ Each suite is an object with the following attributes:
   configuration. Copied from the kpet database value of the same name. See
   https://beaker-project.org/docs/admin-guide/kickstarts.html for more
   information.
+* `waived`: True if the suites's failure should be ignored regarding the
+  test run success/failure, eg. because it's new or unstable.
 * `maintainers`: List of strings with the names and emails of the test
   maintainers.
 * `origin`: The name of a test suite origin - the source for the suite's code.

@@ -56,7 +56,7 @@ class Suite:
         exported_attributes = ["id", "name", "description",
                                "hostRequires", "partitions",
                                "kickstart", "maintainers", "origin",
-                               "location"]
+                               "location", "waived"]
         for attr in exported_attributes:
             setattr(self, attr, getattr(suite, attr))
         self.cases = cases
