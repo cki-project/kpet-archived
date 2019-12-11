@@ -24,6 +24,10 @@ from kpet.schema import Invalid, Struct, Choice, \
 # pylint: disable=raising-format-tuple,access-member-before-definition
 
 
+# Schema for suite and case IDs
+ID_SCHEMA = String(pattern="[a-zA-Z0-9_-]+")
+
+
 class Object:   # pylint: disable=too-few-public-methods
     """An abstract data object"""
     def __init__(self, schema, data):
@@ -281,7 +285,7 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                 ),
                 optional=dict(
                     # TODO Make mandatory once database has IDs
-                    id=String(),
+                    id=ID_SCHEMA,
                     host_type_regex=Regex(),
                     hostRequires=String(),
                     partitions=String(),
@@ -358,7 +362,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                 ),
                 optional=dict(
                     # TODO Make mandatory once database has IDs
-                    id=String(),
+                    id=ID_SCHEMA,
                     name=String(),
                     # TODO Remove once database transitions to names
                     description=String(),
