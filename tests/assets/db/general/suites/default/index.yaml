@@ -1,4 +1,4 @@
-description: 'layout of ltplite for KPET'
+name: 'layout of ltplite for KPET'
 maintainers:
   - maint1
 location: distribution/ltp/lite

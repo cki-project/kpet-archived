@@ -43,7 +43,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                     baz: "dolor"
                 """,
             "suite1.yaml": """
-                  description: suite1
+                  name: suite1
                   location: somewhere
                   maintainers:
                     - maint1
@@ -54,7 +54,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                       max_duration_seconds: 600
             """,
             "suite2.yaml": """
-                  description: suite2
+                  name: suite2
                   location: somewhere
                   maintainers:
                     - maint2
@@ -106,7 +106,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                     baz: "dolor"
                 """,
             "suite1.yaml": """
-                  description: suite1
+                  name: suite1
                   location: somewhere
                   maintainers:
                     - maint1
@@ -119,7 +119,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                       sets: foo
             """,
             "suite2.yaml": """
-                  description: suite2
+                  name: suite2
                   location: somewhere
                   maintainers:
                     - maint2
@@ -172,7 +172,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                     baz: "dolor"
                 """,
             "suite1.yaml": """
-                  description: suite1
+                  name: suite1
                   location: somewhere
                   maintainers:
                     - maint1
@@ -223,7 +223,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                     baz: "dolor"
                 """,
             "suite1.yaml": """
-                  description: suite1
+                  name: suite1
                   location: somewhere
                   maintainers:
                     - maint1
@@ -273,7 +273,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                     baz: "dolor"
                 """,
             "suite1.yaml": """
-                  description: suite1
+                  name: suite1
                   location: somewhere
                   maintainers:
                     - maint1
@@ -324,7 +324,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
                     baz: "dolor"
                 """,
             "suite1.yaml": """
-                  description: suite1
+                  name: suite1
                   location: somewhere
                   maintainers:
                     - maint1
