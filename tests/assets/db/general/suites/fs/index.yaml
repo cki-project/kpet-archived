@@ -1,4 +1,4 @@
-description: 'layout of xfs tests for KPET'
+name: 'layout of xfs tests for KPET'
 location: /filesystems/xfs/xfstests
 maintainers:
   - maint1

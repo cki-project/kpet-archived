@@ -43,7 +43,7 @@ DB_YAML_WITH_ORIGINS = \
 
 # A suite YAML without origin specified
 SUITE_YAML_WITHOUT_ORIGIN = """
-    description: Suite
+    name: Suite
     location: somewhere
     maintainers:
       - maint1

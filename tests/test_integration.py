@@ -71,7 +71,7 @@ INDEX_BASE_YAML = """
 """
 
 SUITE_BASE = """
-description: suite{}
+name: suite{}
 location: somewhere
 maintainers:
   - maint1

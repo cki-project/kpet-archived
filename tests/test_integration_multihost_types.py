@@ -153,7 +153,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                     - suite2.yaml
             """,
             "suite1.yaml": """
-                description: suite1
+                name: suite1
                 location: somewhere
                 maintainers:
                   - maint1
@@ -167,7 +167,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                             - a
             """,
             "suite2.yaml": """
-                description: suite2
+                name: suite2
                 location: somewhere
                 maintainers:
                   - maint1
@@ -476,7 +476,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                 - suite2.yaml
             """,
             "suite1.yaml": """
-            description: suite1
+            name: suite1
             location: somewhere
             maintainers:
               - maint1
@@ -490,7 +490,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
                         - a
             """,
             "suite2.yaml": """
-            description: suite2
+            name: suite2
             location: somewhere
             maintainers:
               - maint1

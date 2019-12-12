@@ -44,7 +44,7 @@ DB_YAML_OPTIONAL_VARIABLE_X = \
 
 # An empty suite's YAML file
 SUITE_YAML_EMPTY = """
-    description: Empty suite
+    name: Empty suite
     location: somewhere
     maintainers:
       - maint1
