@@ -73,7 +73,10 @@ Each recipe set is a *list* of "host" objects containing these attributes:
   for the host type. Copied from the kpet database value of the same
   name. See https://beaker-project.org/docs/user-guide/tasks.html for
   more information.
-* `suites`: List of test suites.
+* `tests`: List of test. Essentially similar to `suites` but uses different
+  structure.
+* `suites`: List of test suites. Essentially similar to `tests` but uses
+  different structure.
 
 Each suite is an object with the following attributes:
 
@@ -131,3 +134,42 @@ Each case is an object with the following attributes:
   set when running this test case.
 * `maintainers`: List of strings with the names and emails of the test
   case maintainers.
+
+Each test is an object with the following attributes:
+
+* `id`: ID of the test.
+* `name`: Name of the test.
+* `origin`: The name of a test origin - the source for the test's code.
+  One of the keys from the `origins` dictionary in the database's top
+  `index.yaml` file. Undefined, if the latter is not defined. Examples:
+  `github`, `beaker`, or `suites_zip`. See the `origins` dictionary in the
+  database's top `index.yaml` for the available origins and the meanings they
+  assign to `location` values.
+* `location`: The location of the test's code, with whatever meaning the
+  database choses to assign to it, but must be interpreted according to the
+  `origin`, if specified. Examples: a tarball URL, a path inside a common
+  tarball, a Beaker task name. See the `origins` dictionary in the database's
+  top `index.yaml` for the available origins and the meanings they assign to
+  `location` values.
+* `max_duration_seconds`: Maximum number of seconds the test is allowed to
+  run.
+* `hostRequires`: a list of paths to Jinja2 templates with the host
+  requirements for the test run. Copied from the kpet database value of the
+  same name for both suites and cases.
+* `partitions`: a list of paths to Jinja2 templates with custom partition
+  configuration. Copied from the kpet database value of the same name for both
+  suites and cases. See
+  https://beaker-project.org/docs/user-guide/customizing-partitions.html
+  for more information.
+* `kickstart`: a list of paths to Jinja2 templates with custom Anaconda
+  kickstart configuration. Copied from the kpet database value of the same
+  name for both suites and cases. See
+  https://beaker-project.org/docs/admin-guide/kickstarts.html for more
+  information.
+* `waived`: True if the test's result should be ignored when summarizing the
+  overall run result, eg. because it's new or unstable.
+* `role`: The value for the Beaker task's role attribute.
+* `environment`: Dictionary with environment variables that should be
+  set when running this test.
+* `maintainers`: List of strings with the names and emails of the test
+  maintainers.

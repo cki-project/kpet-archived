@@ -62,12 +62,51 @@ class Suite:
         self.cases = cases
 
 
+class Test:
+    # pylint: disable=too-few-public-methods, too-many-instance-attributes
+    """A test run - an execution of a particular case of a test suite"""
+
+    def __init__(self, suite, case):
+        """
+        Initialize a test run.
+
+        Args:
+            suite:  The test suite (kpet.data.Suite) being executed.
+            case:   The test case of the test suite (kpet.data.Case) being
+                    executed.
+        """
+        assert isinstance(suite, data.Suite)
+        assert isinstance(case, data.Case)
+        assert case in suite.cases
+
+        # pylint: disable=invalid-name
+        # TODO Remove conditions once IDs are mandatory
+        self.id = (suite.id or "") + "." + (case.id or "")
+        self.name = " - ".join(filter(None, (suite.name, case.name)))
+        self.origin = suite.origin
+        self.location = suite.location
+        self.max_duration_seconds = case.max_duration_seconds
+        self.hostRequires = filter(None,
+                                   (suite.hostRequires, case.hostRequires))
+        self.partitions = filter(None,
+                                 (suite.partitions, case.partitions))
+        self.kickstart = filter(None,
+                                (suite.kickstart, case.kickstart))
+        self.waived = \
+            case.waived if case.waived is not None else \
+            suite.waived if suite.waived is not None else \
+            False
+        self.role = case.role
+        self.environment = case.environment
+        self.maintainers = suite.maintainers + case.maintainers
+
+
 class Host:
     # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """A host running test suites"""
 
     # pylint: disable=redefined-builtin
-    def __init__(self, name, type, suites):
+    def __init__(self, name, type, suites, tests):
         """
         Initialize a host run.
 
@@ -75,10 +114,17 @@ class Host:
             name:       Name of the host.
             type:       Type of the host.
             suites:     List of suite runs to execute.
+                        Essentially similar to "tests", but uses different
+                        structure.
+            tests:      List of test runs to execute.
+                        Essentially similar to "suites", but uses different
+                        structure.
         """
         assert isinstance(type, data.HostType)
         assert isinstance(suites, list)
         assert all(isinstance(suite, Suite) for suite in suites)
+        assert isinstance(tests, list)
+        assert all(isinstance(test, Test) for test in tests)
 
         self.ignore_panic = type.ignore_panic
         # pylint: disable=invalid-name
@@ -86,7 +132,9 @@ class Host:
         self.partitions = type.partitions
         self.kickstart = type.kickstart
         self.tasks = type.tasks
+        # TODO: Remove once database transitions to "tests"
         self.suites = suites
+        self.tests = tests
 
         self.name = name
         self.hostname = type.hostname
@@ -146,7 +194,7 @@ class Base:     # pylint: disable=too-few-public-methods
             pool_suites:    A list of tuples, each containing a suite
                             and its cases selected for the run.
         Returns:
-            A list of Host instances with suite runs assigned to them
+            A list of Host instances with suite and test runs assigned to them
         """
         host_types = \
             database.host_types \
@@ -155,8 +203,10 @@ class Base:     # pylint: disable=too-few-public-methods
 
         hosts = list()
         for host_type_name, host_type in host_types.items():
-            # Create a suite run list
+            # Create a suite run list and a test run list
+            # TODO Remove suites once transitioned to tests
             suites = list()
+            tests = list()
             for pool_suite in pool_suites.copy():
                 suite, pool_cases = pool_suite
                 # Create case list from cases matching host type
@@ -174,15 +224,20 @@ class Base:     # pylint: disable=too-few-public-methods
                 # Add the suite run to the list, if it has cases to run
                 if cases:
                     suites.append(Suite(suite, [Case(c) for c in cases]))
+                for case in cases:
+                    tests.append(Test(suite, case))
+
                 # Remove suite from the pool, if it has no more cases
                 if not pool_cases:
                     pool_suites.remove(pool_suite)
             # Add host to list, if it has suites to run
+            # TODO Remove suites once transitioned to tests
             if suites:
                 suites = list(sorted(suites, key=lambda suite:
                                      len([case for case in suite.cases if
                                           case.waived])))
-                hosts.append(Host(host_type_name, host_type, suites))
+                tests.sort(key=lambda t: t.waived)
+                hosts.append(Host(host_type_name, host_type, suites, tests))
 
         return hosts
 
