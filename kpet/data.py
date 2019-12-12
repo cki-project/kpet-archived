@@ -24,6 +24,10 @@ from kpet.schema import Invalid, Struct, Choice, \
 # pylint: disable=raising-format-tuple,access-member-before-definition
 
 
+# Schema for universal IDs
+UNIVERSAL_ID_SCHEMA = String(pattern="[.a-zA-Z0-9_-]*")
+
+
 class Object:   # pylint: disable=too-few-public-methods
     """An abstract data object"""
     def __init__(self, name, schema, data):
@@ -282,6 +286,7 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                 ),
                 optional=dict(
                     name=String(),
+                    universal_id=UNIVERSAL_ID_SCHEMA,
                     host_type_regex=Regex(),
                     hostRequires=String(),
                     partitions=String(),
@@ -346,6 +351,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                 ),
                 optional=dict(
                     name=String(),
+                    universal_id=UNIVERSAL_ID_SCHEMA,
                     host_type_regex=Regex(),
                     hostRequires=String(),
                     partitions=String(),

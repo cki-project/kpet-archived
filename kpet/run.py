@@ -38,6 +38,10 @@ class Test:
         # pylint: disable=invalid-name
         self.name = " - ".join(filter(lambda x: x is not None,
                                       (suite.name, case.name)))
+        self.universal_id = \
+            case.universal_id if case.universal_id is not None else \
+            suite.universal_id if suite.universal_id is not None else \
+            None
         self.origin = suite.origin
         self.location = suite.location
         self.max_duration_seconds = case.max_duration_seconds
