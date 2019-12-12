@@ -1,21 +1,17 @@
 {% macro host_add_tasks(host) -%}
-  {% for suite in host.suites %}
-    {% for case in suite.cases %}
-      <task name="{{ case['name'] }}" role="{{ case['role'] }}">
-        <fetch url="{{ VARIABLES.suites_zip_url }}#{{ suite.location }}"/>
-        <params>
-          {% if case['waived'] is not none %}
-            <param name="_WAIVED" value="{{ case['waived'] }}"/>
-          {% endif %}
-          {% set maint = suite['maintainers']|join(", ")|e %}
-          <param name="_MAINTAINERS" value="{{ maint }}"/>
-
-          {% for name in case.environment %}
-          <param name="{{ name }}" value="{{ case.environment[name] }}"/>
-          {% endfor %}
-        </params>
-      </task>
-    {% endfor %}
+  {% for test in host.tests %}
+    <task name="{{ test.name }}" role="{{ test.role }}">
+      <fetch url="{{ VARIABLES.suites_zip_url }}#{{ test.location }}"/>
+      <params>
+        {% if test.waived %}
+          <param name="_WAIVED" value="{{ test.waived }}"/>
+        {% endif %}
+        <param name="_MAINTAINERS" value="{{ test.maintainers | join(", ") | e }}"/>
+        {% for name, value in test.environment.items() %}
+          <param name="{{ name }}" value="{{ value }}"/>
+        {% endfor %}
+      </params>
+    </task>
   {% endfor %}
 {% endmacro %}
 
@@ -23,14 +19,9 @@
   {% if host[template_field] %}
     {% include host[template_field] %}
   {% endif %}
-  {% for suite in host.suites %}
-    {% if suite[template_field] %}
-      {% include suite[template_field] %}
-    {% endif %}
-    {% for case in suite.cases %}
-      {% if case[template_field] %}
-        {% include case[template_field] %}
-      {% endif %}
+  {% for test in host.tests %}
+    {% for template in test[template_field] %}
+      {% include template %}
     {% endfor %}
   {% endfor %}
 {% endmacro %}

@@ -72,11 +72,11 @@ class IntegrationMatchSetsTests(IntegrationTests):
         # Matches suite
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "-s", "foo",
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Matches a different suite
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "-s", "bar",
-            stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite2 - case2\s*</job>.*')
         # Doesn't match any suite
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "-s", "baz",
@@ -140,11 +140,11 @@ class IntegrationMatchSetsTests(IntegrationTests):
         # Matches suite
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "-s", "foo",
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Matches a different suite
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "-s", "bar",
-            stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite2 - case2\s*</job>.*')
 
     def test_match_not_subset_error(self):
         """

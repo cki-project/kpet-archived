@@ -266,7 +266,7 @@ class IntegrationMiscTests(IntegrationTests):
 
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
 
     def test_empty_case_with_a_pattern_run_generate(self):
         """Test run generation with an empty test case with a pattern"""
@@ -288,7 +288,7 @@ class IntegrationMiscTests(IntegrationTests):
 
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
 
     def test_preparation_tasks_are_added(self):
         """Test source-matching with a specific case"""
@@ -340,8 +340,8 @@ class IntegrationMiscTests(IntegrationTests):
             <job>
               {% for recipeset in RECIPESETS %}
                 {% for HOST in recipeset %}
-                  {% for suite in HOST.suites %}
-                    {{ suite.name }}
+                  {% for test in HOST.tests %}
+                    {{ test.name }}
                   {% endfor %}
                 {% endfor %}
               {% endfor %}
@@ -353,7 +353,8 @@ class IntegrationMiscTests(IntegrationTests):
 
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*first_suite_with_name\s*</job>.*')
+            stdout_matching=r'.*<job>\s*first_suite_with_name - '
+                            r'case1\s*</job>.*')
 
     def test_cases_expose_their_maintainers(self):
         """Test cases' "Maintainers" field should be exposed to templates"""
@@ -376,13 +377,11 @@ class IntegrationMiscTests(IntegrationTests):
             <job>
               {% for recipeset in RECIPESETS %}
                 {% for HOST in recipeset %}
-                  {% for suite in HOST.suites %}
-                    {{ suite.name }}
-                    {% for case in suite.cases %}
-                      Maintainers:
-                      {% for maintainer in case.maintainers %}
-                        # {{ maintainer | e }}
-                      {% endfor %}
+                  {% for test in HOST.tests %}
+                    {{ test.name }}
+                    Maintainers:
+                    {% for maintainer in test.maintainers %}
+                      # {{ maintainer | e }}
                     {% endfor %}
                   {% endfor %}
                 {% endfor %}

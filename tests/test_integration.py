@@ -40,11 +40,8 @@ COMMONTREE_XML = """
   {% for recipeset in RECIPESETS %}
     {% for HOST in recipeset %}
       HOST
-      {% for suite in HOST.suites %}
-        {{ suite.name }}
-        {% for case in suite.cases %}
-          {{ case.name }}
-        {% endfor %}
+      {% for test in HOST.tests %}
+        {{ test.name }}
       {% endfor %}
       {% if HOST.tasks %}
         {% include HOST.tasks %}
@@ -235,25 +232,25 @@ class IntegrationTests(unittest.TestCase):
         # Both appear in baseline output
         self.assertKpetProduces(
             kpet_run_generate, db_name,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
-                            r'suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*'
+                            r'suite2 - case2\s*</job>.*')
         # One appears with its patches
         self.assertKpetProduces(
             kpet_run_generate, db_name,
             get_patch_path("misc/files_abc.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Another appears with its patches
         self.assertKpetProduces(
             kpet_run_generate, db_name,
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite2 - case2\s*</job>.*')
         # Both appear with their patches
         self.assertKpetProduces(
             kpet_run_generate, db_name,
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
-                            r'suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*'
+                            r'suite2 - case2\s*</job>.*')
         # None appear with other patches
         self.assertKpetProduces(
             kpet_run_generate, db_name,
@@ -270,12 +267,12 @@ class IntegrationTests(unittest.TestCase):
         # Only one appears in baseline output
         self.assertKpetProduces(
             kpet_run_generate, db_name,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # One appears with its patches
         self.assertKpetProduces(
             kpet_run_generate, db_name,
             get_patch_path("misc/files_abc.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Another doesn't appear with its patches
         self.assertKpetProduces(
             kpet_run_generate, db_name,
@@ -286,7 +283,7 @@ class IntegrationTests(unittest.TestCase):
             kpet_run_generate, db_name,
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # None appear with other patches
         self.assertKpetProduces(
             kpet_run_generate, db_name,
