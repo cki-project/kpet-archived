@@ -94,7 +94,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
         # Matches default ("arch") architecture
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Doesn't match empty architecture
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "-a", "",
@@ -142,12 +142,12 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
         # Matches default ("arch") architecture
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Matches non-default (but listed) architecture
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             "-a", "other_arch",
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Doesn't match empty architecture
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "-a", "",
@@ -237,7 +237,7 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
         # Matches default ("tree") tree
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Doesn't match empty tree
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "-t", "",
@@ -291,12 +291,12 @@ class IntegrationMatchTreesArchesTests(IntegrationTests):
         # Matches default ("tree") tree
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Matches non-default (but listed) tree
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             "-t", "other_tree",
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Doesn't match empty tree
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "-t", "",

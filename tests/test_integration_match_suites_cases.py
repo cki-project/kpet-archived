@@ -37,12 +37,12 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
         # Matches baseline
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Matches patches
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_abc.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
 
     def test_match_sources_one_case_one_pattern(self):
         """Test source-matching a case with one pattern"""
@@ -63,12 +63,12 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
         # Matches baseline
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Matches patches it should
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_abc.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Doesn't match patches it shouldn't
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
@@ -96,23 +96,23 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
         # Matches baseline
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Matches first patch
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_abc.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Matches second patch
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Matches both patches only once
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Doesn't match patches it shouldn't
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
@@ -143,25 +143,25 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
         # Both match baseline
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*'
-                            r'case1\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*'
+                            r'suite1 - case2\s*</job>.*')
         # First matches its patch
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_abc.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Second matches its patch
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case2\s*</job>.*')
         # Both match their patches
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*'
-                            r'case1\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*'
+                            r'suite1 - case2\s*</job>.*')
         # None match other patches
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
@@ -209,25 +209,25 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
         # Both match baseline
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
-                            r'suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*'
+                            r'suite2 - case2\s*</job>.*')
         # First matches its patch
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_abc.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Second matches its patch
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite2 - case2\s*</job>.*')
         # Both match their patches
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
-                            r'suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*'
+                            r'suite2 - case2\s*</job>.*')
         # None match other patches
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
@@ -283,24 +283,24 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
         # Only non-specific suite matches baseline
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite2 - case2\s*</job>.*')
         # First matches its patch
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_abc.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Second matches its patch
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite2 - case2\s*</job>.*')
         # All suites can match if provided appropriate patches
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
-                            r'suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*'
+                            r'suite2 - case2\s*</job>.*')
         # None match other patches
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
@@ -349,24 +349,24 @@ class IntegrationMatchSuitesCasesTests(IntegrationTests):
         # Only non-specific case matches baseline
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite2 - case2\s*</job>.*')
         # First matches its patch
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_abc.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*</job>.*')
         # Second matches its patch
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite2 - case2\s*</job>.*')
         # All cases can match if provided appropriate patches
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
             get_patch_path("misc/files_abc.diff"),
             get_patch_path("misc/files_def.diff"),
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
-                            r'suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*'
+                            r'suite2 - case2\s*</job>.*')
         # None match other patches
         self.assertKpetProduces(
             kpet_run_generate, assets_path,

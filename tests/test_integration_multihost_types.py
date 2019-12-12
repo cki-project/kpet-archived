@@ -286,8 +286,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
 
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
-                            r'HOST\s*suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*'
+                            r'HOST\s*suite2 - case2\s*</job>.*')
 
     def test_multihost_two_types_both_cases_first(self):
         """
@@ -340,8 +340,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
         # TODO Distinguish host types somehow
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
-                            r'suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*'
+                            r'suite2 - case2\s*</job>.*')
 
     def test_multihost_two_types_both_cases_second(self):
         """
@@ -394,8 +394,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
         # TODO Distinguish host types somehow
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
-                            r'suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*'
+                            r'suite2 - case2\s*</job>.*')
 
     def test_multihost_two_types_both_cases_both(self):
         """
@@ -453,8 +453,8 @@ class IntegrationMultihostTypesTests(IntegrationTests):
         # TODO Distinguish host types somehow
         self.assertKpetProduces(
             kpet_run_generate, assets_path,
-            stdout_matching=r'.*<job>\s*HOST\s*suite1\s*case1\s*'
-                            r'suite2\s*case2\s*</job>.*')
+            stdout_matching=r'.*<job>\s*HOST\s*suite1 - case1\s*'
+                            r'suite2 - case2\s*</job>.*')
 
     def test_multihost_one_type_suite_wrong_regex(self):
         """Test multihost schema invalid error with wrong suite regexes"""
