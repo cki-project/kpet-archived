@@ -275,10 +275,10 @@ class Case(Object):     # pylint: disable=too-few-public-methods
         super().__init__(
             Struct(
                 required=dict(
-                    name=String(),
                     max_duration_seconds=Int(),
                 ),
                 optional=dict(
+                    name=String(),
                     host_type_regex=Regex(),
                     hostRequires=String(),
                     partitions=String(),
