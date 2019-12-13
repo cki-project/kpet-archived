@@ -243,14 +243,13 @@ def main_print_test_cases(args, baserun):
         args:       Parsed command-line arguments.
         baserun:    Test execution data.
     """
-    case_name_list = []
+    test_name_list = []
     for recipeset in baserun.recipesets_of_hosts:
         for host in recipeset:
-            for suite in host.suites:
-                for case in suite.cases:
-                    case_name_list.append(case.name)
-    for case_name in sorted(case_name_list):
-        print(case_name)
+            for test in host.tests:
+                test_name_list.append(test.name)
+    for test_name in sorted(test_name_list):
+        print(test_name)
 
 
 def main(args):
