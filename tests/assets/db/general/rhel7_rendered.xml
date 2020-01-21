@@ -42,7 +42,7 @@
       </task>
       <task name="/distribution/command" role="None">
         <params>
-          <param name="CMDS_TO_RUN" value="curl https://password.corp.redhat.com/RH-IT-Root-CA.crt &gt; /etc/pki/ca-trust/source/anchors/RH-IT-Root-CA.crt &amp;&amp; update-ca-trust extract"/>
+          <param name="CMDS_TO_RUN" value="curl http://password.corp.redhat.com/RH-IT-Root-CA.crt &gt; /etc/pki/ca-trust/source/anchors/RH-IT-Root-CA.crt &amp;&amp; update-ca-trust extract"/>
         </params>
       </task>
       <task name="/test/misc/machineinfo">
