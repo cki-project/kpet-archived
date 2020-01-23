@@ -137,7 +137,6 @@ Each case is an object with the following attributes:
 
 Each test is an object with the following attributes:
 
-* `id`: ID of the test.
 * `name`: Name of the test.
 * `origin`: The name of a test origin - the source for the test's code.
   One of the keys from the `origins` dictionary in the database's top
