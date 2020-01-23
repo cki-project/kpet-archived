@@ -80,7 +80,6 @@ Each recipe set is a *list* of "host" objects containing these attributes:
 
 Each suite is an object with the following attributes:
 
-* `id`: ID of the test suite, unique within all suites.
 * `name`: Name of the test suite.
 * `description`: Description of the test suite.
 * `hostRequires`: Jinja2 template path with the host requirements for
@@ -137,7 +136,6 @@ Each case is an object with the following attributes:
 
 Each test is an object with the following attributes:
 
-* `id`: ID of the test.
 * `name`: Name of the test.
 * `origin`: The name of a test origin - the source for the test's code.
   One of the keys from the `origins` dictionary in the database's top
