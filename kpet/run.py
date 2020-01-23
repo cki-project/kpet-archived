@@ -53,7 +53,7 @@ class Suite:
         assert isinstance(cases, list)
 
         # TODO Remove "description" once database transitions to names
-        exported_attributes = ["id", "name", "description",
+        exported_attributes = ["name", "description",
                                "hostRequires", "partitions",
                                "kickstart", "maintainers", "origin",
                                "location", "waived"]
@@ -80,8 +80,6 @@ class Test:
         assert case in suite.cases
 
         # pylint: disable=invalid-name
-        # TODO Remove conditions once IDs are mandatory
-        self.id = (suite.id or "") + "." + (case.id or "")
         self.name = " - ".join(filter(None, (suite.name, case.name)))
         self.origin = suite.origin
         self.location = suite.location

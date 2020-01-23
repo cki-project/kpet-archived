@@ -16,16 +16,11 @@
 import os
 import re
 from functools import reduce
-from kpet import misc
 from kpet.schema import Invalid, Struct, Choice, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, \
     Int, Null, RE, Reduction
 
 # pylint: disable=raising-format-tuple,access-member-before-definition
-
-
-# Schema for suite and case IDs
-ID_SCHEMA = String(pattern="[a-zA-Z0-9_-]+")
 
 
 class Object:   # pylint: disable=too-few-public-methods
@@ -284,8 +279,6 @@ class Case(Object):     # pylint: disable=too-few-public-methods
                     max_duration_seconds=Int(),
                 ),
                 optional=dict(
-                    # TODO Make mandatory once database has IDs
-                    id=ID_SCHEMA,
                     host_type_regex=Regex(),
                     hostRequires=String(),
                     partitions=String(),
@@ -325,19 +318,6 @@ class Case(Object):     # pylint: disable=too-few-public-methods
 class Suite(Object):    # pylint: disable=too-few-public-methods
     """Test suite"""
 
-    def validate_case_ids(self):
-        """
-        Check case IDs are unique.
-        """
-        repeated_id_set = misc.get_repeated((
-            case.id for case in self.cases
-            # TODO Remove the condition once ID is mandatory
-            if case.id is not None
-        ))
-        if repeated_id_set:
-            raise Invalid(f"The suite has repeated case IDs: "
-                          f"{repeated_id_set}")
-
     def validate_maintainers(self):
         """
         Check that every test case has a maintainer.
@@ -361,8 +341,6 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                     cases=List(Class(Case))
                 ),
                 optional=dict(
-                    # TODO Make mandatory once database has IDs
-                    id=ID_SCHEMA,
                     name=String(),
                     # TODO Remove once database transitions to names
                     description=String(),
@@ -387,7 +365,6 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
                 raise Invalid(
                     'The suite has neither name nor description specified.')
             self.name = self.description
-        self.validate_case_ids()
         if self.maintainers is None:
             self.maintainers = []
         self.validate_maintainers()
@@ -584,19 +561,6 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                                   "in suite: {}\ncase: {}".
                                   format(suite.name, case.name))
 
-    def validate_suite_ids(self):
-        """
-        Check suite IDs are unique.
-        """
-        repeated_id_set = misc.get_repeated((
-            suite.id for suite in self.suites
-            # TODO Remove the condition once ID is mandatory
-            if suite.id is not None
-        ))
-        if repeated_id_set:
-            raise Invalid(f"The database has repeated suite IDs: "
-                          f"{repeated_id_set}")
-
     def __init__(self, dir_path):
         """
         Initialize a database object.
@@ -646,8 +610,6 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             self.suites = []
         if self.variables is None:
             self.variables = dict()
-        # Validate suite IDs
-        self.validate_suite_ids()
         # Validate suite origins
         self.validate_suite_origins()
         # Regex check
