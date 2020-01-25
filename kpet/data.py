@@ -16,6 +16,7 @@
 import os
 import re
 from functools import reduce
+from kpet import misc
 from kpet.schema import Invalid, Struct, Choice, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, \
     Int, Null, RE, Reduction
@@ -553,6 +554,20 @@ class Base(Object):     # pylint: disable=too-few-public-methods
                                   "in suite: {}\ncase: {}".
                                   format(suite.name, case.name))
 
+    def validate_test_names(self):
+        """
+        Check test names are unique.
+        """
+        name_list = []
+        for suite in self.suites:
+            for case in suite.cases:
+                name_list.append(tuple(filter(lambda x: x is not None,
+                                              (suite.name, case.name))))
+        repeated_name_set = misc.get_repeated(name_list)
+        if repeated_name_set:
+            raise Invalid(f"Repeated test names encountered: "
+                          f"{repeated_name_set}")
+
     def __init__(self, dir_path):
         """
         Initialize a database object.
@@ -602,6 +617,8 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             self.suites = []
         if self.variables is None:
             self.variables = dict()
+        # Validate test names
+        self.validate_test_names()
         # Validate suite origins
         self.validate_suite_origins()
         # Regex check
