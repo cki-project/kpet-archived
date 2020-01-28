@@ -79,7 +79,8 @@ class Test:
         assert case in suite.cases
 
         # pylint: disable=invalid-name
-        self.name = " - ".join(filter(None, (suite.name, case.name)))
+        self.name = " - ".join(filter(lambda x: x is not None,
+                                      (suite.name, case.name)))
         self.origin = suite.origin
         self.location = suite.location
         self.max_duration_seconds = case.max_duration_seconds
