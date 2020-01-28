@@ -52,8 +52,7 @@ class Suite:
         assert isinstance(suite, data.Suite)
         assert isinstance(cases, list)
 
-        # TODO Remove "description" once database transitions to names
-        exported_attributes = ["name", "description",
+        exported_attributes = ["name",
                                "hostRequires", "partitions",
                                "kickstart", "maintainers", "origin",
                                "location", "waived"]
