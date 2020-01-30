@@ -69,6 +69,19 @@ Each recipe set is a *list* of "host" objects containing these attributes:
   configuration. Copied from the kpet database value of the same name. See
   https://beaker-project.org/docs/admin-guide/kickstarts.html for more
   information.
+* `hostRequires_list`: a list of paths to Jinja2 templates with the host
+  requirements for the test run. Contains the `hostRequires` database values
+  of the host's type, and all the suites and cases executed on the host.
+* `partitions_list`: a list of paths to Jinja2 templates with custom partition
+  configuration. Contains the `partitions` database values of the host's type,
+  and all the suites and cases executed on the host. See
+  https://beaker-project.org/docs/user-guide/customizing-partitions.html for
+  more information.
+* `kickstart_list`: a list of paths to Jinja2 templates with custom Anaconda
+  kickstart configuration. Contains the `kickstart` database values of the
+  host's type, and all the suites and cases executed on the host. See
+  https://beaker-project.org/docs/admin-guide/kickstarts.html for more
+  information.
 * `tasks`: Jinja2 template path with custom tasks (<task> elements)
   for the host type. Copied from the kpet database value of the same
   name. See https://beaker-project.org/docs/user-guide/tasks.html for
@@ -151,19 +164,6 @@ Each test is an object with the following attributes:
   `location` values.
 * `max_duration_seconds`: Maximum number of seconds the test is allowed to
   run.
-* `hostRequires`: a list of paths to Jinja2 templates with the host
-  requirements for the test run. Copied from the kpet database value of the
-  same name for both suites and cases.
-* `partitions`: a list of paths to Jinja2 templates with custom partition
-  configuration. Copied from the kpet database value of the same name for both
-  suites and cases. See
-  https://beaker-project.org/docs/user-guide/customizing-partitions.html
-  for more information.
-* `kickstart`: a list of paths to Jinja2 templates with custom Anaconda
-  kickstart configuration. Copied from the kpet database value of the same
-  name for both suites and cases. See
-  https://beaker-project.org/docs/admin-guide/kickstarts.html for more
-  information.
 * `waived`: True if the test's result should be ignored when summarizing the
   overall run result, eg. because it's new or unstable.
 * `role`: The value for the Beaker task's role attribute.
