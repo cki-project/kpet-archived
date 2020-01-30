@@ -84,12 +84,6 @@ class Test:
         self.origin = suite.origin
         self.location = suite.location
         self.max_duration_seconds = case.max_duration_seconds
-        self.hostRequires = filter(None,
-                                   (suite.hostRequires, case.hostRequires))
-        self.partitions = filter(None,
-                                 (suite.partitions, case.partitions))
-        self.kickstart = filter(None,
-                                (suite.kickstart, case.kickstart))
         self.waived = \
             case.waived if case.waived is not None else \
             suite.waived if suite.waived is not None else \
@@ -101,41 +95,75 @@ class Test:
 
 class Host:
     # pylint: disable=too-few-public-methods, too-many-instance-attributes
-    """A host running test suites"""
+    """A host running tests"""
 
     # pylint: disable=redefined-builtin
-    def __init__(self, name, type, suites, tests):
+    def __init__(self, name, type, suites_and_cases):
         """
         Initialize a host run.
 
         Args:
-            name:       Name of the host.
-            type:       Type of the host.
-            suites:     List of suite runs to execute.
-                        Essentially similar to "tests", but uses different
-                        structure.
-            tests:      List of test runs to execute.
-                        Essentially similar to "suites", but uses different
-                        structure.
+            name:               Name of the host.
+            type:               Type of the host.
+            suites_and_cases:   A list of suite-and-cases tuples.
+                                The first element of each tuple being a
+                                kpet.data.Suite instance and the second
+                                element - a list of kpet.data.Case instances.
+                                Represents the suites and their cases to be
+                                executed on the host.
         """
         assert isinstance(type, data.HostType)
-        assert isinstance(suites, list)
-        assert all(isinstance(suite, Suite) for suite in suites)
-        assert isinstance(tests, list)
-        assert all(isinstance(test, Test) for test in tests)
+        assert isinstance(suites_and_cases, list)
+        assert all((isinstance(suite_and_cases, tuple) and
+                    isinstance(suite_and_cases[0], data.Suite) and
+                    isinstance(suite_and_cases[1], list) and
+                    suite_and_cases[1] and
+                    all(isinstance(case, data.Case)
+                        for case in suite_and_cases[1]))
+                   for suite_and_cases in suites_and_cases)
 
+        self.name = name
+        self.hostname = type.hostname
         self.ignore_panic = type.ignore_panic
         # pylint: disable=invalid-name
+        # TODO: Remove once database transitions to *_list fields
         self.hostRequires = type.hostRequires
         self.partitions = type.partitions
         self.kickstart = type.kickstart
         self.tasks = type.tasks
-        # TODO: Remove once database transitions to "tests"
-        self.suites = suites
-        self.tests = tests
 
-        self.name = name
-        self.hostname = type.hostname
+        # Collect host parameters and create "suite" and "test" lists
+        # TODO: Remove suite list once database transitions to "tests"
+        self.suites = list()
+        self.tests = list()
+        hostRequires_list = [type.hostRequires]
+        partitions_list = [type.partitions]
+        kickstart_list = [type.kickstart]
+        for suite, cases in suites_and_cases:
+            hostRequires_list.append(suite.hostRequires)
+            partitions_list.append(suite.partitions)
+            kickstart_list.append(suite.kickstart)
+            for case in cases:
+                hostRequires_list.append(case.hostRequires)
+                partitions_list.append(case.partitions)
+                kickstart_list.append(case.kickstart)
+                self.tests.append(Test(suite, case))
+            # TODO: Remove suite list once database transitions to "tests"
+            self.suites.append(Suite(suite, [Case(c) for c in cases]))
+
+        # Remove undefined template paths
+        self.hostRequires_list = filter(lambda e: e is not None,
+                                        hostRequires_list)
+        self.partitions_list = filter(lambda e: e is not None,
+                                      partitions_list)
+        self.kickstart_list = filter(lambda e: e is not None,
+                                     kickstart_list)
+
+        # Put waived tests at the end
+        # TODO: Remove suite list once database transitions to "tests"
+        self.suites.sort(key=lambda suite: len([case for case in suite.cases
+                                                if case.waived]))
+        self.tests.sort(key=lambda t: t.waived)
 
 
 class Base:     # pylint: disable=too-few-public-methods
@@ -199,16 +227,14 @@ class Base:     # pylint: disable=too-few-public-methods
             if database.host_types is not None \
             else {"": data.DEFAULT_HOST_TYPE}
 
-        hosts = list()
+        hosts = []
         for host_type_name, host_type in host_types.items():
-            # Create a suite run list and a test run list
-            # TODO Remove suites once transitioned to tests
-            suites = list()
-            tests = list()
+            # Create a host suite-and-cases list
+            host_suites = []
             for pool_suite in pool_suites.copy():
                 suite, pool_cases = pool_suite
-                # Create case list from cases matching host type
-                cases = []
+                # Create case list from suite cases matching the host type
+                host_suite_cases = []
                 for case in pool_cases.copy():
                     host_type_regex = \
                         case.host_type_regex or \
@@ -217,25 +243,17 @@ class Base:     # pylint: disable=too-few-public-methods
                     if database.host_types is None or \
                        host_type_regex and \
                        host_type_regex.fullmatch(host_type_name):
-                        cases.append(case)
+                        host_suite_cases.append(case)
                         pool_cases.remove(case)
-                # Add the suite run to the list, if it has cases to run
-                if cases:
-                    suites.append(Suite(suite, [Case(c) for c in cases]))
-                for case in cases:
-                    tests.append(Test(suite, case))
-
+                # Add suite and cases to the host list if there are any cases
+                if host_suite_cases:
+                    host_suites.append((suite, host_suite_cases))
                 # Remove suite from the pool, if it has no more cases
                 if not pool_cases:
                     pool_suites.remove(pool_suite)
             # Add host to list, if it has suites to run
-            # TODO Remove suites once transitioned to tests
-            if suites:
-                suites = list(sorted(suites, key=lambda suite:
-                                     len([case for case in suite.cases if
-                                          case.waived])))
-                tests.sort(key=lambda t: t.waived)
-                hosts.append(Host(host_type_name, host_type, suites, tests))
+            if host_suites:
+                hosts.append(Host(host_type_name, host_type, host_suites))
 
         return hosts
 
