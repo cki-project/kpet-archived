@@ -188,7 +188,7 @@ class IntegrationMiscTests(IntegrationTests):
         self.assertKpetProduces(kpet_with_db, assets_path,
                                 "tree", "list",
                                 status=1,
-                                stderr_matching=r'.*Invalid Base data.*')
+                                stderr_matching=r'.*Invalid database.*')
 
     def test_invalid_suite_data_tree_list(self):
         """Test tree listing with invalid data in a suite file"""
@@ -210,7 +210,7 @@ class IntegrationMiscTests(IntegrationTests):
         self.assertKpetProduces(kpet_with_db, assets_path,
                                 "tree", "list",
                                 status=1,
-                                stderr_matching=r'.*Invalid Suite data.*')
+                                stderr_matching=r'.*Invalid suite.*')
 
     def test_empty_suite_run_generate(self):
         """Test run generation with an empty suite"""
