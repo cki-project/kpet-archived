@@ -26,12 +26,13 @@ from kpet.schema import Invalid, Struct, Choice, \
 
 class Object:   # pylint: disable=too-few-public-methods
     """An abstract data object"""
-    def __init__(self, schema, data):
+    def __init__(self, name, schema, data):
         """
         Initialize an abstract data object with a schema validating and
         resolving a supplied data.
 
         Args:
+            name:   Name of the data instance to use in error messages.
             schema: The schema of the data, must recognize to a Struct.
             data:   The object data to be validated against and resolved with
                     the schema.
@@ -40,7 +41,7 @@ class Object:   # pylint: disable=too-few-public-methods
         try:
             data = schema.resolve(data)
         except Invalid:
-            raise Invalid("Invalid {} data".format(type(self).__name__))
+            raise Invalid("Invalid {}".format(name))
 
         # Recognize the schema
         schema = schema.recognize()
@@ -48,7 +49,7 @@ class Object:   # pylint: disable=too-few-public-methods
         try:
             schema.validate(data)
         except Invalid as exc:
-            raise Exception("Resolved data is invalid:\n{}".format(exc))
+            raise Exception("Resolved {} is invalid:\n{}".format(name, exc))
 
         # Assign members
         for member_name in schema.required.keys():
@@ -274,6 +275,7 @@ class Case(Object):     # pylint: disable=too-few-public-methods
     def __init__(self, data):
         sets_schema = Reduction(Regex(), lambda x: [x], List(Regex()))
         super().__init__(
+            "case",
             Struct(
                 required=dict(
                     max_duration_seconds=Int(),
@@ -336,6 +338,7 @@ class Suite(Object):    # pylint: disable=too-few-public-methods
         sets_schema = Reduction(Regex(), lambda x: [x], List(Regex()))
 
         super().__init__(
+            "suite",
             Struct(
                 required=dict(
                     location=String(),
@@ -383,6 +386,7 @@ class HostType(Object):     # pylint: disable=too-few-public-methods
         Initialize a host type.
         """
         super().__init__(
+            "host type",
             Struct(optional=dict(
                 ignore_panic=Boolean(),
                 hostRequires=String(),
@@ -577,6 +581,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         arches_schema = Reduction(Regex(), lambda x: [x], List(Regex()))
 
         super().__init__(
+            "database",
             ScopedYAMLFile(
                 Struct(
                     required=dict(
