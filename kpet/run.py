@@ -87,10 +87,6 @@ class Host:
         self.hostname = type.hostname
         self.ignore_panic = type.ignore_panic
         # pylint: disable=invalid-name
-        # TODO: Remove once database transitions to *_list fields
-        self.hostRequires = type.hostRequires
-        self.partitions = type.partitions
-        self.kickstart = type.kickstart
         self.tasks = type.tasks
 
         # Collect host parameters and create "suite" and "test" lists
