@@ -59,16 +59,6 @@ Each recipe set is a *list* of "host" objects containing these attributes:
 * `hostname`: Hostname if this will run on a specific machine, None otherwise.
 * `ignore_panic`: If kernel panics should be ignored when running
   tests. Copied from the kpet database value of the same name.
-* `hostRequires`: Jinja2 template path with the host requirements for
-  the test run. Copied from the kpet database value of the same name.
-* `partitions`: Jinja2 template path with custom partition
-  configuration. Copied from the kpet database value of the same name. See
-  https://beaker-project.org/docs/user-guide/customizing-partitions.html
-  for more information.
-* `kickstart`: Jinja2 template path with custom Anaconda kickstart
-  configuration. Copied from the kpet database value of the same name. See
-  https://beaker-project.org/docs/admin-guide/kickstarts.html for more
-  information.
 * `hostRequires_list`: a list of paths to Jinja2 templates with the host
   requirements for the test run. Contains the `hostRequires` database values
   of the host's type, and all the suites and cases executed on the host.
