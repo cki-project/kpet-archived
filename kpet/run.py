@@ -90,7 +90,7 @@ class Host:
         self.tasks = type.tasks
 
         # Collect host parameters and create "suite" and "test" lists
-        self.tests = list()
+        self.tests = []
         hostRequires_list = [type.hostRequires]
         partitions_list = [type.partitions]
         kickstart_list = [type.kickstart]
@@ -147,9 +147,9 @@ class Base:     # pylint: disable=too-few-public-methods
         db_recipesets = database.recipesets
 
         # Distribute hosts to their respective recipesets
-        recipesets_of_hosts = list()
+        recipesets_of_hosts = []
         for host_recipeset_names in db_recipesets.values():
-            recipeset = list()
+            recipeset = []
             for host_recipeset_name in host_recipeset_names:
                 for host in hosts:
                     if host.name == host_recipeset_name:
