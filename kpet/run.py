@@ -91,22 +91,24 @@ class Host:
 
         # Collect host parameters and create "suite" and "test" lists
         self.tests = []
-        hostRequires_list = [type.hostRequires]
+        host_requires_list = [type.hostRequires]
         partitions_list = [type.partitions]
         kickstart_list = [type.kickstart]
         for suite, cases in suites_and_cases:
-            hostRequires_list.append(suite.hostRequires)
+            host_requires_list.append(suite.hostRequires)
             partitions_list.append(suite.partitions)
             kickstart_list.append(suite.kickstart)
             for case in cases:
-                hostRequires_list.append(case.hostRequires)
+                host_requires_list.append(case.hostRequires)
                 partitions_list.append(case.partitions)
                 kickstart_list.append(case.kickstart)
                 self.tests.append(Test(suite, case))
 
         # Remove undefined template paths
-        self.hostRequires_list = filter(lambda e: e is not None,
-                                        hostRequires_list)
+        self.host_requires_list = filter(lambda e: e is not None,
+                                         host_requires_list)
+        # TODO: For compatibility. Remove when kpet-db is updated.
+        self.hostRequires_list = self.host_requires_list
         self.partitions_list = filter(lambda e: e is not None,
                                       partitions_list)
         self.kickstart_list = filter(lambda e: e is not None,

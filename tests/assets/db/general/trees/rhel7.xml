@@ -32,7 +32,7 @@
               <labcontroller op="=" value="example2.com"/>
               <labcontroller op="=" value="example3.com"/>
             </or>
-            {{- host_include_template_list(host, role, 'hostRequires_list') -}}
+            {{- host_include_template_list(host, role, 'host_requires_list') -}}
           </hostRequires>
           <repos/>
           <partitions>
