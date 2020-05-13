@@ -87,7 +87,10 @@ class Host:
         self.hostname = type.hostname
         self.ignore_panic = type.ignore_panic
         # pylint: disable=invalid-name
-        self.tasks = type.tasks
+        self.preboot_tasks = type.preboot_tasks
+        self.postboot_tasks = type.postboot_tasks
+        # TODO Remove once kpet-db switches to preboot_tasks
+        self.tasks = type.preboot_tasks
 
         # Collect host parameters and create "suite" and "test" lists
         self.tests = []
