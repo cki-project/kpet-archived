@@ -19,7 +19,7 @@ from functools import reduce
 from kpet import misc
 from kpet.schema import Invalid, Struct, Choice, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, \
-    Int, Null, RE, Reduction
+    Int, Null, RE, Reduction, Succession
 
 # pylint: disable=raising-format-tuple,access-member-before-definition
 
@@ -391,16 +391,33 @@ class HostType(Object):     # pylint: disable=too-few-public-methods
         """
         Initialize a host type.
         """
+        # TODO Drop the old schema once kpet-db is switched to the new one
+        def inherit(data):
+            if "tasks" in data:
+                data["preboot_tasks"] = data.pop("tasks")
+            return data
         super().__init__(
             "host type",
-            Struct(optional=dict(
-                ignore_panic=Boolean(),
-                hostRequires=String(),
-                hostname=String(),
-                partitions=String(),
-                kickstart=String(),
-                tasks=String(),
-            )),
+            Succession(
+                Struct(optional=dict(
+                    ignore_panic=Boolean(),
+                    hostRequires=String(),
+                    hostname=String(),
+                    partitions=String(),
+                    kickstart=String(),
+                    tasks=String(),
+                )),
+                inherit,
+                Struct(optional=dict(
+                    ignore_panic=Boolean(),
+                    hostRequires=String(),
+                    hostname=String(),
+                    partitions=String(),
+                    kickstart=String(),
+                    preboot_tasks=String(),
+                    postboot_tasks=String(),
+                )),
+            ),
             data
         )
 
