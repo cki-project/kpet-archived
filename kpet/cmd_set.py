@@ -45,7 +45,7 @@ def main(args):
         max_name_length = max((len(k) for k in database.sets), default=0)
         for name, description in sorted(database.sets.items(),
                                         key=lambda i: i[0]):
-            if regex.match(name):
+            if regex.fullmatch(name):
                 print(f"{name: <{max_name_length}} {description}")
     else:
         misc.raise_action_not_found(args.action, args.command)

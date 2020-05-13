@@ -46,7 +46,7 @@ def main(args):
         max_name_length = max((len(k) for k in database.variables), default=0)
         for name, info in sorted(database.variables.items(),
                                  key=lambda i: i[0]):
-            if regex.match(name):
+            if regex.fullmatch(name):
                 print(f"{name: <{max_name_length}} {info['description']}")
                 if 'default' in info:
                     print(f"{'': <{max_name_length}} "
