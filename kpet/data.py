@@ -21,7 +21,7 @@ from kpet.schema import Invalid, Struct, Choice, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, \
     Int, Null, RE, Reduction, Succession
 
-# pylint: disable=access-member-before-definition
+# pylint: disable=access-member-before-definition, no-member
 
 
 # Schema for universal IDs
