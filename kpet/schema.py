@@ -140,12 +140,14 @@ class Choice(Node):
 
     def resolve(self, data):
         self.validate(data)
+        exc_list = []
         for schema in self.schemas:
             try:
                 return schema.resolve(data)
-            except Invalid:
-                pass
-        assert False, "Data deemed valid, but no schema resolved"
+            except Invalid as exc:
+                exc_list.append(exc)
+        raise Invalid("\nand\n".join(format_exception_stack(exc)
+                                     for exc in exc_list))
 
 
 class Attraction(Node):
