@@ -16,6 +16,7 @@
 import re
 import os
 import yaml
+from kpet.misc import format_exception_stack
 
 # pylint: disable=raising-format-tuple
 
@@ -123,15 +124,16 @@ class Choice(Node):
 
     def validate(self, data):
         super().validate(data)
-        err_list = []
+        exc_list = []
         # For each schema
         for schema in self.schemas:
             try:
                 schema.validate(data)
                 return
             except Invalid as exc:
-                err_list.append(str(exc))
-        raise Invalid("\nand\n".join(err_list))
+                exc_list.append(exc)
+        raise Invalid("\nand\n".join(format_exception_stack(exc)
+                                     for exc in exc_list))
 
     def recognize(self):
         return Choice(*(schema.recognize() for schema in self.schemas))
@@ -175,7 +177,7 @@ class Attraction(Node):
 
     def validate(self, data):
         super().validate(data)
-        err_list = []
+        exc_list = []
         # For each schema/converter
         for schema_or_converter in self.schemas_and_converters:
             # If it's a schema
@@ -184,8 +186,9 @@ class Attraction(Node):
                     schema_or_converter.validate(data)
                     return
                 except Invalid as exc:
-                    err_list.append(str(exc))
-        raise Invalid("\nand\n".join(err_list))
+                    exc_list.append(exc)
+        raise Invalid("\nand\n".join(format_exception_stack(exc)
+                                     for exc in exc_list))
 
     def recognize(self):
         return self.schemas_and_converters[-1].recognize()

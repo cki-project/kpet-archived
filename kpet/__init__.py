@@ -78,16 +78,8 @@ def main(args=None):
         if args.debug:
             traceback.print_exc(file=sys.stderr)
             print("", file=sys.stderr)
-
         # The actual exception thrown won't necessarily make much
         # sense (too generic), so print all the context recursively so
         # that the user understand what exactly has happened.
-        indentation = ""
-        # pylint: disable=using-constant-test
-        while exc:
-            print(indentation + str(exc) + (":" if exc.__context__ else ""),
-                  file=sys.stderr)
-            indentation += "  "
-            exc = exc.__context__
-
+        print(misc.format_exception_stack(exc), file=sys.stderr)
         sys.exit(1)

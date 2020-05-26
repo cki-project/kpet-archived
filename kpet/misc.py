@@ -13,6 +13,7 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Miscellaneous routines"""
 from urllib.parse import urlparse
+from textwrap import indent
 
 
 class ActionNotFound(Exception):
@@ -22,6 +23,30 @@ class ActionNotFound(Exception):
 def is_url(string):
     """Check if a string can be interpreted as a URL"""
     return bool(urlparse(string).scheme)
+
+
+def format_exception_stack(exc):
+    """
+    Format an exception's context stack as a series of indented messages.
+
+    Args:
+        exc:    The exception to format the stack of.
+
+    Returns:
+        The formatted exception stack.
+    """
+    assert isinstance(exc, Exception)
+    string = ""
+    prefix = ""
+    while True:
+        string += indent(str(exc), prefix)
+        if exc.__context__:
+            string += ":\n"
+            prefix += "  "
+            exc = exc.__context__
+        else:
+            break
+    return string
 
 
 def get_repeated(iterable):
