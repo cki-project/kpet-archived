@@ -120,7 +120,7 @@ class IntegrationNamesTests(IntegrationTests):
         })
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "--no-lint", status=1,
-            stderr_matching=r".*Repeated test names encountered: \{\(\)\}.*")
+            stderr_matching=r".*a non-unique name: \(\).*")
 
         # Double empty test name from suites
         assets_path = create_asset_files(self.test_dir, {
@@ -141,7 +141,7 @@ class IntegrationNamesTests(IntegrationTests):
         })
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "--no-lint", status=1,
-            stderr_matching=r".*Repeated test names encountered: \{\(\)\}.*")
+            stderr_matching=r".*has a non-unique name: \(\).*")
 
         # Double non-empty test name from cases
         assets_path = create_asset_files(self.test_dir, {
@@ -159,7 +159,7 @@ class IntegrationNamesTests(IntegrationTests):
         })
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "--no-lint", status=1,
-            stderr_matching=r".*encountered: \{\('case',\)\}.*")
+            stderr_matching=r".*non-unique name: \('case',\).*")
 
         # Double non-empty test name from suite
         assets_path = create_asset_files(self.test_dir, {
@@ -176,7 +176,7 @@ class IntegrationNamesTests(IntegrationTests):
         })
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "--no-lint", status=1,
-            stderr_matching=r".*encountered: \{\('suite',\)\}.*")
+            stderr_matching=r".*non-unique name: \('suite',\).*")
 
         # Double non-empty test name from two suites' cases
         assets_path = create_asset_files(self.test_dir, {
@@ -199,7 +199,7 @@ class IntegrationNamesTests(IntegrationTests):
         })
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "--no-lint", status=1,
-            stderr_matching=r".*encountered: \{\('case',\)\}.*")
+            stderr_matching=r".* non-unique name: \('case',\).*")
 
         # Double non-empty test name from two suites' names
         assets_path = create_asset_files(self.test_dir, {
@@ -222,7 +222,7 @@ class IntegrationNamesTests(IntegrationTests):
         })
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "--no-lint", status=1,
-            stderr_matching=r".*encountered: \{\('suite',\)\}.*")
+            stderr_matching=r".* non-unique name: \('suite',\).*")
 
         # Double assymetric-placement test name
         assets_path = create_asset_files(self.test_dir, {
@@ -245,7 +245,7 @@ class IntegrationNamesTests(IntegrationTests):
         })
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "--no-lint", status=1,
-            stderr_matching=r".*encountered: \{\('foo',\)\}.*")
+            stderr_matching=r".* non-unique name: \('foo',\).*")
 
         # Single empty test name
         assets_path = create_asset_files(self.test_dir, {

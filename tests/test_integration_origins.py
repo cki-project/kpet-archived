@@ -47,8 +47,6 @@ SUITE_YAML_WITHOUT_ORIGIN = """
     location: somewhere
     maintainers:
       - maint1
-    cases: []
-
 """
 
 # A suite YAML with origin "X" specified
@@ -98,7 +96,7 @@ class IntegrationOriginsTests(IntegrationTests):
         )
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "--no-lint", status=1,
-            stderr_matching=r'.* Suite "Suite" has origin specified\b.*')
+            stderr_matching=r'.* has origin specified\b.*')
 
     def test_db_with_origins_and_suite_without_origin_fails(self):
         """Check not using suite origins with origins defined fails"""
@@ -112,7 +110,7 @@ class IntegrationOriginsTests(IntegrationTests):
         )
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "--no-lint", status=1,
-            stderr_matching=r'.* Suite "Suite" has no origin specified\b.*')
+            stderr_matching=r'.* has no origin specified\b.*')
 
     def test_db_with_origins_and_suite_with_origin_x_works(self):
         """Check using one of two defined origins works"""
@@ -152,5 +150,4 @@ class IntegrationOriginsTests(IntegrationTests):
         )
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "--no-lint", status=1,
-            stderr_matching=r'.* Suite "Suite" has unknown origin '
-                            r'specified\b.*')
+            stderr_matching=r'.* has unknown origin specified: "Z".*')

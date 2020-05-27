@@ -238,7 +238,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
         """Test multihost support with two types matching one case each"""
         assets = {
             "index.yaml": """
-                host_type_regex: ^normal
+                host_type_regex: .*
                 host_types:
                     normal: {}
                     panicky:
@@ -296,7 +296,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
         """
         assets = {
             "index.yaml": """
-                host_type_regex: ^normal
+                host_type_regex: .*
                 recipesets:
                     rcs1:
                       - a
@@ -350,7 +350,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
         """
         assets = {
             "index.yaml": """
-                host_type_regex: ^normal
+                host_type_regex: .*
                 recipesets:
                     rcs1:
                       - a
@@ -404,17 +404,11 @@ class IntegrationMultihostTypesTests(IntegrationTests):
         """
         assets = {
             "index.yaml": """
-                host_type_regex: ^normal
-                host_types:
-                    normal: {}
-                    panicky:
-                        ignore_panic: true
-                    multihost_1: {}
+                host_type_regex: ".*"
                 recipesets:
                     rcs1:
                       - a
                       - b
-
                 arches:
                     - arch
                 trees:
@@ -510,7 +504,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
 
         self.assertKpetSchemaInvalidError(
             assets_path,
-            "One of host_type_regex")
+            "Host type regex \"not_normal\" .* does not match")
 
     def test_multihost_one_type_case_wrong_regex(self):
         """Test multihost schema invalid error with wrong case regexes"""
@@ -555,7 +549,7 @@ class IntegrationMultihostTypesTests(IntegrationTests):
         assets_path = create_asset_files(self.test_dir, assets)
         self.assertKpetSchemaInvalidError(
             assets_path,
-            "One of host_type_regex")
+            "Host type regex \"not_normal\" .* does not match")
 
     def test_multihost_one_type_wrong_regex(self):
         """Test multihost schema invalid error with wrong db-level regex"""
@@ -601,4 +595,4 @@ class IntegrationMultihostTypesTests(IntegrationTests):
 
         self.assertKpetSchemaInvalidError(
             assets_path,
-            "One of host_type_regex")
+            "Host type regex \"not_normal\" .* does not match")

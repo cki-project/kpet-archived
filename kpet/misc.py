@@ -49,21 +49,29 @@ def format_exception_stack(exc):
     return string
 
 
-def get_repeated(iterable):
+def attr_parentage(obj, attr, omit_none=True):
     """
-    Get the set of repeated items from an iterable.
+    Ascend object parentage, yielding values of the specified attribute for
+    each. Omit None values by default.
 
     Args:
-        iterable:   The iterable to get repeated items from.
+        obj:        The object to start ascending at, or None for no object.
+                    Must have "parent" attribute with either the parent object
+                    or None, as must all the parent objects thus linked.
+        attr:       The name of the attribute to return values of.
+        omit_none:  True, if None attribute values should be omitted.
+                    False, if all attribute values should yielded.
 
-    Returns:
-        The set of repeated items.
+    Yields:
+        Values of the specified attribute in order of parentage.
     """
-    item_set = set()
-    repeated_item_set = set()
-    for item in iterable:
-        (repeated_item_set if item in item_set else item_set).add(item)
-    return repeated_item_set
+    assert obj is None or hasattr(obj, "parent")
+    assert isinstance(attr, str)
+    while obj is not None:
+        value = getattr(obj, attr)
+        if not omit_none or value is not None:
+            yield value
+        obj = obj.parent
 
 
 def raise_action_not_found(action, command):

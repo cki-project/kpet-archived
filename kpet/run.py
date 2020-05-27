@@ -13,107 +13,106 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """Execution of tests from the database"""
 
+from functools import reduce
 import jinja2
 from lxml import etree
 from kpet import data
+from kpet.misc import attr_parentage
 
 
 class Test:
     # pylint: disable=too-few-public-methods, too-many-instance-attributes
-    """A test run - an execution of a particular case of a test suite"""
+    """A test run - an instance of a test case"""
 
-    def __init__(self, suite, case):
+    def __init__(self, case):
         """
-        Initialize a test run.
+        Initialize a test run as an instance of a test case.
 
         Args:
-            suite:  The test suite (kpet.data.Suite) being executed.
-            case:   The test case of the test suite (kpet.data.Case) being
-                    executed.
+            case:           The test case (kpet.data.Case) to instantiate.
         """
-        assert isinstance(suite, data.Suite)
         assert isinstance(case, data.Case)
-        assert case in suite.cases
 
-        self.name = " - ".join(filter(lambda x: x is not None,
-                                      (suite.name, case.name)))
-        self.universal_id = \
-            case.universal_id if case.universal_id is not None else \
-            suite.universal_id if suite.universal_id is not None else \
-            None
-        self.origin = suite.origin
-        self.location = suite.location
-        self.max_duration_seconds = case.max_duration_seconds
-        self.waived = \
-            case.waived if case.waived is not None else \
-            suite.waived if suite.waived is not None else \
-            False
-        self.role = case.role
-        self.environment = case.environment
-        self.maintainers = suite.maintainers + case.maintainers
+        self.case = case
+        self.case_path = ".".join(
+            tuple(attr_parentage(case, "id", omit_none=False))[-2::-1]
+        )
+        self.name = " - ".join(tuple(attr_parentage(case, "name"))[::-1])
+        self.universal_id = next(attr_parentage(case, "universal_id"), None)
+        self.origin = next(attr_parentage(case, "origin"), None)
+        self.location = next(attr_parentage(case, "location"), None)
+        self.max_duration_seconds = next(
+            attr_parentage(case, "max_duration_seconds"), None
+        )
+        self.host_type_regex = next(
+            attr_parentage(case, "host_type_regex"), None
+        )
+        self.waived = reduce(max, attr_parentage(case, "waived"), False)
+        self.role = next(attr_parentage(case, "role"), None)
+        self.environment = reduce(
+            lambda x, y: {**y, **x}, attr_parentage(case, "environment"), {}
+        )
+        self.maintainers = reduce(
+            lambda x, y: y + x, attr_parentage(case, "maintainers"), []
+        )
 
 
 class Host:
     # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """A host running tests"""
 
-    def __init__(self, name, type, suites_and_cases):
+    def __init__(self, type, tests):
         """
         Initialize a host run.
 
         Args:
-            name:               Name of the host.
-            type:               Type of the host.
-            suites_and_cases:   A list of suite-and-cases tuples.
-                                The first element of each tuple being a
-                                kpet.data.Suite instance and the second
-                                element - a list of kpet.data.Case instances.
-                                Represents the suites and their cases to be
-                                executed on the host.
+            type:   Type of the host.
+            tests:  A list of tests (run.Test instances).
         """
         assert isinstance(type, data.HostType)
-        assert isinstance(suites_and_cases, list)
-        assert all((isinstance(suite_and_cases, tuple) and
-                    isinstance(suite_and_cases[0], data.Suite) and
-                    isinstance(suite_and_cases[1], list) and
-                    suite_and_cases[1] and
-                    all(isinstance(case, data.Case)
-                        for case in suite_and_cases[1]))
-                   for suite_and_cases in suites_and_cases)
+        assert isinstance(tests, list)
+        assert all(isinstance(test, Test) for test in tests)
 
-        self.name = name
         self.hostname = type.hostname
         self.ignore_panic = type.ignore_panic
         self.preboot_tasks = type.preboot_tasks
         self.postboot_tasks = type.postboot_tasks
         # TODO Remove once kpet-db switches to preboot_tasks
         self.tasks = type.preboot_tasks
+        self.tests = tests
 
+        # Collect all unique cases referenced by tests,
+        # in per-test top-bottom series
+        cases = []
+        for test in tests:
+            pos = len(cases)
+            case = test.case
+            while case is not None:
+                if case not in cases:
+                    cases.insert(pos, case)
+                case = case.parent
+
+        # Assemble host_requires, partitions and kickstart lists
         # Collect host parameters and create "suite" and "test" lists
-        self.tests = []
         host_requires_list = [type.hostRequires]
         partitions_list = [type.partitions]
         kickstart_list = [type.kickstart]
-        for suite, cases in suites_and_cases:
-            host_requires_list.append(suite.hostRequires)
-            partitions_list.append(suite.partitions)
-            kickstart_list.append(suite.kickstart)
-            for case in cases:
-                host_requires_list.append(case.hostRequires)
-                partitions_list.append(case.partitions)
-                kickstart_list.append(case.kickstart)
-                self.tests.append(Test(suite, case))
+        for case in cases:
+            host_requires_list.append(case.host_requires)
+            partitions_list.append(case.partitions)
+            kickstart_list.append(case.kickstart)
 
         # Remove undefined template paths
         self.host_requires_list = filter(lambda e: e is not None,
                                          host_requires_list)
-        # TODO: For compatibility. Remove when kpet-db is updated.
-        # pylint: disable=invalid-name
-        self.hostRequires_list = self.host_requires_list
         self.partitions_list = filter(lambda e: e is not None,
                                       partitions_list)
         self.kickstart_list = filter(lambda e: e is not None,
                                      kickstart_list)
+
+        # TODO: For compatibility. Remove when kpet-db is updated.
+        # pylint: disable=invalid-name
+        self.hostRequires_list = self.host_requires_list
 
         # Put waived tests at the end
         self.tests.sort(key=lambda t: t.waived)
@@ -121,127 +120,6 @@ class Host:
 
 class Base:     # pylint: disable=too-few-public-methods
     """A specific execution of tests in a database"""
-
-    @staticmethod
-    def __get_recipesets(database, target, sets):
-        """
-        Distribute hosts, suites and cases to recipesets.
-
-        Args:
-            database:   The database to get test data from.
-            target:     The target (a data.Target) to match/run tests against.
-                        The target's tree must be present in the database.
-            sets:       A set of names of test sets to have their members
-                        included into the run. None if all suites and cases
-                        should be included, regardless if members or not.
-
-        Returns:
-            A list of recipesets - host synchronization domains - lists which
-            contain hosts with tests to be executed on them.
-        """
-        assert isinstance(database, data.Base)
-        assert isinstance(target, data.Target)
-        assert sets is None or isinstance(sets, set)
-
-        # get hosts and their testcases
-        hosts = Base.__get_hosts(database, target, sets)
-
-        # load recipesets assignments from yaml
-        db_recipesets = database.recipesets
-
-        # Distribute hosts to their respective recipesets
-        recipesets_of_hosts = []
-        for host_recipeset_names in db_recipesets.values():
-            recipeset = []
-            for host_recipeset_name in host_recipeset_names:
-                for host in hosts:
-                    if host.name == host_recipeset_name:
-                        recipeset.append(host)
-
-            if recipeset:
-                recipesets_of_hosts.append(recipeset)
-
-        return recipesets_of_hosts
-
-    @staticmethod
-    def __distribute_into_hosts(database, pool_suites):
-        """
-        Distribute suites and their cases to hosts
-
-        Args:
-            database:       The database to get host_types from.
-            pool_suites:    A list of tuples, each containing a suite
-                            and its cases selected for the run.
-        Returns:
-            A list of Host instances with suite and test runs assigned to them
-        """
-        host_types = \
-            database.host_types \
-            if database.host_types is not None \
-            else {"": data.DEFAULT_HOST_TYPE}
-
-        hosts = []
-        for host_type_name, host_type in host_types.items():
-            # Create a host suite-and-cases list
-            host_suites = []
-            for pool_suite in pool_suites.copy():
-                suite, pool_cases = pool_suite
-                # Create case list from suite cases matching the host type
-                host_suite_cases = []
-                for case in pool_cases.copy():
-                    host_type_regex = \
-                        case.host_type_regex or \
-                        suite.host_type_regex or \
-                        database.host_type_regex
-                    if database.host_types is None or \
-                       host_type_regex and \
-                       host_type_regex.fullmatch(host_type_name):
-                        host_suite_cases.append(case)
-                        pool_cases.remove(case)
-                # Add suite and cases to the host list if there are any cases
-                if host_suite_cases:
-                    host_suites.append((suite, host_suite_cases))
-                # Remove suite from the pool, if it has no more cases
-                if not pool_cases:
-                    pool_suites.remove(pool_suite)
-            # Add host to list, if it has suites to run
-            if host_suites:
-                hosts.append(Host(host_type_name, host_type, host_suites))
-
-        return hosts
-
-    @staticmethod
-    def __get_hosts(database, target, sets):
-        """
-        Get a list of hosts to run.
-
-        Args:
-            database:   The database to get test data from.
-            target:     The target (a data.Target) to match/run tests against.
-            sets:       A set of names of test sets to have their members
-                        included into the run. None if all suites and cases
-                        should be included, regardless if members or not.
-        Returns:
-            A list of Host instances with test runs assigned to them
-        """
-        assert isinstance(database, data.Base)
-        assert isinstance(target, data.Target)
-        assert sets is None or isinstance(sets, set)
-
-        # Build a pool of suites and cases
-        pool_suites = []
-        for suite in database.suites:
-            if suite.matches(target) and \
-               (sets is None or suite.sets & sets):
-                pool_cases = []
-                for case in suite.cases:
-                    if case.matches(target) and \
-                       (sets is None or case.sets & sets):
-                        pool_cases.append(case)
-                if pool_cases:
-                    pool_suites.append((suite, pool_cases))
-
-        return Base.__distribute_into_hosts(database, pool_suites)
 
     def __init__(self, database, target, sets):
         """
@@ -265,8 +143,52 @@ class Base:     # pylint: disable=too-few-public-methods
 
         self.database = database
         self.target = target
-        self.recipesets_of_hosts = self.__get_recipesets(database, target,
-                                                         sets)
+
+        # Distribute tests to host types
+        host_type_tests = {}
+
+        def place_case(case):
+            # If the case doesn't match the criteria
+            if not case.matches(target) or \
+               (sets is not None and not case.sets & sets):
+                return
+            # If this is not a fully-defined case (a non-leaf tree node)
+            if case.cases is not None:
+                for subcase in case.cases.values():
+                    place_case(subcase)
+                return
+            # Create the test
+            test = Test(case)
+            # Assign the test to a host type
+            for host_type_name in database.host_types:
+                if test.host_type_regex and \
+                   test.host_type_regex.fullmatch(host_type_name):
+                    tests = host_type_tests.get(host_type_name, [])
+                    tests.append(test)
+                    host_type_tests[host_type_name] = tests
+                    break
+            else:
+                raise Exception(
+                    f"No host type found for case {test.case_path}"
+                )
+        if database.case is not None:
+            place_case(database.case)
+
+        # Distribute host types to recipesets
+        self.recipesets = []
+        for recipeset_host_type_names in database.recipesets.values():
+            recipeset = []
+            for recipeset_host_type_name in recipeset_host_type_names:
+                for host_type_name, tests in host_type_tests.items():
+                    if host_type_name == recipeset_host_type_name:
+                        recipeset.append(Host(
+                            database.host_types[host_type_name],
+                            tests
+                        ))
+                        del host_type_tests[host_type_name]
+                        break
+            if recipeset:
+                self.recipesets.append(recipeset)
 
     # pylint: disable=too-many-arguments
     def generate(self, description, kernel_location, lint, variables):
@@ -298,7 +220,7 @@ class Base:     # pylint: disable=too-few-public-methods
             KURL=kernel_location,
             ARCH=arch_name,
             TREE=tree_name,
-            RECIPESETS=self.recipesets_of_hosts,
+            RECIPESETS=self.recipesets,
             VARIABLES=variables,
         )
 

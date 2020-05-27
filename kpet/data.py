@@ -17,7 +17,7 @@ import os
 import re
 from functools import reduce
 from kpet import misc
-from kpet.schema import Invalid, Struct, Choice, \
+from kpet.schema import Invalid, Type, Struct, Choice, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, \
     Int, Null, RE, Reduction, Succession
 
@@ -64,7 +64,7 @@ class Object:   # pylint: disable=too-few-public-methods
 
 class Target:  # pylint: disable=too-few-public-methods, too-many-arguments
     """
-    Execution target which suite/case patterns match against.
+    Execution target which case patterns match against.
 
     A target has a fixed collection of parameters, each of which can be
     assigned a target set.
@@ -274,30 +274,103 @@ class Pattern(Object):  # pylint: disable=too-few-public-methods
 
 
 class Case(Object):     # pylint: disable=too-few-public-methods
-    """Test case"""
+    """Universal test case"""
 
     def __init__(self, data):
+        # TODO Remove once kpet-db transitions to universal cases
+        def convert(data):
+            """
+            Convert either legacy suite data or legacy case data to universal
+            case data.
+
+            Args:
+                data:   The data to convert.
+
+            Returns:
+                The converted data.
+            """
+            if "hostRequires" in data:
+                data["host_requires"] = data.pop("hostRequires")
+            if "cases" in data:
+                data["cases"] = {
+                    str(i): v
+                    for i, v in enumerate(data["cases"])
+                }
+            return data
+
         sets_schema = Reduction(Regex(), lambda x: [x], List(Regex()))
         super().__init__(
-            "case",
-            Struct(
-                required=dict(
-                    max_duration_seconds=Int(),
+            "test case",
+            Reduction(
+                # Legacy case
+                Struct(
+                    required=dict(
+                        max_duration_seconds=Int(),
+                    ),
+                    optional=dict(
+                        name=String(),
+                        universal_id=UNIVERSAL_ID_SCHEMA,
+                        host_type_regex=Regex(),
+                        hostRequires=String(),
+                        partitions=String(),
+                        kickstart=String(),
+                        sets=sets_schema,
+                        pattern=Class(Pattern),
+                        waived=Boolean(),
+                        role=String(),
+                        environment=Dict(String()),
+                        maintainers=List(String()),
+                    )
                 ),
-                optional=dict(
-                    name=String(),
-                    universal_id=UNIVERSAL_ID_SCHEMA,
-                    host_type_regex=Regex(),
-                    hostRequires=String(),
-                    partitions=String(),
-                    kickstart=String(),
-                    sets=sets_schema,
-                    pattern=Class(Pattern),
-                    waived=Boolean(),
-                    role=String(),
-                    environment=Dict(String()),
-                    maintainers=List(String()),
-                )
+                convert,
+                # Legacy suite
+                Struct(
+                    required=dict(
+                        location=String(),
+                        cases=List(Class(Case))
+                    ),
+                    optional=dict(
+                        name=String(),
+                        universal_id=UNIVERSAL_ID_SCHEMA,
+                        host_type_regex=Regex(),
+                        hostRequires=String(),
+                        partitions=String(),
+                        kickstart=String(),
+                        pattern=Class(Pattern),
+                        sets=sets_schema,
+                        origin=String(),
+                        waived=Boolean(),
+                        maintainers=List(String())
+                    )
+                ),
+                convert,
+                # New case
+                Struct(
+                    required=dict(),
+                    optional=dict(
+                        name=String(),
+                        universal_id=UNIVERSAL_ID_SCHEMA,
+                        origin=String(),
+                        location=String(),
+                        max_duration_seconds=Int(),
+                        host_type_regex=Regex(),
+                        host_requires=String(),
+                        partitions=String(),
+                        kickstart=String(),
+                        sets=sets_schema,
+                        pattern=Class(Pattern),
+                        waived=Boolean(),
+                        role=String(),
+                        environment=Dict(String()),
+                        maintainers=List(String()),
+                        cases=Dict(key_schema=String(pattern="[a-zA-Z0-9_-]*"),
+                                   value_schema=Choice(YAMLFile(Class(Case)),
+                                                       Class(Case),
+                                                       # TODO Remove after
+                                                       # transition
+                                                       Type(Case)))
+                    )
+                ),
             ),
             data
         )
@@ -310,6 +383,13 @@ class Case(Object):     # pylint: disable=too-few-public-methods
         if self.maintainers is None:
             self.maintainers = []
 
+        self.id = None
+        self.parent = None
+        if self.cases is not None:
+            for id, case in self.cases.items():
+                case.id = id
+                case.parent = self
+
     def matches(self, target):
         """
         Check if the case matches a target.
@@ -319,67 +399,6 @@ class Case(Object):     # pylint: disable=too-few-public-methods
 
         Returns:
             True if the case matches the target, False otherwise.
-        """
-        return self.pattern.matches(target)
-
-
-class Suite(Object):    # pylint: disable=too-few-public-methods
-    """Test suite"""
-
-    def validate_maintainers(self):
-        """
-        Check that every test case has a maintainer.
-        Raises:
-            schema.Invalid when a test case doesn't have any maintainers
-        """
-        for case in self.cases or []:
-            if not case.maintainers and not self.maintainers:
-                raise Invalid("There has to be a maintainer for each "
-                              "test, either at suite level or at case "
-                              "level; in suite: {}\ncase: {}".
-                              format(self.name, case.name))
-
-    def __init__(self, data):
-        sets_schema = Reduction(Regex(), lambda x: [x], List(Regex()))
-
-        super().__init__(
-            "suite",
-            Struct(
-                required=dict(
-                    location=String(),
-                    cases=List(Class(Case))
-                ),
-                optional=dict(
-                    name=String(),
-                    universal_id=UNIVERSAL_ID_SCHEMA,
-                    host_type_regex=Regex(),
-                    hostRequires=String(),
-                    partitions=String(),
-                    kickstart=String(),
-                    pattern=Class(Pattern),
-                    sets=sets_schema,
-                    origin=String(),
-                    waived=Boolean(),
-                    maintainers=List(String())
-                )
-            ),
-            data
-        )
-        if self.pattern is None:
-            self.pattern = Pattern({})
-        if self.maintainers is None:
-            self.maintainers = []
-        self.validate_maintainers()
-
-    def matches(self, target):
-        """
-        Check if the suite matches a target.
-
-        Args:
-            target: The target to match against.
-
-        Returns:
-            True if the suite matches the target, False otherwise.
         """
         return self.pattern.matches(target)
 
@@ -422,10 +441,6 @@ class HostType(Object):     # pylint: disable=too-few-public-methods
         )
 
 
-# Host type to use when there are none defined
-DEFAULT_HOST_TYPE = HostType({})
-
-
 class Base(Object):     # pylint: disable=too-few-public-methods
     """Database"""
 
@@ -443,62 +458,96 @@ class Base(Object):     # pylint: disable=too-few-public-methods
         """
         return os.path.isfile(dir_path + "/index.yaml")
 
-    def validate_host_type_regex(self):
+    # pylint: disable=too-many-branches
+    def resolve_case(self, path, case, sets, tests):
         """
-        Check if any of the regexes are invalid.
-        Raises:
-            schema.Invalid when finding an invalid regex
+        Validate and resolve a case and its sub-cases.
+
+        Args:
+            path:   The path of the case being resolved.
+            case:   The case to resolve.
+            sets:   A set of names of sets the case can belong to.
+            tests:  A set of raw test names encountered so far - tuples of
+                    names along leaf case branches, top-to-bottom.
+                    Will have encountered names added.
         """
-        host_types = list((self.host_types or {}).keys())
+        assert isinstance(path, str)
+        assert isinstance(case, Case)
+        assert isinstance(sets, set)
+        assert all(isinstance(set_name, str) for set_name in sets)
+        assert isinstance(tests, set)
+        assert all(isinstance(test_name, tuple) and
+                   all(isinstance(case_name, str) for case_name in test_name)
+                   for test_name in tests)
 
-        error = ("One of {0} regexes\n" +
-                 "doesn't match any of the available {1}\n" +
-                 "In suite: {2}\n" +
-                 "In case: {3}\n" +
-                 "The regex: {4}\n" +
-                 "The avaliable {1}: {5}")
+        case_ref = f"case {path}" if path else "the root case"
 
-        for suite in self.suites:
-            for case in suite.cases:
-                host_type_regex = case.host_type_regex or \
-                        suite.host_type_regex or \
-                        self.host_type_regex
+        # Check host_type_regex matches something
+        host_type_names = tuple(self.host_types or {})
+        if case.host_type_regex is not None and \
+           not any(case.host_type_regex.fullmatch(name)
+                   for name in host_type_names):
+            raise Invalid(f'Host type regex "{case.host_type_regex.pattern}" '
+                          f'of {case_ref} does not match any of the '
+                          f'available host type names: {host_type_names}')
 
-                for host in host_types:
-                    if host_type_regex.fullmatch(host):
-                        break
-                else:
-                    raise Invalid(error.format("host_type_regex", "host_types",
-                                               suite.name, case.name,
-                                               host_type_regex.pattern,
-                                               host_types))
+        # Check case origin is valid
+        if self.origins is None:
+            if case.origin is not None:
+                raise Invalid(
+                    f'{case_ref.capitalize()} has origin specified, '
+                    f'but available origins are not defined in '
+                    f'the database.'
+                )
+        else:
+            if case.origin is not None and \
+               case.origin not in self.origins:
+                raise Invalid(
+                    f'{case_ref.capitalize()} has unknown origin '
+                    f'specified: "{case.origin}".\n'
+                    f'Expecting one of the following: '
+                    f'{", ".join(self.origins.keys())}.'
+                )
 
-    def validate_suite_origins(self):
-        """
-        Check that suite origins are valid.
-        Raises:
-            schema.Invalid when finding an invalid origin.
-        """
-        for suite in self.suites:
-            if self.origins is None:
-                if suite.origin is not None:
-                    raise Invalid(
-                        f'Suite "{suite.name}" has origin specified, '
-                        f'but available origins are not defined in '
-                        f'the database.'
-                    )
-            else:
-                if suite.origin is None:
-                    raise Invalid(
-                        f'Suite "{suite.name}" has no origin specified'
-                    )
-                if suite.origin not in self.origins:
-                    raise Invalid(
-                        f'Suite "{suite.name}" has unknown origin '
-                        f'specified: "{suite.origin}".\n'
-                        f'Expecting one of the following: '
-                        f'{", ".join(self.origins.keys())}.'
-                    )
+        # Resolve set regexes into set names
+        if case.sets is None:
+            case.sets = sets.copy()
+        else:
+            resolved_sets = set()
+            for regex in case.sets:
+                matches = set(filter(regex.fullmatch, sets))
+                if not matches:
+                    raise Invalid(f"{case_ref.capitalize()} set regex "
+                                  f"\"{regex.pattern}\" doesn't match "
+                                  f"any of the available sets: {sets}")
+                resolved_sets |= matches
+            case.sets = resolved_sets
+
+        # If this is a test (a leaf node)
+        if case.cases is None:
+            # Check the test name is unique
+            test_name = tuple(misc.attr_parentage(case, "name"))[::-1]
+            if test_name in tests:
+                raise Invalid(f"Test for {case_ref} has a non-unique name: "
+                              f"{test_name}")
+            tests.add(test_name)
+
+            # Check the test has at least one maintainer
+            if not reduce(lambda x, y: y + x,
+                          misc.attr_parentage(case, "maintainers"), []):
+                raise Invalid(f"Test for {case_ref} has no maintainers")
+
+            # Check the test has an origin, if needed
+            if self.origins is not None and \
+               not list(misc.attr_parentage(case, "origin")):
+                raise Invalid(f"Test for {case_ref} has no origin specified")
+
+        # Else this is an intermediate case
+        else:
+            # Resolve sub-cases
+            for subcase in case.cases.values():
+                subpath = (path + "." if path else "") + subcase.id
+                self.resolve_case(subpath, subcase, case.sets, tests)
 
     def convert_tree_arches(self):
         """
@@ -527,74 +576,6 @@ class Base(Object):     # pylint: disable=too-few-public-methods
 
             self.trees[name]["arches"] = list(tree_arches)
 
-    def convert_sets(self):
-        """
-        Convert each suite / cases sets from a list of regexes
-        to a list of set names matching those regexes
-
-        Raises:
-            A schema.Invalid exception when finding an invalid regex
-        """
-
-        def get_sets_from_regex_list(regex_list):
-            """
-            Generate a set of set names matching any regular expressions from
-            the supplied list. Return None if None is passed instead,
-            signifying a missing set and regular expression list respectively.
-
-            Args:
-                regex_list:     The list of regular expressions to match
-                                against. None if regex_list is missing.
-
-            Returns:
-                A set of set names matched by the list of regular
-                expressions, or None, signifying a missing set, in case the
-                list was missing.
-
-            Raises:
-                Invalid - if a regular expression didn't match any set names.
-            """
-            if regex_list is None:
-                return None
-            sets = set()
-            for regex in regex_list:
-                match = set(filter(regex.fullmatch, self.sets.keys()))
-                if match == set():
-                    raise Invalid(f'Regex "{regex.pattern}" matches no sets')
-                sets |= match
-            return sets
-
-        for suite in self.suites:
-            suite.sets = get_sets_from_regex_list(suite.sets)
-
-            if suite.sets is None:
-                suite.sets = set()
-
-            for case in suite.cases:
-                case.sets = get_sets_from_regex_list(case.sets)
-
-                if case.sets is None:
-                    case.sets = suite.sets
-
-                if not case.sets <= suite.sets:
-                    raise Invalid("Case sets are not a subset of suite sets "
-                                  "in suite: {}\ncase: {}".
-                                  format(suite.name, case.name))
-
-    def validate_test_names(self):
-        """
-        Check test names are unique.
-        """
-        name_list = []
-        for suite in self.suites:
-            for case in suite.cases:
-                name_list.append(tuple(filter(lambda x: x is not None,
-                                              (suite.name, case.name))))
-        repeated_name_set = misc.get_repeated(name_list)
-        if repeated_name_set:
-            raise Invalid(f"Repeated test names encountered: "
-                          f"{repeated_name_set}")
-
     def __init__(self, dir_path):
         """
         Initialize a database object.
@@ -603,30 +584,53 @@ class Base(Object):     # pylint: disable=too-few-public-methods
 
         arches_schema = Reduction(Regex(), lambda x: [x], List(Regex()))
 
+        base_optional_fields = dict(
+            trees=Dict(
+                Struct(required=dict(template=String()),
+                       optional=dict(arches=arches_schema))
+            ),
+            arches=List(String()),
+            components=Dict(String()),
+            sets=Dict(String()),
+            host_types=Dict(Class(HostType)),
+            recipesets=Dict(List(String())),
+            variables=Dict(
+                Struct(required=dict(description=String()),
+                       optional=dict(default=String()))
+            ),
+            origins=Dict(String()),
+        )
+
+        legacy_optional_fields = dict(
+            **base_optional_fields,
+            suites=List(YAMLFile(Class(Case))),
+            host_type_regex=Regex(),
+        )
+
+        new_optional_fields = dict(
+            **base_optional_fields,
+            case=Choice(YAMLFile(Class(Case)),
+                        Class(Case))
+        )
+
+        # TODO Remove once kpet-db transitions to universal cases
+        def convert(data):
+            data["case"] = dict(
+                cases={
+                    str(i): v for i, v in enumerate(data.pop("suites", []))
+                }
+            )
+            if "host_type_regex" in data:
+                data["case"]["host_type_regex"] = data.pop("host_type_regex")
+            return data
+
         super().__init__(
             "database",
             ScopedYAMLFile(
-                Struct(
-                    required=dict(
-                    ),
-                    optional=dict(
-                        suites=List(YAMLFile(Class(Suite))),
-                        trees=Dict(
-                            Struct(required=dict(template=String()),
-                                   optional=dict(arches=arches_schema))
-                        ),
-                        arches=List(String()),
-                        components=Dict(String()),
-                        sets=Dict(String()),
-                        host_types=Dict(Class(HostType)),
-                        host_type_regex=Regex(),
-                        recipesets=Dict(List(String())),
-                        variables=Dict(
-                            Struct(required=dict(description=String()),
-                                   optional=dict(default=String()))
-                        ),
-                        origins=Dict(String()),
-                    )
+                Succession(
+                    Struct(optional=legacy_optional_fields),
+                    convert,
+                    Struct(optional=new_optional_fields)
                 )
             ),
             dir_path + "/index.yaml"
@@ -641,19 +645,7 @@ class Base(Object):     # pylint: disable=too-few-public-methods
             self.components = {}
         if self.sets is None:
             self.sets = {}
-        if self.suites is None:
-            self.suites = []
         if self.variables is None:
             self.variables = dict()
-        # Validate test names
-        self.validate_test_names()
-        # Validate suite origins
-        self.validate_suite_origins()
-        # Regex check
-        self.validate_host_type_regex()
-        # Replace the list of regexes with a list of available arches
-        # for easier usage
         self.convert_tree_arches()
-        # Replace the list of regexes in each suite / case
-        # with a list of matching sets
-        self.convert_sets()
+        self.resolve_case("", self.case, set(self.sets.keys()), set())

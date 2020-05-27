@@ -244,7 +244,7 @@ def main_print_test_cases(args, baserun):
         baserun:    Test execution data.
     """
     test_name_list = []
-    for recipeset in baserun.recipesets_of_hosts:
+    for recipeset in baserun.recipesets:
         for host in recipeset:
             for test in host.tests:
                 test_name_list.append(test.name)

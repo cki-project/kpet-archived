@@ -148,8 +148,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
 
     def test_match_not_subset_error(self):
         """
-        Check for the 'not a subset error'
-        by having the a case with sets that it's suite doesn't have
+        Check we detect a case with sets its suite doesn't have
         """
         assets = {
             "index.yaml": """
@@ -194,9 +193,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
         # Matches suite
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "-s", "foo", status=1,
-            stderr_matching=r'.*kpet.schema.Invalid: Case sets are not a '
-                            r'subset of suite sets in suite:\s*'
-                            r'suite1\s*case: case1\b.*')
+            stderr_matching=r".* doesn't match any of the available sets: .*")
 
     def test_match_nonexistent_set_case_error(self):
         """
@@ -246,7 +243,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
         # Matches suite
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "-s", "foo", status=1,
-            stderr_matching=r'.*kpet.schema.Invalid: .* matches no sets.*')
+            stderr_matching=r".* doesn't match any of the available sets: .*")
 
     def test_match_nonexistent_set_suite_error(self):
         """
@@ -296,7 +293,7 @@ class IntegrationMatchSetsTests(IntegrationTests):
         # Matches suite
         self.assertKpetProduces(
             kpet_run_generate, assets_path, "-s", "foo", status=1,
-            stderr_matching=r'.*kpet.schema.Invalid: .* matches no sets.*')
+            stderr_matching=r".* doesn't match any of the available sets: .*")
 
     def test_match_nonexistent_set_error(self):
         """

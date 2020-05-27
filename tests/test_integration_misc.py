@@ -198,7 +198,8 @@ class IntegrationMiscTests(IntegrationTests):
                     - suite.yaml
             """,
             "suite.yaml": """
-                name: "Suite data with missing nodes"
+                name: "Suite data with unknown nodes"
+                foobar: True
                 location: somewhere
                 maintainers:
                   - maint1
@@ -210,7 +211,7 @@ class IntegrationMiscTests(IntegrationTests):
         self.assertKpetProduces(kpet_with_db, assets_path,
                                 "tree", "list",
                                 status=1,
-                                stderr_matching=r'.*Invalid suite.*')
+                                stderr_matching=r'.*Invalid test case.*')
 
     def test_empty_suite_run_generate(self):
         """Test run generation with an empty suite"""
