@@ -50,14 +50,14 @@ class Invalid(Exception):
     """Invalid data exception"""
 
 
-class Node:
+class Type:
     """
-    Abstract node schema validating the data to be an instance of specified
+    Most basic schema validating the data to be an instance of specified
     type and resolving to the same.
     """
     def __init__(self, type):
         """
-        Initialize a node schema.
+        Initialize a type schema.
 
         Args:
             type:   The type the data should be instance of.
@@ -103,7 +103,7 @@ class Node:
         return data
 
 
-class Choice(Node):
+class Choice(Type):
     """
     A schema matching a choice of other schemas.
     """
@@ -115,7 +115,7 @@ class Choice(Node):
             args:   A list of schemas the data can match.
         """
         for arg in args:
-            assert isinstance(arg, Node)
+            assert isinstance(arg, Type)
         super().__init__(object)
         self.schemas = args
 
@@ -147,7 +147,7 @@ class Choice(Node):
                                      for exc in exc_list))
 
 
-class Attraction(Node):
+class Attraction(Type):
     """
     An abstract schema describing an ordered list of schemas, optionally
     intermixed with data conversion functions of undefined purpose. Validates
@@ -168,9 +168,9 @@ class Attraction(Node):
         """
         assert args
         for arg in args:
-            assert isinstance(arg, Node) or callable(arg)
-        assert isinstance(args[0], Node)
-        assert isinstance(args[-1], Node)
+            assert isinstance(arg, Type) or callable(arg)
+        assert isinstance(args[0], Type)
+        assert isinstance(args[-1], Type)
         super().__init__(object)
         self.schemas_and_converters = args
 
@@ -180,7 +180,7 @@ class Attraction(Node):
         # For each schema/converter
         for schema_or_converter in self.schemas_and_converters:
             # If it's a schema
-            if isinstance(schema_or_converter, Node):
+            if isinstance(schema_or_converter, Type):
                 try:
                     schema_or_converter.validate(data)
                     return
@@ -215,7 +215,7 @@ class Succession(Attraction):
         # For each schema/converter in the succession
         for schema_or_converter in self.schemas_and_converters:
             # If it's a schema
-            if isinstance(schema_or_converter, Node):
+            if isinstance(schema_or_converter, Type):
                 try:
                     # Validate the data
                     schema_or_converter.validate(data)
@@ -254,7 +254,7 @@ class Reduction(Attraction):
         # until the next schema.
         for schema_or_converter in self.schemas_and_converters:
             # If it's a schema
-            if isinstance(schema_or_converter, Node):
+            if isinstance(schema_or_converter, Type):
                 # If we found our schema (and converted data) already
                 if first_valid_schema:
                     break
@@ -274,13 +274,13 @@ class Reduction(Attraction):
         return self.schemas_and_converters[-1].resolve(data)
 
 
-class Null(Node):
+class Null(Type):
     """Null schema"""
     def __init__(self):
         super().__init__(type(None))
 
 
-class String(Node):
+class String(Type):
     """String schema"""
     def __init__(self, pattern="(.|\\n)*"):
         """
@@ -303,19 +303,19 @@ class String(Node):
             )
 
 
-class Int(Node):
+class Int(Type):
     """Integer number schema"""
     def __init__(self):
         super().__init__(int)
 
 
-class Float(Node):
+class Float(Type):
     """Floating-point number schema"""
     def __init__(self):
         super().__init__(float)
 
 
-class Boolean(Node):
+class Boolean(Type):
     """Boolean schema"""
     def __init__(self):
         super().__init__(bool)
@@ -333,7 +333,7 @@ class Regex(String):
             raise Invalid("Invalid regular expression")
 
     def recognize(self):
-        return Node(RE)
+        return Type(RE)
 
     def resolve(self, data):
         self.validate(data)
@@ -356,7 +356,7 @@ class YAMLFile(String):
     specified schema.
     """
     def __init__(self, contents_schema):
-        assert isinstance(contents_schema, Node)
+        assert isinstance(contents_schema, Type)
         super().__init__()
         self.contents_schema = contents_schema
 
@@ -404,7 +404,7 @@ class ScopedYAMLFile(YAMLFile):
             os.chdir(orig_dir_path)
 
 
-class List(Node):
+class List(Type):
     """
     List schema, with every element matching a single specified schema.
     """
@@ -413,12 +413,12 @@ class List(Node):
         Initialize a List schema.
 
         Args:
-            element_schema:  An instance of the specific Node type the list
+            element_schema:  An instance of the specific Type type the list
                 items should be instance of.
             min_len: Optional parameter to force the list to contain at least
                 "min_len" elements. Defaults to 0.
         """
-        assert isinstance(element_schema, Node)
+        assert isinstance(element_schema, Type)
         assert isinstance(min_len, int)
         assert min_len >= 0
         super().__init__(list)
@@ -452,7 +452,7 @@ class List(Node):
 DICT_KEY_SCHEMA_DEFAULT = String()
 
 
-class Dict(Node):
+class Dict(Type):
     """
     Dictionary schema, with separate schemas for all keys and all values.
     """
@@ -465,8 +465,8 @@ class Dict(Node):
             key_schema:     Schema for dictionary keys.
                             Optional. Default is String().
         """
-        assert isinstance(key_schema, Node)
-        assert isinstance(value_schema, Node)
+        assert isinstance(key_schema, Type)
+        assert isinstance(value_schema, Type)
         super().__init__(dict)
         self.key_schema = key_schema
         self.value_schema = value_schema
@@ -512,17 +512,17 @@ class Struct(Dict):
         """
         assert required is None or isinstance(required, dict)
         assert optional is None or isinstance(optional, dict)
-        super().__init__(Node(object))
+        super().__init__(Type(object))
         if required is None:
             required = {}
         if optional is None:
             optional = {}
         for key, value in required.items():
             assert isinstance(key, str)
-            assert isinstance(value, Node)
+            assert isinstance(value, Type)
         for key, value in optional.items():
             assert isinstance(key, str)
-            assert isinstance(value, Node)
+            assert isinstance(value, Type)
         assert not (set(required.keys()) & set(optional.keys())), \
             "Some keys are both required and optional"
         self.required = required
@@ -584,7 +584,7 @@ class StrictStruct(Struct):
         super().__init__(required=kwargs)
 
 
-class Class(Node):
+class Class(Type):
     """
     Class instance schema, resolves to a class instance with (arbitrary) data
     as the creation argument.
@@ -594,7 +594,7 @@ class Class(Node):
         self.instance_type = instance_type
 
     def recognize(self):
-        return Node(object)
+        return Type(object)
 
     def resolve(self, data):
         self.validate(data)
