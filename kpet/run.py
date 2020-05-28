@@ -57,7 +57,6 @@ class Host:
     # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """A host running tests"""
 
-    # pylint: disable=redefined-builtin
     def __init__(self, name, type, suites_and_cases):
         """
         Initialize a host run.

@@ -14,7 +14,6 @@
 """Miscellaneous command-related definitions"""
 
 
-# (argparse uses help as parameter) pylint: disable=redefined-builtin
 def build(cmds_parser, common_parser, name, help):
     """Build a new command argument with its corresponding action subparser"""
     cmd_parser = cmds_parser.add_parser(

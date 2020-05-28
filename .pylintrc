@@ -93,6 +93,8 @@ disable=print-statement,
         #
         # We want to leave FIXMEs for fixing in later commits.
         fixme,
+        # Ignore redefining some common-use identifiers, like "id" and "type"
+        redefined-builtin,
         # Ignore pylint not being able to introspect lxml
         c-extension-no-member,
         # Ignore duplicate content in multiple files
