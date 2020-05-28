@@ -69,7 +69,7 @@ class Type:
         Validate data according to the schema.
 
         Args:
-            The data to validate.
+            data:   The data to validate.
 
         Raises:
             Invalid:    The data didn't match the schema.
