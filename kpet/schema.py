@@ -53,7 +53,7 @@ class Invalid(Exception):
 class Type:
     """
     Most basic schema validating the data to be an instance of specified
-    type and resolving to the same.
+    type and resolving to the same. The base class for all other schemas.
     """
     def __init__(self, type):
         """
