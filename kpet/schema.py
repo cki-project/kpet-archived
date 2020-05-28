@@ -18,9 +18,6 @@ import os
 import yaml
 from kpet.misc import format_exception_stack
 
-# pylint: disable=raising-format-tuple
-
-
 # The type returned by re.compile(). Different between Python 2 and 3
 # TODO Switch to just using re.Pattern once upgraded to Python 3.7 or later
 RE = type(re.compile(""))

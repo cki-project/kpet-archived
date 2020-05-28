@@ -21,7 +21,7 @@ from kpet.schema import Invalid, Struct, Choice, \
     List, Dict, String, Regex, ScopedYAMLFile, YAMLFile, Class, Boolean, \
     Int, Null, RE, Reduction, Succession
 
-# pylint: disable=raising-format-tuple,access-member-before-definition
+# pylint: disable=access-member-before-definition
 
 
 # Schema for universal IDs
