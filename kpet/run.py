@@ -35,7 +35,6 @@ class Test:
         assert isinstance(case, data.Case)
         assert case in suite.cases
 
-        # pylint: disable=invalid-name
         self.name = " - ".join(filter(lambda x: x is not None,
                                       (suite.name, case.name)))
         self.universal_id = \
@@ -86,7 +85,6 @@ class Host:
         self.name = name
         self.hostname = type.hostname
         self.ignore_panic = type.ignore_panic
-        # pylint: disable=invalid-name
         self.preboot_tasks = type.preboot_tasks
         self.postboot_tasks = type.postboot_tasks
         # TODO Remove once kpet-db switches to preboot_tasks
@@ -111,6 +109,7 @@ class Host:
         self.host_requires_list = filter(lambda e: e is not None,
                                          host_requires_list)
         # TODO: For compatibility. Remove when kpet-db is updated.
+        # pylint: disable=invalid-name
         self.hostRequires_list = self.host_requires_list
         self.partitions_list = filter(lambda e: e is not None,
                                       partitions_list)
