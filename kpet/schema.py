@@ -55,14 +55,14 @@ class Node:
     Abstract node schema validating the data to be an instance of specified
     type and resolving to the same.
     """
-    def __init__(self, data_type):
+    def __init__(self, type):
         """
         Initialize a node schema.
 
         Args:
-            data_type:  The type the data should be instance of.
+            type:   The type the data should be instance of.
         """
-        self.data_type = data_type
+        self.type = type
 
     def validate(self, data):
         """
@@ -74,9 +74,9 @@ class Node:
         Raises:
             Invalid:    The data didn't match the schema.
         """
-        if not isinstance(data, self.data_type):
+        if not isinstance(data, self.type):
             raise Invalid("Invalid type: {}, expecting {}".format(
-                type(data).__name__, self.data_type.__name__
+                type(data).__name__, self.type.__name__
             ))
 
     def recognize(self):
